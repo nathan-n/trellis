@@ -21,6 +21,15 @@
       "collectionGroup": "tasks",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "assigneeUids", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "dueDate", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "dueDateYYYYMM", "order": "ASCENDING" },
         { "fieldPath": "dueDate", "order": "ASCENDING" }
       ]
@@ -46,6 +55,14 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "logDate", "order": "DESCENDING" },
+        { "fieldPath": "logTimestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "careLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "logDate", "order": "ASCENDING" },
         { "fieldPath": "logTimestamp", "order": "DESCENDING" }
       ]
     },

@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -23,6 +24,7 @@ import CircleCreateDialog from './CircleCreateDialog';
 export default function CircleSelectPage() {
   const { userProfile, firebaseUser, refreshProfile } = useAuth();
   const { switchCircle } = useCircle();
+  const navigate = useNavigate();
   const { showMessage } = useSnackbar();
   const [circles, setCircles] = useState<Circle[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -47,6 +49,7 @@ export default function CircleSelectPage() {
 
   const handleSelectCircle = async (circleId: string) => {
     await switchCircle(circleId);
+    navigate('/');
   };
 
   const handleAcceptInvitation = async (invitation: Invitation) => {
@@ -69,6 +72,7 @@ export default function CircleSelectPage() {
   const handleCreated = async (circleId: string) => {
     await refreshProfile();
     await switchCircle(circleId);
+    navigate('/');
   };
 
   if (loading) {
