@@ -1,0 +1,132 @@
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Box,
+  Typography,
+  Divider,
+} from '@mui/material';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import EventIcon from '@mui/icons-material/Event';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import MedicationIcon from '@mui/icons-material/Medication';
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
+import EmergencyIcon from '@mui/icons-material/LocalHospital';
+import FolderIcon from '@mui/icons-material/Folder';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { SIDEBAR_WIDTH, CircleRole } from '../../constants';
+import { useCircle } from '../../contexts/CircleContext';
+import { hasMinRole } from '../../utils/roleUtils';
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ReactElement;
+  minRole?: CircleRole;
+}
+
+const navItems: NavItem[] = [
+  { label: 'My Next Priority', path: '/my-next', icon: <PriorityHighIcon /> },
+  { label: 'Tasks', path: '/tasks', icon: <TaskAltIcon /> },
+  { label: 'Task Calendar', path: '/tasks/calendar', icon: <CalendarMonthIcon /> },
+  { label: 'Visit Schedule', path: '/visits', icon: <EventIcon /> },
+  { label: 'Medications', path: '/medications', icon: <MedicationIcon /> },
+  { label: 'Care Log', path: '/care-log', icon: <NoteAltIcon /> },
+  { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon /> },
+  { label: 'Documents', path: '/documents', icon: <FolderIcon /> },
+];
+
+const adminItems: NavItem[] = [
+  { label: 'Circle Settings', path: '/circle/settings', icon: <SettingsIcon />, minRole: CircleRole.ADMIN },
+];
+
+interface SidebarProps {
+  mobileOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { role } = useCircle();
+
+  const handleNav = (path: string) => {
+    navigate(path);
+    onClose();
+  };
+
+  const drawer = (
+    <Box>
+      <Toolbar>
+        <Typography variant="h5" fontWeight={700} color="primary">
+          Trellis
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        {navItems.map((item) => (
+          <ListItem key={item.path} disablePadding>
+            <ListItemButton
+              selected={location.pathname === item.path}
+              onClick={() => handleNav(item.path)}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        {adminItems
+          .filter((item) => !item.minRole || (role && hasMinRole(role, item.minRole)))
+          .map((item) => (
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => handleNav(item.path)}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+      </List>
+    </Box>
+  );
+
+  return (
+    <Box component="nav" sx={{ width: { md: SIDEBAR_WIDTH }, flexShrink: { md: 0 } }}>
+      {/* Mobile drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH },
+        }}
+      >
+        {drawer}
+      </Drawer>
+      {/* Desktop drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, boxSizing: 'border-box' },
+        }}
+        open
+      >
+        {drawer}
+      </Drawer>
+    </Box>
+  );
+}
