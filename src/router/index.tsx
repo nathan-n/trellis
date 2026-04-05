@@ -6,6 +6,7 @@ import CircleSelectPage from '../components/circles/CircleSelectPage';
 import CircleSettingsPage from '../components/circles/CircleSettingsPage';
 import AppShell from '../components/layout/AppShell';
 import TaskListPage from '../components/tasks/TaskListPage';
+import TaskDetailPage from '../components/tasks/TaskDetailPage';
 import TaskCalendarView from '../components/tasks/TaskCalendarView';
 import MyNextPriorityCard from '../components/tasks/MyNextPriorityCard';
 import VisitCalendarPage from '../components/visits/VisitCalendarPage';
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/my-next" replace /> },
       { path: 'my-next', element: <MyNextPriorityCard /> },
       { path: 'tasks', element: <TaskListPage /> },
+      { path: 'tasks/:taskId', element: <TaskDetailPage /> },
       { path: 'tasks/calendar', element: <TaskCalendarView /> },
       { path: 'visits', element: <VisitCalendarPage /> },
       { path: 'medications', element: <MedicationListPage /> },
