@@ -18,6 +18,7 @@ import { subscribeMyPriorityTask } from '../../services/taskService';
 import { formatDateTime } from '../../utils/dateUtils';
 import type { Task } from '../../types';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import WellbeingCheckinCard from '../wellbeing/WellbeingCheckinCard';
 
 const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
   urgent: 'error',
@@ -62,6 +63,8 @@ export default function MyNextPriorityCard() {
 
   return (
     <Box>
+      <WellbeingCheckinCard />
+
       <Typography variant="h5" gutterBottom>
         My Next Priority
       </Typography>

@@ -19,6 +19,10 @@ const MedicationListPage = lazy(() => import('../components/medications/Medicati
 const CareLogPage = lazy(() => import('../components/careLogs/CareLogPage'));
 const EmergencyQuickAccessPage = lazy(() => import('../components/emergency/EmergencyQuickAccessPage'));
 const DocumentVaultPage = lazy(() => import('../components/documents/DocumentVaultPage'));
+const ActivityFeedPage = lazy(() => import('../components/activity/ActivityFeedPage'));
+const ExpenseListPage = lazy(() => import('../components/expenses/ExpenseListPage'));
+const DoctorPrepPage = lazy(() => import('../components/doctorPrep/DoctorPrepPage'));
+const WellbeingHistoryPage = lazy(() => import('../components/wellbeing/WellbeingHistoryPage'));
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>;
@@ -59,6 +63,10 @@ const router = createBrowserRouter([
       { path: 'care-log', element: <Lazy><CareLogPage /></Lazy> },
       { path: 'emergency', element: <Lazy><EmergencyQuickAccessPage /></Lazy> },
       { path: 'documents', element: <Lazy><DocumentVaultPage /></Lazy> },
+      { path: 'expenses', element: <Lazy><ExpenseListPage /></Lazy> },
+      { path: 'doctor-prep', element: <Lazy><DoctorPrepPage /></Lazy> },
+      { path: 'activity', element: <Lazy><ActivityFeedPage /></Lazy> },
+      { path: 'wellbeing', element: <Lazy><WellbeingHistoryPage /></Lazy> },
       {
         path: 'circle/settings',
         element: (

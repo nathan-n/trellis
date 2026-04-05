@@ -19,6 +19,8 @@ import { toYYYYMM } from '../utils/dateUtils';
 import { writeAuditEntry } from './auditService';
 import { uploadFile, deleteFile } from './storageService';
 import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
+import type { RecurrenceFrequency } from '../constants';
 
 function tasksCol(circleId: string) {
   return collection(db, 'circles', circleId, 'tasks');
@@ -40,6 +42,7 @@ export interface CreateTaskData {
   resourceLinks: string[];
   rationale: string | null;
   pointsOfContact: { name: string; phone: string; email: string }[];
+  recurrence?: { frequency: string } | null;
 }
 
 export async function createTask(
@@ -105,6 +108,68 @@ export async function deleteTask(
 ): Promise<void> {
   await deleteDoc(taskDoc(circleId, taskId));
   await writeAuditEntry(circleId, userId, userName, 'task.delete', 'task', taskId, {});
+}
+
+function getNextDueDate(currentDue: Date, frequency: RecurrenceFrequency): Date {
+  const d = dayjs(currentDue);
+  switch (frequency) {
+    case 'daily': return d.add(1, 'day').toDate();
+    case 'weekly': return d.add(1, 'week').toDate();
+    case 'biweekly': return d.add(2, 'week').toDate();
+    case 'monthly': return d.add(1, 'month').toDate();
+    default: return d.add(1, 'week').toDate();
+  }
+}
+
+export async function completeRecurringTask(
+  circleId: string,
+  task: Task,
+  userId: string,
+  userName: string
+): Promise<string | null> {
+  // Mark current task as done
+  await updateDoc(taskDoc(circleId, task.id), {
+    status: 'done',
+    updatedAt: serverTimestamp(),
+  });
+
+  await writeAuditEntry(circleId, userId, userName, 'task.complete', 'task', task.id, {
+    title: task.title,
+    recurring: true,
+  });
+
+  // Create next instance if recurring and has a due date
+  if (!task.recurrence || !task.dueDate) return null;
+
+  const nextDue = getNextDueDate(task.dueDate.toDate(), task.recurrence.frequency);
+  const searchTerms = buildSearchTerms(task.title, task.description, task.location, task.rationale);
+
+  const docRef = await addDoc(tasksCol(circleId), {
+    title: task.title,
+    description: task.description,
+    category: task.category,
+    priority: task.priority,
+    status: 'todo',
+    assigneeUids: task.assigneeUids,
+    dueDate: Timestamp.fromDate(nextDue),
+    dueDateYYYYMM: toYYYYMM(nextDue),
+    location: task.location,
+    resourceLinks: task.resourceLinks,
+    rationale: task.rationale,
+    pointsOfContact: task.pointsOfContact,
+    recurrence: task.recurrence,
+    searchTerms,
+    createdByUid: userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  await writeAuditEntry(circleId, userId, userName, 'task.create', 'task', docRef.id, {
+    title: task.title,
+    recurringNext: true,
+  });
+
+  return docRef.id;
 }
 
 export function subscribeTasks(

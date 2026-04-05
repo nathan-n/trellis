@@ -120,6 +120,20 @@ service cloud.firestore {
         allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
       }
 
+      // Expenses
+      match /expenses/{expenseId} {
+        allow read: if request.auth != null && isCircleMember(circleId);
+        allow create: if request.auth != null && hasMinRole(circleId, 'family');
+        allow update: if request.auth != null && hasMinRole(circleId, 'family');
+        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+      }
+
+      // Wellbeing Check-ins (private to author)
+      match /wellbeingCheckins/{checkinId} {
+        allow read: if request.auth != null && request.auth.uid == resource.data.authorUid;
+        allow create: if request.auth != null && isCircleMember(circleId);
+      }
+
       // Audit Log (append-only)
       match /auditLog/{logId} {
         allow read: if request.auth != null && isCircleMember(circleId);

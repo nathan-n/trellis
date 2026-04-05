@@ -70,6 +70,9 @@ export default function TaskCard({ task }: TaskCardProps) {
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
             <Chip label={categoryLabels[task.category] ?? task.category} size="small" variant="outlined" />
             <Chip label={statusLabels[task.status] ?? task.status} size="small" variant="outlined" />
+            {task.recurrence && (
+              <Chip label={`Repeats ${task.recurrence.frequency}`} size="small" color="secondary" variant="outlined" />
+            )}
             {task.dueDate && (
               <Typography variant="caption" color="text.secondary">
                 Due: {formatDate(task.dueDate)}

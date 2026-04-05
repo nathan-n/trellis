@@ -92,4 +92,22 @@ export const MealAmount = {
 } as const;
 export type MealAmount = (typeof MealAmount)[keyof typeof MealAmount];
 
+export const RecurrenceFrequency = {
+  DAILY: 'daily',
+  WEEKLY: 'weekly',
+  BIWEEKLY: 'biweekly',
+  MONTHLY: 'monthly',
+} as const;
+export type RecurrenceFrequency = (typeof RecurrenceFrequency)[keyof typeof RecurrenceFrequency];
+
+export const ExpenseCategory = {
+  MEDICAL: 'medical',
+  SUPPLIES: 'supplies',
+  HOME_MODIFICATION: 'home_modification',
+  TRAVEL: 'travel',
+  PROFESSIONAL_CARE: 'professional_care',
+  OTHER: 'other',
+} as const;
+export type ExpenseCategory = (typeof ExpenseCategory)[keyof typeof ExpenseCategory];
+
 export const SIDEBAR_WIDTH = 260;

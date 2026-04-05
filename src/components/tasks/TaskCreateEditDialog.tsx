@@ -56,6 +56,7 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
   const [resourceLinks, setResourceLinks] = useState('');
   const [rationale, setRationale] = useState('');
   const [contacts, setContacts] = useState<PointOfContact[]>([]);
+  const [recurrenceFreq, setRecurrenceFreq] = useState<string>('');
 
   const isEdit = Boolean(task);
 
@@ -72,6 +73,7 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
       setResourceLinks(task.resourceLinks?.join('\n') ?? '');
       setRationale(task.rationale ?? '');
       setContacts(task.pointsOfContact?.length ? task.pointsOfContact : []);
+      setRecurrenceFreq(task.recurrence?.frequency ?? '');
     } else {
       resetForm();
     }
@@ -89,6 +91,7 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
     setResourceLinks('');
     setRationale('');
     setContacts([]);
+    setRecurrenceFreq('');
   };
 
   const handleSave = async () => {
@@ -111,6 +114,7 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
           .filter(Boolean),
         rationale: rationale.trim() || null,
         pointsOfContact: contacts.filter((c) => c.name.trim()),
+        recurrence: recurrenceFreq ? { frequency: recurrenceFreq } : null,
       };
 
       if (isEdit && task) {
@@ -230,6 +234,17 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
             onChange={setDueDate}
             slotProps={{ textField: { fullWidth: true } }}
           />
+
+          <FormControl sx={{ minWidth: 180 }}>
+            <InputLabel>Repeats</InputLabel>
+            <Select value={recurrenceFreq} label="Repeats" onChange={(e) => setRecurrenceFreq(e.target.value)}>
+              <MenuItem value="">One-time</MenuItem>
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="weekly">Weekly</MenuItem>
+              <MenuItem value="biweekly">Every 2 Weeks</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+            </Select>
+          </FormControl>
 
           <TextField
             label="Location"

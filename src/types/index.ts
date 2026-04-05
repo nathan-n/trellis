@@ -7,3 +7,5 @@ export type { CareLog, MealEntry, HydrationEntry, SleepEntry } from './careLog';
 export type { EmergencyProfile, EmergencyContact, MedicationSummary } from './emergency';
 export type { VaultDocument } from './document';
 export type { AuditLogEntry } from './audit';
+export type { Expense } from './expense';
+export type { WellbeingCheckin } from './wellbeing';

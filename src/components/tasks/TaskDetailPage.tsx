@@ -20,6 +20,8 @@ import { TabContext, TabList, TabPanel } from '@mui/lab';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RepeatIcon from '@mui/icons-material/Repeat';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
@@ -32,7 +34,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useCircleMembers } from '../../hooks/useCircleMembers';
-import { deleteTask } from '../../services/taskService';
+import { deleteTask, completeRecurringTask, updateTask } from '../../services/taskService';
 import { formatDateTime } from '../../utils/dateUtils';
 import { CircleRole } from '../../constants';
 import { hasMinRole } from '../../utils/roleUtils';
@@ -97,6 +99,22 @@ export default function TaskDetailPage() {
     return unsubscribe;
   }, [activeCircle?.id, taskId]);
 
+  const handleComplete = async () => {
+    if (!activeCircle || !task || !userProfile) return;
+    try {
+      if (task.recurrence) {
+        const nextId = await completeRecurringTask(activeCircle.id, task, userProfile.uid, userProfile.displayName);
+        showMessage(nextId ? 'Completed — next occurrence created' : 'Task completed', 'success');
+        if (nextId) navigate(`/tasks/${nextId}`);
+      } else {
+        await updateTask(activeCircle.id, task.id, userProfile.uid, userProfile.displayName, { status: 'done' });
+        showMessage('Task completed', 'success');
+      }
+    } catch {
+      showMessage('Failed to complete task', 'error');
+    }
+  };
+
   const handleDelete = async () => {
     if (!activeCircle || !taskId || !userProfile) return;
     try {
@@ -147,9 +165,19 @@ export default function TaskDetailPage() {
                 />
                 <Chip label={statusLabels[task.status] ?? task.status} size="small" variant="outlined" />
                 <Chip label={categoryLabels[task.category] ?? task.category} size="small" variant="outlined" />
+                {task.recurrence && (
+                  <Chip icon={<RepeatIcon />} label={`Repeats ${task.recurrence.frequency}`} size="small" color="secondary" variant="outlined" />
+                )}
               </Box>
             </Box>
             <Box sx={{ display: 'flex', gap: 0.5 }}>
+              {canEdit && task.status !== 'done' && (
+                <Tooltip title={task.recurrence ? 'Complete & create next' : 'Mark complete'}>
+                  <IconButton color="success" onClick={handleComplete}>
+                    <CheckCircleIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
               {canEdit && (
                 <IconButton onClick={() => setEditOpen(true)}>
                   <EditIcon />

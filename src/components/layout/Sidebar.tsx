@@ -18,6 +18,10 @@ import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import MedicationIcon from '@mui/icons-material/Medication';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import EmergencyIcon from '@mui/icons-material/LocalHospital';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import SummarizeIcon from '@mui/icons-material/Summarize';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import FolderIcon from '@mui/icons-material/Folder';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { SIDEBAR_WIDTH, CircleRole } from '../../constants';
@@ -40,6 +44,10 @@ const navItems: NavItem[] = [
   { label: 'Care Log', path: '/care-log', icon: <NoteAltIcon /> },
   { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon /> },
   { label: 'Documents', path: '/documents', icon: <FolderIcon /> },
+  { label: 'Expenses', path: '/expenses', icon: <ReceiptLongIcon /> },
+  { label: 'Doctor Prep', path: '/doctor-prep', icon: <SummarizeIcon /> },
+  { label: 'Activity', path: '/activity', icon: <TimelineIcon /> },
+  { label: 'My Wellbeing', path: '/wellbeing', icon: <FavoriteIcon /> },
 ];
 
 const adminItems: NavItem[] = [
