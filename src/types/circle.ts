@@ -23,6 +23,7 @@ export interface CircleMember {
   role: CircleRole;
   joinedAt: Timestamp;
   invitedByUid: string;
+  lastActiveAt: Timestamp | null;
 }
 
 export interface Invitation {

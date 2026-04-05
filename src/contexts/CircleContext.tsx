@@ -3,7 +3,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
 import { updateUserProfile } from '../services/authService';
-import { getCircle } from '../services/circleService';
+import { getCircle, updateMemberLastActive } from '../services/circleService';
 import type { Circle, CircleMember } from '../types';
 import { CircleRole } from '../constants';
 
@@ -61,15 +61,18 @@ export function CircleProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, [userProfile?.activeCircleId, firebaseUser]);
 
-  // Load circle when activeCircleId changes
+  // Load circle when activeCircleId changes and track last active
   useEffect(() => {
     if (userProfile?.activeCircleId) {
       loadCircle(userProfile.activeCircleId);
+      if (firebaseUser) {
+        updateMemberLastActive(userProfile.activeCircleId, firebaseUser.uid).catch(() => {});
+      }
     } else {
       setActiveCircle(null);
       setLoading(false);
     }
-  }, [userProfile?.activeCircleId, loadCircle]);
+  }, [userProfile?.activeCircleId, loadCircle, firebaseUser]);
 
   const switchCircle = async (circleId: string) => {
     if (firebaseUser) {

@@ -18,20 +18,51 @@ import {
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CancelIcon from '@mui/icons-material/Cancel';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { useCircle } from '../../contexts/CircleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { getCircleMembers, updateMemberRole, removeMember } from '../../services/circleService';
-import { CircleRole } from '../../constants';
+import {
+  getCircleMembers,
+  updateMemberRole,
+  removeMember,
+  getCircleInvitations,
+  revokeInvitation,
+} from '../../services/circleService';
+import { CircleRole, InvitationStatus } from '../../constants';
 import { getRoleLabel } from '../../utils/roleUtils';
-import type { CircleMember } from '../../types';
+import { formatDate, formatDateTime } from '../../utils/dateUtils';
+import type { CircleMember, Invitation } from '../../types';
 import InviteDialog from './InviteDialog';
+
+const inviteStatusConfig: Record<string, { label: string; color: 'warning' | 'success' | 'default' | 'error' }> = {
+  pending: { label: 'Pending', color: 'warning' },
+  accepted: { label: 'Accepted', color: 'success' },
+  declined: { label: 'Declined', color: 'default' },
+  expired: { label: 'Revoked', color: 'error' },
+};
+
+function formatLastActive(ts: { toDate: () => Date } | null): string {
+  if (!ts) return 'Never';
+  const date = ts.toDate();
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return formatDate(ts as Parameters<typeof formatDate>[0]);
+}
 
 export default function CircleSettingsPage() {
   const { activeCircle, role } = useCircle();
   const { firebaseUser } = useAuth();
   const { showMessage } = useSnackbar();
   const [members, setMembers] = useState<CircleMember[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedMember, setSelectedMember] = useState<CircleMember | null>(null);
@@ -41,6 +72,7 @@ export default function CircleSettingsPage() {
   useEffect(() => {
     if (activeCircle) {
       getCircleMembers(activeCircle.id).then(setMembers);
+      getCircleInvitations(activeCircle.id).then(setInvitations);
     }
   }, [activeCircle]);
 
@@ -70,6 +102,28 @@ export default function CircleSettingsPage() {
     setMenuAnchor(null);
   };
 
+  const handleRevoke = async (invitationId: string) => {
+    try {
+      await revokeInvitation(invitationId);
+      setInvitations((prev) =>
+        prev.map((inv) =>
+          inv.id === invitationId ? { ...inv, status: InvitationStatus.EXPIRED as Invitation['status'] } : inv
+        )
+      );
+      showMessage('Invitation revoked', 'success');
+    } catch {
+      showMessage('Failed to revoke invitation', 'error');
+    }
+  };
+
+  const handleInviteClose = () => {
+    setInviteOpen(false);
+    // Refresh invitations after closing the dialog
+    if (activeCircle) {
+      getCircleInvitations(activeCircle.id).then(setInvitations);
+    }
+  };
+
   if (!activeCircle) return null;
 
   return (
@@ -81,7 +135,8 @@ export default function CircleSettingsPage() {
         {activeCircle.name} — Caring for {activeCircle.patientName}
       </Typography>
 
-      <Card>
+      {/* Members */}
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Members ({members.length})</Typography>
@@ -124,14 +179,71 @@ export default function CircleSettingsPage() {
                     </Box>
                   }
                   secondary={
-                    <>
-                      {member.email} — {getRoleLabel(member.role)}
-                    </>
+                    <Box component="span" sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>{member.email} — {getRoleLabel(member.role)}</span>
+                      <Typography variant="caption" color="text.secondary" component="span">
+                        Last active: {formatLastActive(member.lastActiveAt)}
+                      </Typography>
+                    </Box>
                   }
                 />
               </ListItem>
             ))}
           </List>
+        </CardContent>
+      </Card>
+
+      {/* Invitations */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 2 }}>Invitations ({invitations.length})</Typography>
+          <Divider />
+          {invitations.length === 0 ? (
+            <Typography color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+              No invitations sent yet.
+            </Typography>
+          ) : (
+            <List>
+              {invitations.map((inv) => {
+                const config = inviteStatusConfig[inv.status] ?? { label: inv.status, color: 'default' as const };
+                return (
+                  <ListItem
+                    key={inv.id}
+                    secondaryAction={
+                      isAdmin && inv.status === InvitationStatus.PENDING ? (
+                        <IconButton color="error" onClick={() => handleRevoke(inv.id)} title="Revoke invitation">
+                          <CancelIcon />
+                        </IconButton>
+                      ) : undefined
+                    }
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: 'action.selected' }}>
+                        <MailOutlineIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {inv.inviteeEmail}
+                          <Chip label={config.label} size="small" color={config.color} />
+                          <Chip label={getRoleLabel(inv.role)} size="small" variant="outlined" />
+                        </Box>
+                      }
+                      secondary={
+                        <>
+                          Invited by {inv.invitedByName} — {formatDateTime(inv.createdAt)}
+                          {inv.status === InvitationStatus.PENDING && inv.expiresAt && (
+                            <> — Expires {formatDate(inv.expiresAt)}</>
+                          )}
+                        </>
+                      }
+                    />
+                  </ListItem>
+                );
+              })}
+            </List>
+          )}
         </CardContent>
       </Card>
 
@@ -163,7 +275,7 @@ export default function CircleSettingsPage() {
         </MenuItem>
       </Menu>
 
-      <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} />
+      <InviteDialog open={inviteOpen} onClose={handleInviteClose} />
     </Box>
   );
 }

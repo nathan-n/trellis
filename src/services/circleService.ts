@@ -12,6 +12,7 @@ import {
   arrayUnion,
   arrayRemove,
   Timestamp,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { CircleRole, InvitationStatus } from '../constants';
@@ -200,4 +201,25 @@ export async function declineInvitation(invitationId: string): Promise<void> {
   await updateDoc(doc(db, 'invitations', invitationId), {
     status: InvitationStatus.DECLINED,
   });
+}
+
+export async function getCircleInvitations(circleId: string): Promise<Invitation[]> {
+  const q = query(
+    collection(db, 'invitations'),
+    where('circleId', '==', circleId),
+    orderBy('createdAt', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Invitation);
+}
+
+export async function revokeInvitation(invitationId: string): Promise<void> {
+  await updateDoc(doc(db, 'invitations', invitationId), {
+    status: InvitationStatus.EXPIRED,
+  });
+}
+
+export async function updateMemberLastActive(circleId: string, userId: string): Promise<void> {
+  const memberRef = doc(db, 'circles', circleId, 'members', userId);
+  await updateDoc(memberRef, { lastActiveAt: serverTimestamp() });
 }
