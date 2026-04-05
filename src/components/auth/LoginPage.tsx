@@ -1,18 +1,26 @@
 import { Box, Button, Card, CardContent, Typography, CircularProgress } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useState } from 'react';
 
 export default function LoginPage() {
-  const { signIn } = useAuth();
+  const { firebaseUser, loading, signIn } = useAuth();
   const { showMessage } = useSnackbar();
+  const navigate = useNavigate();
   const [signingIn, setSigningIn] = useState(false);
+
+  // Already authenticated — redirect to app
+  if (!loading && firebaseUser) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSignIn = async () => {
     setSigningIn(true);
     try {
       await signIn();
+      navigate('/');
     } catch (err) {
       console.error('Sign in error:', err);
       showMessage('Failed to sign in. Please try again.', 'error');
