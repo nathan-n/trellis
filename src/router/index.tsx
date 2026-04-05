@@ -1,36 +1,43 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
-import LoginPage from '../components/auth/LoginPage';
-import InvitationAcceptPage from '../components/circles/InvitationAcceptPage';
-import CircleSelectPage from '../components/circles/CircleSelectPage';
-import CircleSettingsPage from '../components/circles/CircleSettingsPage';
 import AppShell from '../components/layout/AppShell';
-import TaskListPage from '../components/tasks/TaskListPage';
-import TaskDetailPage from '../components/tasks/TaskDetailPage';
-import TaskCalendarView from '../components/tasks/TaskCalendarView';
-import MyNextPriorityCard from '../components/tasks/MyNextPriorityCard';
-import VisitCalendarPage from '../components/visits/VisitCalendarPage';
-import MedicationListPage from '../components/medications/MedicationListPage';
-import CareLogPage from '../components/careLogs/CareLogPage';
-import EmergencyQuickAccessPage from '../components/emergency/EmergencyQuickAccessPage';
-import DocumentVaultPage from '../components/documents/DocumentVaultPage';
+import LoadingSpinner from '../components/shared/LoadingSpinner';
 import RoleGuard from '../guards/RoleGuard';
 import { CircleRole } from '../constants';
+
+const LoginPage = lazy(() => import('../components/auth/LoginPage'));
+const InvitationAcceptPage = lazy(() => import('../components/circles/InvitationAcceptPage'));
+const CircleSelectPage = lazy(() => import('../components/circles/CircleSelectPage'));
+const CircleSettingsPage = lazy(() => import('../components/circles/CircleSettingsPage'));
+const TaskListPage = lazy(() => import('../components/tasks/TaskListPage'));
+const TaskDetailPage = lazy(() => import('../components/tasks/TaskDetailPage'));
+const TaskCalendarView = lazy(() => import('../components/tasks/TaskCalendarView'));
+const MyNextPriorityCard = lazy(() => import('../components/tasks/MyNextPriorityCard'));
+const VisitCalendarPage = lazy(() => import('../components/visits/VisitCalendarPage'));
+const MedicationListPage = lazy(() => import('../components/medications/MedicationListPage'));
+const CareLogPage = lazy(() => import('../components/careLogs/CareLogPage'));
+const EmergencyQuickAccessPage = lazy(() => import('../components/emergency/EmergencyQuickAccessPage'));
+const DocumentVaultPage = lazy(() => import('../components/documents/DocumentVaultPage'));
+
+function Lazy({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>;
+}
 
 const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: <Lazy><LoginPage /></Lazy>,
   },
   {
     path: '/invite/:invitationId',
-    element: <InvitationAcceptPage />,
+    element: <Lazy><InvitationAcceptPage /></Lazy>,
   },
   {
     path: '/select-circle',
     element: (
       <ProtectedRoute>
-        <CircleSelectPage />
+        <Lazy><CircleSelectPage /></Lazy>
       </ProtectedRoute>
     ),
   },
@@ -43,20 +50,20 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/my-next" replace /> },
-      { path: 'my-next', element: <MyNextPriorityCard /> },
-      { path: 'tasks', element: <TaskListPage /> },
-      { path: 'tasks/:taskId', element: <TaskDetailPage /> },
-      { path: 'tasks/calendar', element: <TaskCalendarView /> },
-      { path: 'visits', element: <VisitCalendarPage /> },
-      { path: 'medications', element: <MedicationListPage /> },
-      { path: 'care-log', element: <CareLogPage /> },
-      { path: 'emergency', element: <EmergencyQuickAccessPage /> },
-      { path: 'documents', element: <DocumentVaultPage /> },
+      { path: 'my-next', element: <Lazy><MyNextPriorityCard /></Lazy> },
+      { path: 'tasks', element: <Lazy><TaskListPage /></Lazy> },
+      { path: 'tasks/:taskId', element: <Lazy><TaskDetailPage /></Lazy> },
+      { path: 'tasks/calendar', element: <Lazy><TaskCalendarView /></Lazy> },
+      { path: 'visits', element: <Lazy><VisitCalendarPage /></Lazy> },
+      { path: 'medications', element: <Lazy><MedicationListPage /></Lazy> },
+      { path: 'care-log', element: <Lazy><CareLogPage /></Lazy> },
+      { path: 'emergency', element: <Lazy><EmergencyQuickAccessPage /></Lazy> },
+      { path: 'documents', element: <Lazy><DocumentVaultPage /></Lazy> },
       {
         path: 'circle/settings',
         element: (
           <RoleGuard minRole={CircleRole.ADMIN}>
-            <CircleSettingsPage />
+            <Lazy><CircleSettingsPage /></Lazy>
           </RoleGuard>
         ),
       },
