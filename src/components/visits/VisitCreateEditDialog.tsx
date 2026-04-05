@@ -26,9 +26,10 @@ interface VisitCreateEditDialogProps {
   open: boolean;
   onClose: () => void;
   visit?: Visit | null;
+  defaultDate?: Date | null;
 }
 
-export default function VisitCreateEditDialog({ open, onClose, visit }: VisitCreateEditDialogProps) {
+export default function VisitCreateEditDialog({ open, onClose, visit, defaultDate }: VisitCreateEditDialogProps) {
   const { userProfile } = useAuth();
   const { activeCircle } = useCircle();
   const { showMessage } = useSnackbar();
@@ -52,8 +53,14 @@ export default function VisitCreateEditDialog({ open, onClose, visit }: VisitCre
       setStatus(visit.status);
     } else {
       setCaregiverUid(userProfile?.uid ?? '');
-      setStartTime(null);
-      setEndTime(null);
+      if (defaultDate) {
+        const d = dayjs(defaultDate);
+        setStartTime(d.hour(9).minute(0));
+        setEndTime(d.hour(17).minute(0));
+      } else {
+        setStartTime(null);
+        setEndTime(null);
+      }
       setNotes('');
       setStatus(VisitStatus.SCHEDULED);
     }
