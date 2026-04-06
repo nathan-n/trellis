@@ -6,7 +6,7 @@ import LoadingSpinner from '../components/shared/LoadingSpinner';
 import RoleGuard from '../guards/RoleGuard';
 import { CircleRole } from '../constants';
 
-const LoginPage = lazy(() => import('../components/auth/LoginPage'));
+const LandingPage = lazy(() => import('../components/landing/LandingPage'));
 const InvitationAcceptPage = lazy(() => import('../components/circles/InvitationAcceptPage'));
 const CircleSelectPage = lazy(() => import('../components/circles/CircleSelectPage'));
 const CircleSettingsPage = lazy(() => import('../components/circles/CircleSettingsPage'));
@@ -31,7 +31,7 @@ function Lazy({ children }: { children: React.ReactNode }) {
 const router = createBrowserRouter([
   {
     path: '/login',
-    element: <Lazy><LoginPage /></Lazy>,
+    element: <Lazy><LandingPage /></Lazy>,
   },
   {
     path: '/invite/:invitationId',
