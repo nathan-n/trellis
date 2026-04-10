@@ -110,4 +110,14 @@ export const ExpenseCategory = {
 } as const;
 export type ExpenseCategory = (typeof ExpenseCategory)[keyof typeof ExpenseCategory];
 
+export const ResourceType = {
+  LOCAL: 'local',
+  ONLINE: 'online',
+  HOTLINE: 'hotline',
+  SUPPORT_GROUP: 'support_group',
+  GOVERNMENT: 'government',
+  FINANCIAL: 'financial',
+} as const;
+export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
+
 export const SIDEBAR_WIDTH = 260;

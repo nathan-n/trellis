@@ -9,3 +9,4 @@ export type { VaultDocument } from './document';
 export type { AuditLogEntry } from './audit';
 export type { Expense } from './expense';
 export type { WellbeingCheckin } from './wellbeing';
+export type { CaregiverResource } from './resource';

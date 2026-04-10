@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Box, Typography, Card, CardContent, Stack, Chip, Link,
+  Box, Typography, Card, CardContent, Stack, Chip, Link, Button,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { subscribeMyCheckins } from '../../services/wellbeingService';
@@ -16,6 +18,7 @@ const stressColors: Record<number, 'success' | 'info' | 'warning' | 'error'> = {
 };
 
 export default function WellbeingHistoryPage() {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { activeCircle } = useCircle();
   const [checkins, setCheckins] = useState<WellbeingCheckin[]>([]);
@@ -41,24 +44,21 @@ export default function WellbeingHistoryPage() {
         <Typography variant="h5">Your Wellbeing</Typography>
       </Box>
 
-      {/* Resources */}
+      {/* Crisis Support & Resources Link */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>Caregiver Resources</Typography>
-          <Stack spacing={1}>
-            <Link href="https://www.alz.org/help-support/caregiving" target="_blank" rel="noopener noreferrer">
-              Alzheimer's Association — Caregiver Support
-            </Link>
-            <Link href="https://www.caregiver.org/" target="_blank" rel="noopener noreferrer">
-              Family Caregiver Alliance
-            </Link>
-            <Link href="https://www.alz.org/help-support/community_resource_finder" target="_blank" rel="noopener noreferrer">
-              Community Resource Finder — Find Local Help
-            </Link>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              24/7 Helpline: <Link href="tel:1-800-272-3900">1-800-272-3900</Link>
-            </Typography>
-          </Stack>
+          <Typography variant="h6" gutterBottom>Crisis Support</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            24/7 Alzheimer's Association Helpline: <Link href="tel:1-800-272-3900" fontWeight={600}>1-800-272-3900</Link>
+          </Typography>
+          <Button
+            startIcon={<MenuBookIcon />}
+            variant="outlined"
+            size="small"
+            onClick={() => navigate('/resources')}
+          >
+            View all caregiver resources
+          </Button>
         </CardContent>
       </Card>
 

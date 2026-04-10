@@ -23,6 +23,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FolderIcon from '@mui/icons-material/Folder';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { SIDEBAR_WIDTH, CircleRole } from '../../constants';
 import { useCircle } from '../../contexts/CircleContext';
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
   { label: 'Care Log', path: '/care-log', icon: <NoteAltIcon /> },
   { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon /> },
   { label: 'Documents', path: '/documents', icon: <FolderIcon /> },
+  { label: 'Resources', path: '/resources', icon: <MenuBookIcon /> },
   { label: 'Expenses', path: '/expenses', icon: <ReceiptLongIcon /> },
   { label: 'Doctor Prep', path: '/doctor-prep', icon: <SummarizeIcon /> },
   { label: 'Activity', path: '/activity', icon: <TimelineIcon /> },

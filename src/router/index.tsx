@@ -23,6 +23,7 @@ const ActivityFeedPage = lazy(() => import('../components/activity/ActivityFeedP
 const ExpenseListPage = lazy(() => import('../components/expenses/ExpenseListPage'));
 const DoctorPrepPage = lazy(() => import('../components/doctorPrep/DoctorPrepPage'));
 const WellbeingHistoryPage = lazy(() => import('../components/wellbeing/WellbeingHistoryPage'));
+const ResourceListPage = lazy(() => import('../components/resources/ResourceListPage'));
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>;
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
       { path: 'care-log', element: <Lazy><CareLogPage /></Lazy> },
       { path: 'emergency', element: <Lazy><EmergencyQuickAccessPage /></Lazy> },
       { path: 'documents', element: <Lazy><DocumentVaultPage /></Lazy> },
+      { path: 'resources', element: <Lazy><ResourceListPage /></Lazy> },
       { path: 'expenses', element: <Lazy><ExpenseListPage /></Lazy> },
       { path: 'doctor-prep', element: <Lazy><DoctorPrepPage /></Lazy> },
       { path: 'activity', element: <Lazy><ActivityFeedPage /></Lazy> },
