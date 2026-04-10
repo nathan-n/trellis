@@ -37,12 +37,28 @@ export interface CreateTaskData {
   priority: string;
   status: string;
   assigneeUids: string[];
+  visibility?: string;
+  visibleToUids?: string[];
   dueDate: Date | null;
   location: string | null;
   resourceLinks: string[];
   rationale: string | null;
   pointsOfContact: { name: string; phone: string; email: string }[];
   recurrence?: { frequency: string } | null;
+}
+
+function computeVisibleToUids(
+  visibility: string,
+  creatorUid: string,
+  assigneeUids: string[],
+  explicitUids: string[] = []
+): string[] {
+  if (visibility === 'circle') return [];
+  const uids = new Set<string>([creatorUid, ...assigneeUids]);
+  if (visibility === 'specific') {
+    explicitUids.forEach((uid) => uids.add(uid));
+  }
+  return [...uids];
 }
 
 export async function createTask(
@@ -52,9 +68,13 @@ export async function createTask(
   data: CreateTaskData
 ): Promise<string> {
   const searchTerms = buildSearchTerms(data.title, data.description, data.location, data.rationale);
+  const visibility = data.visibility ?? 'circle';
+  const visibleToUids = computeVisibleToUids(visibility, userId, data.assigneeUids, data.visibleToUids ?? []);
 
   const docRef = await addDoc(tasksCol(circleId), {
     ...data,
+    visibility,
+    visibleToUids,
     dueDate: data.dueDate ? Timestamp.fromDate(data.dueDate) : null,
     dueDateYYYYMM: data.dueDate ? toYYYYMM(data.dueDate) : null,
     searchTerms,
@@ -90,6 +110,17 @@ export async function updateTask(
       data.description ?? '',
       data.location ?? null,
       data.rationale ?? null
+    );
+  }
+
+  // Recompute visibleToUids when visibility or assignees change
+  if (data.visibility !== undefined || data.assigneeUids !== undefined) {
+    const visibility = data.visibility ?? 'circle';
+    updates.visibleToUids = computeVisibleToUids(
+      visibility,
+      userId,
+      data.assigneeUids ?? [],
+      data.visibleToUids ?? []
     );
   }
 
@@ -151,6 +182,8 @@ export async function completeRecurringTask(
     priority: task.priority,
     status: 'todo',
     assigneeUids: task.assigneeUids,
+    visibility: task.visibility ?? 'circle',
+    visibleToUids: task.visibleToUids ?? [],
     dueDate: Timestamp.fromDate(nextDue),
     dueDateYYYYMM: toYYYYMM(nextDue),
     location: task.location,

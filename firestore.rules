@@ -55,15 +55,27 @@ service cloud.firestore {
         allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
       }
 
-      // Tasks
+      // Tasks (with visibility)
       match /tasks/{taskId} {
-        allow read: if request.auth != null && isCircleMember(circleId);
+        allow read: if request.auth != null && isCircleMember(circleId) && (
+          !('visibility' in resource.data)
+          || resource.data.visibility == 'circle'
+          || getCircleRole(circleId) == 'admin'
+          || request.auth.uid == resource.data.createdByUid
+          || (request.auth.uid in resource.data.visibleToUids)
+        );
         allow create: if request.auth != null && hasMinRole(circleId, 'professional');
         allow update: if request.auth != null && hasMinRole(circleId, 'professional');
         allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
 
         match /comments/{commentId} {
-          allow read: if request.auth != null && isCircleMember(circleId);
+          allow read: if request.auth != null && isCircleMember(circleId) && (
+            !('visibility' in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data)
+            || get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibility == 'circle'
+            || getCircleRole(circleId) == 'admin'
+            || request.auth.uid == get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.createdByUid
+            || (request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibleToUids)
+          );
           allow create: if request.auth != null && hasMinRole(circleId, 'professional');
           allow update: if request.auth != null && request.auth.uid == resource.data.authorUid;
           allow delete: if request.auth != null && (
@@ -72,7 +84,13 @@ service cloud.firestore {
         }
 
         match /attachments/{attachmentId} {
-          allow read: if request.auth != null && isCircleMember(circleId);
+          allow read: if request.auth != null && isCircleMember(circleId) && (
+            !('visibility' in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data)
+            || get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibility == 'circle'
+            || getCircleRole(circleId) == 'admin'
+            || request.auth.uid == get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.createdByUid
+            || (request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibleToUids)
+          );
           allow create: if request.auth != null && hasMinRole(circleId, 'professional');
           allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
         }

@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { TaskCategory, TaskPriority, TaskStatus, RecurrenceFrequency } from '../constants';
+import { TaskCategory, TaskPriority, TaskStatus, TaskVisibility, RecurrenceFrequency } from '../constants';
 
 export interface PointOfContact {
   name: string;
@@ -15,6 +15,8 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   assigneeUids: string[];
+  visibility: TaskVisibility;
+  visibleToUids: string[];
   dueDate: Timestamp | null;
   dueDateYYYYMM: string | null;
   location: string | null;

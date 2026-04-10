@@ -1,17 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useCircle } from '../contexts/CircleContext';
 import { subscribeTasks } from '../services/taskService';
+import { canUserSeeTask } from '../utils/taskVisibility';
 import type { Task } from '../types';
 
 export function useTasks() {
-  const { activeCircle } = useCircle();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { userProfile } = useAuth();
+  const { activeCircle, role } = useCircle();
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!activeCircle) {
-      setTasks([]);
+      setAllTasks([]);
       setLoading(false);
       return;
     }
@@ -20,7 +23,7 @@ export function useTasks() {
     const unsubscribe = subscribeTasks(
       activeCircle.id,
       (data) => {
-        setTasks(data);
+        setAllTasks(data);
         setLoading(false);
       },
       (err) => {
@@ -31,6 +34,11 @@ export function useTasks() {
 
     return unsubscribe;
   }, [activeCircle?.id]);
+
+  const tasks = useMemo(() => {
+    if (!userProfile) return allTasks;
+    return allTasks.filter((task) => canUserSeeTask(task, userProfile.uid, role));
+  }, [allTasks, userProfile, role]);
 
   return { tasks, loading, error };
 }

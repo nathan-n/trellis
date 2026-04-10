@@ -28,10 +28,13 @@ import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import LinkIcon from '@mui/icons-material/Link';
+import LockIcon from '@mui/icons-material/Lock';
+import PeopleIcon from '@mui/icons-material/People';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
+import { canUserSeeTask } from '../../utils/taskVisibility';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useCircleMembers } from '../../hooks/useCircleMembers';
 import { deleteTask, completeRecurringTask, updateTask } from '../../services/taskService';
@@ -128,7 +131,7 @@ export default function TaskDetailPage() {
   };
 
   if (loading) return <LoadingSpinner />;
-  if (!task) {
+  if (!task || (userProfile && !canUserSeeTask(task, userProfile.uid, role))) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
         <Typography variant="h6">Task not found</Typography>
@@ -167,6 +170,12 @@ export default function TaskDetailPage() {
                 <Chip label={categoryLabels[task.category] ?? task.category} size="small" variant="outlined" />
                 {task.recurrence && (
                   <Chip icon={<RepeatIcon />} label={`Repeats ${task.recurrence.frequency}`} size="small" color="secondary" variant="outlined" />
+                )}
+                {task.visibility === 'private' && (
+                  <Chip icon={<LockIcon />} label="Private" size="small" variant="outlined" />
+                )}
+                {task.visibility === 'specific' && (
+                  <Chip icon={<PeopleIcon />} label={`Shared with ${task.visibleToUids?.length ?? 0}`} size="small" variant="outlined" />
                 )}
               </Box>
             </Box>

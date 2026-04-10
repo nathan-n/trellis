@@ -92,6 +92,13 @@ export const MealAmount = {
 } as const;
 export type MealAmount = (typeof MealAmount)[keyof typeof MealAmount];
 
+export const TaskVisibility = {
+  CIRCLE: 'circle',
+  PRIVATE: 'private',
+  SPECIFIC: 'specific',
+} as const;
+export type TaskVisibility = (typeof TaskVisibility)[keyof typeof TaskVisibility];
+
 export const RecurrenceFrequency = {
   DAILY: 'daily',
   WEEKLY: 'weekly',

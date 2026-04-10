@@ -57,6 +57,8 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
   const [rationale, setRationale] = useState('');
   const [contacts, setContacts] = useState<PointOfContact[]>([]);
   const [recurrenceFreq, setRecurrenceFreq] = useState<string>('');
+  const [visibility, setVisibility] = useState<string>('circle');
+  const [visibleToUids, setVisibleToUids] = useState<string[]>([]);
 
   const isEdit = Boolean(task);
 
@@ -74,6 +76,8 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
       setRationale(task.rationale ?? '');
       setContacts(task.pointsOfContact?.length ? task.pointsOfContact : []);
       setRecurrenceFreq(task.recurrence?.frequency ?? '');
+      setVisibility(task.visibility ?? 'circle');
+      setVisibleToUids(task.visibleToUids ?? []);
     } else {
       resetForm();
     }
@@ -92,6 +96,8 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
     setRationale('');
     setContacts([]);
     setRecurrenceFreq('');
+    setVisibility('circle');
+    setVisibleToUids([]);
   };
 
   const handleSave = async () => {
@@ -115,6 +121,8 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
         rationale: rationale.trim() || null,
         pointsOfContact: contacts.filter((c) => c.name.trim()),
         recurrence: recurrenceFreq ? { frequency: recurrenceFreq } : null,
+        visibility,
+        visibleToUids: visibility === 'specific' ? visibleToUids : [],
       };
 
       if (isEdit && task) {
@@ -227,6 +235,33 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
             }
             renderInput={(params) => <TextField {...params} label="Assignees" />}
           />
+
+          <FormControl fullWidth>
+            <InputLabel>Visibility</InputLabel>
+            <Select value={visibility} label="Visibility" onChange={(e) => setVisibility(e.target.value)}>
+              <MenuItem value="circle">Entire Circle</MenuItem>
+              <MenuItem value="private">Private (you + assignees)</MenuItem>
+              <MenuItem value="specific">Specific People</MenuItem>
+            </Select>
+          </FormControl>
+
+          {visibility === 'specific' && (
+            <Autocomplete
+              multiple
+              options={members.filter((m) => m.uid !== userProfile?.uid)}
+              getOptionLabel={(m) => m.displayName}
+              value={members.filter((m) => visibleToUids.includes(m.uid) && m.uid !== userProfile?.uid)}
+              onChange={(_, val) => setVisibleToUids(val.map((m) => m.uid))}
+              renderTags={(value, getTagProps) =>
+                value.map((m, index) => (
+                  <Chip label={m.displayName} size="small" {...getTagProps({ index })} key={m.uid} />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField {...params} label="Visible To" helperText="You and assignees are always included" />
+              )}
+            />
+          )}
 
           <DateTimePicker
             label="Due Date"
