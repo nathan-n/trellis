@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
 import { updateUserProfile } from '../services/authService';
@@ -24,7 +24,6 @@ export function CircleProvider({ children }: { children: ReactNode }) {
   const [currentMember, setCurrentMember] = useState<CircleMember | null>(null);
   const [circleLoaded, setCircleLoaded] = useState(false);
   const [memberLoaded, setMemberLoaded] = useState(false);
-  const switchResolveRef = useRef<(() => void) | null>(null);
 
   const activeCircleId = userProfile?.activeCircleId;
 
@@ -86,14 +85,6 @@ export function CircleProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, [activeCircleId, firebaseUser]);
 
-  // Resolve switchCircle promise when both are loaded
-  useEffect(() => {
-    if (circleLoaded && memberLoaded && switchResolveRef.current) {
-      switchResolveRef.current();
-      switchResolveRef.current = null;
-    }
-  }, [circleLoaded, memberLoaded]);
-
   // Timeout: if loading takes >10s, force loaded to prevent infinite spinner
   useEffect(() => {
     if (!loading) return;
@@ -104,29 +95,29 @@ export function CircleProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeout);
   }, [loading]);
 
-  const switchCircle = (circleId: string): Promise<void> => {
-    return new Promise(async (resolve) => {
-      if (!firebaseUser) { resolve(); return; }
+  const switchCircle = async (circleId: string): Promise<void> => {
+    if (!firebaseUser) return;
 
-      // Set up resolver that fires when both circle + member are loaded
-      switchResolveRef.current = resolve;
+    // Load both circle and member directly — don't wait for effect chain
+    setCircleLoaded(false);
+    setMemberLoaded(false);
 
-      // Reset loaded flags so loading becomes true
-      setCircleLoaded(false);
-      setMemberLoaded(false);
+    // Fire all three in parallel: update profile, load circle, load member
+    const [, circle, memberSnap] = await Promise.all([
+      updateUserProfile(firebaseUser.uid, { activeCircleId: circleId }),
+      getCircle(circleId).catch(() => null),
+      getDoc(doc(db, 'circles', circleId, 'members', firebaseUser.uid)).catch(() => null),
+    ]);
 
-      // Update user profile which triggers the effects above
-      await updateUserProfile(firebaseUser.uid, { activeCircleId: circleId });
+    setActiveCircle(circle);
+    setCircleLoaded(true);
 
-      // Also directly load the circle (don't wait for effect to detect change)
-      try {
-        const circle = await getCircle(circleId);
-        setActiveCircle(circle);
-        setCircleLoaded(true);
-      } catch {
-        setCircleLoaded(true);
-      }
-    });
+    if (memberSnap?.exists()) {
+      setCurrentMember({ uid: memberSnap.id, ...memberSnap.data() } as CircleMember);
+    } else {
+      setCurrentMember(null);
+    }
+    setMemberLoaded(true);
   };
 
   const refreshCircle = async () => {
