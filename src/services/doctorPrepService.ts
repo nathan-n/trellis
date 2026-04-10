@@ -44,14 +44,13 @@ export async function fetchDoctorPrepData(
       collection(db, 'circles', circleId, 'medications', med.id, 'administrationLog'),
       where('administeredDateYYYYMMDD', '>=', startDate),
       where('administeredDateYYYYMMDD', '<=', endDate),
-      orderBy('administeredAt', 'asc')
+      orderBy('administeredDateYYYYMMDD', 'asc')
     );
     const adminSnap = await getDocs(adminQ);
     if (!adminSnap.empty) {
-      administrationLogs.set(
-        med.id,
-        adminSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as AdministrationLog)
-      );
+      const logs = adminSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as AdministrationLog);
+      logs.sort((a, b) => (a.administeredAt?.toMillis?.() ?? 0) - (b.administeredAt?.toMillis?.() ?? 0));
+      administrationLogs.set(med.id, logs);
     }
   }
 
