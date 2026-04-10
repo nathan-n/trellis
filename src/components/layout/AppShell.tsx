@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
-import { Box, Toolbar } from '@mui/material';
+import { Box, Toolbar, CircularProgress } from '@mui/material';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,8 +12,17 @@ export default function AppShell() {
   const { userProfile } = useAuth();
   const { activeCircle, loading } = useCircle();
 
-  // If user has no circles, redirect to circle selection
-  if (!loading && userProfile && (!userProfile.circleIds?.length || !activeCircle)) {
+  // While circle data is loading, show spinner — never redirect prematurely
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Only redirect after loading is complete and we know there's no circle
+  if (userProfile && (!userProfile.circleIds?.length || !activeCircle)) {
     return <Navigate to="/select-circle" replace />;
   }
 
@@ -31,7 +40,7 @@ export default function AppShell() {
           bgcolor: 'background.default',
         }}
       >
-        <Toolbar /> {/* Spacer for fixed app bar */}
+        <Toolbar />
         <Outlet />
       </Box>
     </Box>

@@ -1,14 +1,14 @@
-const CACHE_NAME = 'trellis-v2';
+const CACHE_NAME = 'trellis-v3';
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  // Clear all old caches
+  // Delete ALL caches on every activation — clean slate per deploy
   event.waitUntil(
     caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      Promise.all(names.map((n) => caches.delete(n)))
     )
   );
   self.clients.claim();
@@ -23,25 +23,36 @@ self.addEventListener('fetch', (event) => {
   // Skip Firebase/Google API calls entirely
   const url = new URL(request.url);
   if (url.hostname.includes('googleapis') || url.hostname.includes('firestore')) return;
+  if (url.hostname.includes('fda.gov')) return;
 
-  // Network-first for everything — cache is only an offline fallback
+  // Navigation requests (HTML): ALWAYS go to network, never serve from cache
+  // This prevents stale index.html from referencing deleted JS chunks
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => {
+        // Only use cache as last resort when completely offline
+        return caches.match('/index.html').then((cached) =>
+          cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/html' } })
+        );
+      })
+    );
+    return;
+  }
+
+  // Static assets (JS/CSS/fonts/images): network-first with cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Cache successful responses for offline use
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
       })
-      .catch(() => {
-        // Offline: try cache, fall back to index.html for navigation
-        return caches.match(request).then((cached) => {
-          if (cached) return cached;
-          if (request.mode === 'navigate') return caches.match('/index.html');
-          return new Response('Offline', { status: 503 });
-        });
-      })
+      .catch(() =>
+        caches.match(request).then((cached) =>
+          cached || new Response('Offline', { status: 503 })
+        )
+      )
   );
 });
