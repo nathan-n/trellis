@@ -28,6 +28,7 @@ export interface CreateVisitData {
   endTime: Date;
   notes: string | null;
   status: string;
+  isAllDay?: boolean;
 }
 
 export async function createVisit(
@@ -38,9 +39,11 @@ export async function createVisit(
 ): Promise<string> {
   const docRef = await addDoc(visitsCol(circleId), {
     ...data,
+    isAllDay: data.isAllDay ?? false,
     startTime: Timestamp.fromDate(data.startTime),
     endTime: Timestamp.fromDate(data.endTime),
     startDateYYYYMMDD: toYYYYMMDD(data.startTime),
+    endDateYYYYMMDD: toYYYYMMDD(data.endTime),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -67,6 +70,7 @@ export async function updateVisit(
   }
   if (data.endTime) {
     updates.endTime = Timestamp.fromDate(data.endTime);
+    updates.endDateYYYYMMDD = toYYYYMMDD(data.endTime);
   }
 
   await updateDoc(doc(db, 'circles', circleId, 'visits', visitId), updates);
@@ -81,6 +85,23 @@ export async function deleteVisit(
 ): Promise<void> {
   await deleteDoc(doc(db, 'circles', circleId, 'visits', visitId));
   await writeAuditEntry(circleId, userId, userName, 'visit.delete', 'visit', visitId, {});
+}
+
+export async function toggleVisitStatus(
+  circleId: string,
+  visitId: string,
+  currentStatus: string,
+  userId: string,
+  userName: string
+): Promise<void> {
+  const newStatus = currentStatus === 'confirmed' ? 'tentative' : 'confirmed';
+  await updateDoc(doc(db, 'circles', circleId, 'visits', visitId), {
+    status: newStatus,
+    updatedAt: serverTimestamp(),
+  });
+  await writeAuditEntry(circleId, userId, userName, 'visit.update', 'visit', visitId, {
+    statusChange: `${currentStatus} -> ${newStatus}`,
+  });
 }
 
 export function subscribeVisits(

@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { VisitStatus } from '../constants';
+import type { VisitStatus } from '../constants';
 
 export interface Visit {
   id: string;
@@ -8,8 +8,10 @@ export interface Visit {
   startTime: Timestamp;
   endTime: Timestamp;
   startDateYYYYMMDD: string;
+  endDateYYYYMMDD?: string;
+  isAllDay?: boolean;
   notes: string | null;
-  status: VisitStatus;
+  status: VisitStatus | string; // string for backward compat with old statuses
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

@@ -2,11 +2,14 @@ import { Box, Typography } from '@mui/material';
 import MockDevice from '../MockDevice';
 
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const visits: Record<number, { name: string; color: string }[]> = {
+const visits: Record<number, { name: string; color: string; tentative?: boolean }[]> = {
   3: [{ name: 'Nathan', color: '#1976d2' }],
   7: [{ name: 'Sarah', color: '#388e3c' }],
+  8: [{ name: 'Sarah', color: '#388e3c' }],
   10: [{ name: 'Nathan', color: '#1976d2' }],
-  12: [{ name: 'James', color: '#7b1fa2' }],
+  11: [{ name: 'Nathan', color: '#1976d2' }],
+  12: [{ name: 'Nathan', color: '#1976d2' }],
+  15: [{ name: 'James', color: '#7b1fa2', tentative: true }],
   17: [{ name: 'Sarah', color: '#388e3c' }],
   21: [{ name: 'Nathan', color: '#1976d2' }],
   24: [{ name: 'Sarah', color: '#388e3c' }, { name: 'James', color: '#7b1fa2' }],
@@ -53,8 +56,9 @@ export default function MockVisitCalendar() {
                         <Box
                           key={i}
                           sx={{
-                            bgcolor: v.color,
-                            color: 'white',
+                            bgcolor: v.tentative ? `${v.color}25` : v.color,
+                            color: v.tentative ? v.color : 'white',
+                            border: v.tentative ? `1px dashed ${v.color}` : 'none',
                             borderRadius: 0.5,
                             px: 0.5,
                             mt: 0.2,

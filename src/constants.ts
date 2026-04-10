@@ -45,9 +45,8 @@ export const TaskStatus = {
 export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
 
 export const VisitStatus = {
-  SCHEDULED: 'scheduled',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
+  CONFIRMED: 'confirmed',
+  TENTATIVE: 'tentative',
 } as const;
 export type VisitStatus = (typeof VisitStatus)[keyof typeof VisitStatus];
 
