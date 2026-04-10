@@ -7,14 +7,16 @@ import {
   Button,
   Chip,
   Stack,
-  Link,
   Divider,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import PhoneIcon from '@mui/icons-material/Phone';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import MedicationIcon from '@mui/icons-material/Medication';
 import ContactEmergencyIcon from '@mui/icons-material/ContactEmergency';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import PhoneIcon from '@mui/icons-material/Phone';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useCircle } from '../../contexts/CircleContext';
@@ -25,6 +27,17 @@ import type { EmergencyProfile } from '../../types';
 import EmergencyProfileEditDialog from './EmergencyProfileEditDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import EmptyState from '../shared/EmptyState';
+
+const cardSx = { borderRadius: 3, mb: 2 };
+
+function SectionHeader({ icon, label, color = 'text.primary' }: { icon: React.ReactNode; label: string; color?: string }) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, color }}>
+      {icon}
+      <Typography variant="h6" fontWeight={600} color="inherit">{label}</Typography>
+    </Box>
+  );
+}
 
 export default function EmergencyQuickAccessPage() {
   const { activeCircle, role } = useCircle();
@@ -40,7 +53,6 @@ export default function EmergencyQuickAccessPage() {
         if (snap.exists()) {
           const data = snap.data() as EmergencyProfile;
           setProfile(data);
-          // Cache for offline access
           try { localStorage.setItem(`emergency_${activeCircle.id}`, JSON.stringify(data)); } catch { /* ignore */ }
         } else {
           setProfile(null);
@@ -48,7 +60,6 @@ export default function EmergencyQuickAccessPage() {
         setLoading(false);
       },
       () => {
-        // Fallback to cached data if offline
         try {
           const cached = localStorage.getItem(`emergency_${activeCircle.id}`);
           if (cached) setProfile(JSON.parse(cached));
@@ -86,27 +97,34 @@ export default function EmergencyQuickAccessPage() {
         )}
       </Box>
 
-      {/* Patient Info — Large, high-contrast */}
-      <Card sx={{ mb: 2, bgcolor: 'error.dark', color: 'white' }}>
-        <CardContent sx={{ py: 3 }}>
+      {/* Patient Header */}
+      <Card sx={{ ...cardSx, bgcolor: 'primary.main', color: 'white' }}>
+        <CardContent sx={{ py: 3, px: 3 }}>
           <Typography variant="h4" fontWeight={700}>{profile.patientName}</Typography>
           {profile.dateOfBirth && (
-            <Typography variant="h6">DOB: {formatDate(profile.dateOfBirth)}</Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9 }}>DOB: {formatDate(profile.dateOfBirth)}</Typography>
           )}
           {profile.bloodType && (
-            <Chip label={`Blood Type: ${profile.bloodType}`} sx={{ mt: 1, bgcolor: 'white', color: 'error.dark', fontWeight: 700, fontSize: '1rem' }} />
+            <Chip
+              label={`Blood Type: ${profile.bloodType}`}
+              sx={{ mt: 1, bgcolor: 'white', color: 'primary.dark', fontWeight: 700, fontSize: '1rem' }}
+            />
           )}
         </CardContent>
       </Card>
 
-      {/* Allergies — Critical */}
+      {/* Allergies */}
       {profile.allergies?.length > 0 && (
-        <Card sx={{ mb: 2, border: 2, borderColor: 'error.main' }}>
+        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'warning.main' }}>
           <CardContent>
-            <Typography variant="h6" color="error" fontWeight={700}>ALLERGIES</Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+            <SectionHeader icon={<WarningAmberIcon />} label="Allergies" color="warning.dark" />
+            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 0.5 }}>
               {profile.allergies.map((a, i) => (
-                <Chip key={i} label={a} color="error" sx={{ fontSize: '1rem', fontWeight: 600 }} />
+                <Chip
+                  key={i}
+                  label={a}
+                  sx={{ bgcolor: 'warning.light', color: 'warning.dark', fontSize: '0.95rem', fontWeight: 600 }}
+                />
               ))}
             </Stack>
           </CardContent>
@@ -115,12 +133,12 @@ export default function EmergencyQuickAccessPage() {
 
       {/* Conditions */}
       {profile.conditions?.length > 0 && (
-        <Card sx={{ mb: 2 }}>
+        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'secondary.light' }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={600}>Conditions</Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+            <SectionHeader icon={<HealthAndSafetyIcon />} label="Conditions" color="secondary.main" />
+            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 0.5 }}>
               {profile.conditions.map((c, i) => (
-                <Chip key={i} label={c} variant="outlined" sx={{ fontSize: '0.95rem' }} />
+                <Chip key={i} label={c} color="secondary" variant="outlined" sx={{ fontSize: '0.95rem' }} />
               ))}
             </Stack>
           </CardContent>
@@ -129,15 +147,12 @@ export default function EmergencyQuickAccessPage() {
 
       {/* Current Medications */}
       {profile.currentMedications?.length > 0 && (
-        <Card sx={{ mb: 2 }}>
+        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'primary.light' }}>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <MedicationIcon />
-              <Typography variant="h6" fontWeight={600}>Current Medications</Typography>
-            </Box>
+            <SectionHeader icon={<MedicationIcon />} label="Current Medications" color="primary.main" />
             {profile.currentMedications.map((m, i) => (
               <Typography key={i} variant="body1" sx={{ py: 0.5 }}>
-                <strong>{m.name}</strong> — {m.dosage}
+                <strong>{m.name}</strong> <Typography component="span" color="text.secondary">— {m.dosage}</Typography>
               </Typography>
             ))}
           </CardContent>
@@ -146,48 +161,76 @@ export default function EmergencyQuickAccessPage() {
 
       {/* Emergency Contacts */}
       {profile.emergencyContacts?.length > 0 && (
-        <Card sx={{ mb: 2 }}>
+        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'primary.main' }}>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <ContactEmergencyIcon />
-              <Typography variant="h6" fontWeight={600}>Emergency Contacts</Typography>
-            </Box>
-            {profile.emergencyContacts.map((c, i) => (
-              <Box key={i} sx={{ py: 1, borderBottom: i < profile.emergencyContacts.length - 1 ? 1 : 0, borderColor: 'divider' }}>
-                <Typography variant="body1" fontWeight={600}>
-                  {c.name} <Typography component="span" color="text.secondary">({c.relationship})</Typography>
-                </Typography>
-                <Link href={`tel:${c.phone}`} variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <PhoneIcon fontSize="small" /> {c.phone}
-                </Link>
-              </Box>
-            ))}
+            <SectionHeader icon={<ContactEmergencyIcon />} label="Emergency Contacts" color="primary.main" />
+            <Stack spacing={1.5}>
+              {profile.emergencyContacts.map((c, i) => (
+                <Box key={i} sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 2 }}>
+                  <Typography variant="body1" fontWeight={600}>
+                    {c.name} <Typography component="span" color="text.secondary">({c.relationship})</Typography>
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<PhoneIcon />}
+                    href={`tel:${c.phone}`}
+                    component="a"
+                    size="small"
+                    sx={{ mt: 1 }}
+                  >
+                    {c.phone}
+                  </Button>
+                </Box>
+              ))}
+            </Stack>
           </CardContent>
         </Card>
       )}
 
-      {/* Hospital & Insurance */}
-      <Card sx={{ mb: 2 }}>
+      {/* Medical & Insurance */}
+      <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'secondary.main' }}>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <LocalHospitalIcon />
-            <Typography variant="h6" fontWeight={600}>Medical & Insurance</Typography>
-          </Box>
+          <SectionHeader icon={<LocalHospitalIcon />} label="Medical" color="secondary.main" />
           <Stack spacing={1}>
-            {profile.physicianName && <Typography><strong>Physician:</strong> {profile.physicianName}{profile.physicianPhone && (
-              <> — <Link href={`tel:${profile.physicianPhone}`}>{profile.physicianPhone}</Link></>
-            )}</Typography>}
-            {profile.hospitalPreference && <Typography><strong>Hospital:</strong> {profile.hospitalPreference}</Typography>}
-            {profile.hospitalAddress && <Typography color="text.secondary">{profile.hospitalAddress}</Typography>}
-            {profile.insuranceProvider && (
-              <>
-                <Divider />
-                <Typography><strong>Insurance:</strong> {profile.insuranceProvider}</Typography>
-                {profile.insurancePolicyNumber && <Typography>Policy: {profile.insurancePolicyNumber}</Typography>}
-                {profile.insuranceGroupNumber && <Typography>Group: {profile.insuranceGroupNumber}</Typography>}
-              </>
+            {profile.physicianName && (
+              <Box>
+                <Typography variant="body2"><strong>Physician:</strong> {profile.physicianName}</Typography>
+                {profile.physicianPhone && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PhoneIcon />}
+                    href={`tel:${profile.physicianPhone}`}
+                    component="a"
+                    sx={{ mt: 0.5 }}
+                  >
+                    {profile.physicianPhone}
+                  </Button>
+                )}
+              </Box>
+            )}
+            {profile.hospitalPreference && (
+              <Box>
+                <Typography variant="body2"><strong>Hospital:</strong> {profile.hospitalPreference}</Typography>
+                {profile.hospitalAddress && (
+                  <Typography variant="body2" color="text.secondary">{profile.hospitalAddress}</Typography>
+                )}
+              </Box>
             )}
           </Stack>
+
+          {profile.insuranceProvider && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <SectionHeader icon={<VerifiedUserIcon />} label="Insurance" color="secondary.main" />
+              <Stack spacing={0.5}>
+                <Typography variant="body2"><strong>Provider:</strong> {profile.insuranceProvider}</Typography>
+                {profile.insurancePolicyNumber && <Typography variant="body2">Policy: {profile.insurancePolicyNumber}</Typography>}
+                {profile.insuranceGroupNumber && <Typography variant="body2">Group: {profile.insuranceGroupNumber}</Typography>}
+              </Stack>
+            </>
+          )}
         </CardContent>
       </Card>
 
