@@ -13,6 +13,7 @@ import {
   ListItem,
   ListItemText,
   Chip,
+  Box,
   Typography,
   Divider,
 } from '@mui/material';
@@ -24,6 +25,7 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 import { logAdministration, subscribeAdministrationLog } from '../../services/medicationService';
 import { formatDateTime } from '../../utils/dateUtils';
 import type { Medication, AdministrationLog } from '../../types';
+import MedicationDrugInfo from './MedicationDrugInfo';
 
 interface AdministrationLogDialogProps {
   open: boolean;
@@ -81,9 +83,13 @@ export default function AdministrationLogDialog({ open, onClose, medication }: A
         {medication.name} — {medication.dosage}
       </DialogTitle>
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           {medication.frequency}
         </Typography>
+
+        <Box sx={{ mb: 2 }}>
+          <MedicationDrugInfo openFda={medication.openFda} />
+        </Box>
 
         <Stack spacing={2} sx={{ mb: 3 }}>
           <FormControlLabel

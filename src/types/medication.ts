@@ -1,5 +1,19 @@
 import { Timestamp } from 'firebase/firestore';
 
+export interface OpenFdaMetadata {
+  splId: string;
+  brandNames: string[];
+  genericNames: string[];
+  pharmClassEpc: string[];
+  availableDosages: string[];
+  indicationsAndUsage: string;
+  adverseReactions: string;
+  drugInteractions: string;
+  warningsAndCautions: string;
+  dailyMedUrl: string;
+  fetchedAt: number;
+}
+
 export interface Medication {
   id: string;
   name: string;
@@ -13,6 +27,7 @@ export interface Medication {
   isActive: boolean;
   refillDate: Timestamp | null;
   notes: string | null;
+  openFda: OpenFdaMetadata | null;
   createdByUid: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;

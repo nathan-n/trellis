@@ -32,6 +32,7 @@ export interface CreateMedicationData {
   isActive: boolean;
   refillDate: Date | null;
   notes: string | null;
+  openFda?: import('../types/medication').OpenFdaMetadata | null;
 }
 
 export async function createMedication(

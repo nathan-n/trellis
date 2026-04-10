@@ -2,7 +2,7 @@ export type { UserProfile } from './user';
 export type { Circle, CircleMember, Invitation } from './circle';
 export type { Task, TaskComment, TaskAttachment, PointOfContact } from './task';
 export type { Visit } from './visit';
-export type { Medication, AdministrationLog } from './medication';
+export type { Medication, AdministrationLog, OpenFdaMetadata } from './medication';
 export type { CareLog, MealEntry, HydrationEntry, SleepEntry } from './careLog';
 export type { EmergencyProfile, EmergencyContact, MedicationSummary } from './emergency';
 export type { VaultDocument } from './document';

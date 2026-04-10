@@ -17,6 +17,7 @@ import MedicationIcon from '@mui/icons-material/Medication';
 import DeleteIcon from '@mui/icons-material/Delete';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import dayjs from 'dayjs';
+import MedicationDrugInfo from './MedicationDrugInfo';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -134,12 +135,20 @@ export default function MedicationListPage() {
                         )}
                       </Stack>
                     </Box>
+                    {med.openFda?.pharmClassEpc?.length ? (
+                      <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mt: 0.5 }}>
+                        {med.openFda.pharmClassEpc.slice(0, 2).map((cls, i) => (
+                          <Chip key={i} label={cls} size="small" color="info" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                        ))}
+                      </Stack>
+                    ) : null}
                     {med.prescribingDoctor && (
                       <Typography variant="caption" color="text.secondary">
                         Dr. {med.prescribingDoctor}
                         {med.pharmacy && ` — ${med.pharmacy}`}
                       </Typography>
                     )}
+                    <MedicationDrugInfo openFda={med.openFda} />
                   </CardContent>
                 </CardActionArea>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', pr: 1 }}>
@@ -160,8 +169,8 @@ export default function MedicationListPage() {
         </Stack>
       )}
 
-      <MedicationCreateEditDialog open={createOpen} onClose={() => setCreateOpen(false)} />
-      <MedicationCreateEditDialog open={Boolean(editMed)} onClose={() => setEditMed(null)} medication={editMed} />
+      <MedicationCreateEditDialog open={createOpen} onClose={() => setCreateOpen(false)} existingMeds={meds.filter((m) => m.isActive)} />
+      <MedicationCreateEditDialog open={Boolean(editMed)} onClose={() => setEditMed(null)} medication={editMed} existingMeds={meds.filter((m) => m.isActive)} />
       <AdministrationLogDialog open={Boolean(logMed)} onClose={() => setLogMed(null)} medication={logMed} />
       <ConfirmDialog
         open={Boolean(deleteTarget)}
