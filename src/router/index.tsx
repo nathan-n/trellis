@@ -16,6 +16,7 @@ const TaskCalendarView = lazy(() => import('../components/tasks/TaskCalendarView
 const MyNextPriorityCard = lazy(() => import('../components/tasks/MyNextPriorityCard'));
 const VisitCalendarPage = lazy(() => import('../components/visits/VisitCalendarPage'));
 const MedicationListPage = lazy(() => import('../components/medications/MedicationListPage'));
+const MedicationDetailPage = lazy(() => import('../components/medications/MedicationDetailPage'));
 const CareLogPage = lazy(() => import('../components/careLogs/CareLogPage'));
 const EmergencyQuickAccessPage = lazy(() => import('../components/emergency/EmergencyQuickAccessPage'));
 const DocumentVaultPage = lazy(() => import('../components/documents/DocumentVaultPage'));
@@ -61,6 +62,7 @@ const router = createBrowserRouter([
       { path: 'tasks/calendar', element: <Lazy><TaskCalendarView /></Lazy> },
       { path: 'visits', element: <Lazy><VisitCalendarPage /></Lazy> },
       { path: 'medications', element: <Lazy><MedicationListPage /></Lazy> },
+      { path: 'medications/:medicationId', element: <Lazy><MedicationDetailPage /></Lazy> },
       { path: 'care-log', element: <Lazy><CareLogPage /></Lazy> },
       { path: 'emergency', element: <Lazy><EmergencyQuickAccessPage /></Lazy> },
       { path: 'documents', element: <Lazy><DocumentVaultPage /></Lazy> },

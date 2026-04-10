@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -27,12 +28,12 @@ import { CircleRole } from '../../constants';
 import { hasMinRole } from '../../utils/roleUtils';
 import type { Medication } from '../../types';
 import MedicationCreateEditDialog from './MedicationCreateEditDialog';
-import AdministrationLogDialog from './AdministrationLogDialog';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
 export default function MedicationListPage() {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { activeCircle, role } = useCircle();
   const { showMessage } = useSnackbar();
@@ -40,8 +41,6 @@ export default function MedicationListPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'active' | 'all'>('active');
   const [createOpen, setCreateOpen] = useState(false);
-  const [editMed, setEditMed] = useState<Medication | null>(null);
-  const [logMed, setLogMed] = useState<Medication | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Medication | null>(null);
 
   useEffect(() => {
@@ -112,7 +111,7 @@ export default function MedicationListPage() {
           {filtered.map((med) => (
             <Card key={med.id}>
               <Box sx={{ display: 'flex' }}>
-                <CardActionArea onClick={() => setLogMed(med)} sx={{ flex: 1 }}>
+                <CardActionArea onClick={() => navigate(`/medications/${med.id}`)} sx={{ flex: 1 }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box>
@@ -151,11 +150,6 @@ export default function MedicationListPage() {
                   </CardContent>
                 </CardActionArea>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', pr: 1 }}>
-                  {role && hasMinRole(role, CircleRole.FAMILY) && (
-                    <IconButton size="small" onClick={() => setEditMed(med)}>
-                      <MedicationIcon fontSize="small" />
-                    </IconButton>
-                  )}
                   {role && hasMinRole(role, CircleRole.ADMIN) && (
                     <IconButton size="small" color="error" onClick={() => setDeleteTarget(med)}>
                       <DeleteIcon fontSize="small" />
@@ -174,8 +168,6 @@ export default function MedicationListPage() {
       )}
 
       <MedicationCreateEditDialog open={createOpen} onClose={() => setCreateOpen(false)} existingMeds={meds.filter((m) => m.isActive)} />
-      <MedicationCreateEditDialog open={Boolean(editMed)} onClose={() => setEditMed(null)} medication={editMed} existingMeds={meds.filter((m) => m.isActive)} />
-      <AdministrationLogDialog open={Boolean(logMed)} onClose={() => setLogMed(null)} medication={logMed} />
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Remove Medication"
