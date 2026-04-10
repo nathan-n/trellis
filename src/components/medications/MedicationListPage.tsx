@@ -148,7 +148,6 @@ export default function MedicationListPage() {
                         {med.pharmacy && ` — ${med.pharmacy}`}
                       </Typography>
                     )}
-                    <MedicationDrugInfo openFda={med.openFda} />
                   </CardContent>
                 </CardActionArea>
                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', pr: 1 }}>
@@ -164,6 +163,11 @@ export default function MedicationListPage() {
                   )}
                 </Box>
               </Box>
+              {med.openFda && (
+                <Box sx={{ px: 2, pb: 1 }}>
+                  <MedicationDrugInfo openFda={med.openFda} />
+                </Box>
+              )}
             </Card>
           ))}
         </Stack>
