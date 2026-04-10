@@ -61,6 +61,7 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
   const [visibleToUids, setVisibleToUids] = useState<string[]>([]);
 
   const isEdit = Boolean(task);
+  const isCreator = !task || task.createdByUid === userProfile?.uid;
 
   useEffect(() => {
     if (task) {
@@ -126,6 +127,11 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
       };
 
       if (isEdit && task) {
+        // Only the creator can change visibility
+        if (!isCreator) {
+          delete data.visibility;
+          delete data.visibleToUids;
+        }
         await updateTask(activeCircle.id, task.id, userProfile.uid, userProfile.displayName, data);
         showMessage('Task updated', 'success');
       } else {
@@ -236,13 +242,18 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
             renderInput={(params) => <TextField {...params} label="Assignees" />}
           />
 
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={isEdit && !isCreator}>
             <InputLabel>Visibility</InputLabel>
             <Select value={visibility} label="Visibility" onChange={(e) => setVisibility(e.target.value)}>
               <MenuItem value="circle">Entire Circle</MenuItem>
               <MenuItem value="private">Private (you + assignees)</MenuItem>
               <MenuItem value="specific">Specific People</MenuItem>
             </Select>
+            {isEdit && !isCreator && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                Only the task creator can change visibility
+              </Typography>
+            )}
           </FormControl>
 
           {visibility === 'specific' && (
