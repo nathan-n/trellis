@@ -51,7 +51,7 @@ export async function searchDrugLabels(query: string): Promise<OpenFdaSearchResu
 
   try {
     const encoded = encodeURIComponent(query);
-    const url = `${API_BASE}?search=(openfda.brand_name:${encoded}+openfda.generic_name:${encoded})&limit=10`;
+    const url = `${API_BASE}?search=(openfda.brand_name:"${encoded}"+OR+openfda.generic_name:"${encoded}")&limit=10`;
     const res = await fetch(url);
     if (!res.ok) return [];
 
