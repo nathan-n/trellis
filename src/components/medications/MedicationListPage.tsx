@@ -16,13 +16,14 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import MedicationIcon from '@mui/icons-material/Medication';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import dayjs from 'dayjs';
 import MedicationDrugInfo from './MedicationDrugInfo';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { subscribeMedications, deleteMedication } from '../../services/medicationService';
+import { subscribeMedications, deleteMedication, logAdministration } from '../../services/medicationService';
 import { formatDate } from '../../utils/dateUtils';
 import { CircleRole } from '../../constants';
 import { hasMinRole } from '../../utils/roleUtils';
@@ -67,6 +68,18 @@ export default function MedicationListPage() {
       showMessage('Failed to remove medication', 'error');
     }
     setDeleteTarget(null);
+  };
+
+  const handleQuickLog = async (med: Medication) => {
+    if (!activeCircle || !userProfile) return;
+    try {
+      await logAdministration(activeCircle.id, med.id, userProfile.uid, userProfile.displayName, {
+        skipped: false,
+      });
+      showMessage(`${med.name} dose logged`, 'success');
+    } catch {
+      showMessage('Failed to log dose', 'error');
+    }
   };
 
   const isRefillSoon = (med: Medication) => {
@@ -149,7 +162,17 @@ export default function MedicationListPage() {
                     )}
                   </CardContent>
                 </CardActionArea>
-                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', pr: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5, pr: 1 }}>
+                  {med.isActive && (
+                    <IconButton
+                      size="small"
+                      color="success"
+                      onClick={() => handleQuickLog(med)}
+                      title="Log dose given"
+                    >
+                      <CheckCircleOutlineIcon fontSize="small" />
+                    </IconButton>
+                  )}
                   {role && hasMinRole(role, CircleRole.ADMIN) && (
                     <IconButton size="small" color="error" onClick={() => setDeleteTarget(med)}>
                       <DeleteIcon fontSize="small" />
