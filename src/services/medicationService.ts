@@ -90,11 +90,13 @@ export function subscribeMedications(
   onData: (meds: Medication[]) => void,
   onError: (err: Error) => void
 ): Unsubscribe {
-  const q = query(medsCol(circleId), orderBy('name', 'asc'));
+  const q = query(medsCol(circleId));
   return onSnapshot(
     q,
     (snap) => {
-      onData(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Medication));
+      const meds = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Medication);
+      meds.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+      onData(meds);
     },
     onError
   );
