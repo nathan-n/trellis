@@ -28,7 +28,8 @@ import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import type { EmergencyProfile, EmergencyContact, MedicationSummary } from '../../types';
+import { subscribeMedications } from '../../services/medicationService';
+import type { EmergencyProfile, EmergencyContact, Medication } from '../../types';
 import ChipInput from '../shared/ChipInput';
 
 interface EmergencyProfileEditDialogProps {
@@ -64,7 +65,7 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
   const [bloodType, setBloodType] = useState('');
   const [allergies, setAllergies] = useState<string[]>([]);
   const [conditions, setConditions] = useState<string[]>([]);
-  const [medications, setMedications] = useState<MedicationSummary[]>([]);
+  const [activeMeds, setActiveMeds] = useState<Medication[]>([]);
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
   const [hospitalPreference, setHospitalPreference] = useState('');
   const [hospitalAddress, setHospitalAddress] = useState('');
@@ -81,7 +82,6 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
       setBloodType(profile.bloodType ?? '');
       setAllergies(profile.allergies ?? []);
       setConditions(profile.conditions ?? []);
-      setMedications(profile.currentMedications ?? []);
       setContacts(profile.emergencyContacts ?? []);
       setHospitalPreference(profile.hospitalPreference ?? '');
       setHospitalAddress(profile.hospitalAddress ?? '');
@@ -95,6 +95,17 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
     }
   }, [profile, open, activeCircle]);
 
+  // Subscribe to active medications from the tracker
+  useEffect(() => {
+    if (!activeCircle || !open) return;
+    const unsubscribe = subscribeMedications(
+      activeCircle.id,
+      (meds) => setActiveMeds(meds.filter((m) => m.isActive)),
+      () => {}
+    );
+    return unsubscribe;
+  }, [activeCircle?.id, open]);
+
   const handleSave = async () => {
     if (!activeCircle || !userProfile) return;
 
@@ -106,7 +117,6 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
         conditions,
         allergies,
         bloodType: bloodType.trim() || null,
-        currentMedications: medications.filter((m) => m.name.trim()),
         emergencyContacts: contacts.filter((c) => c.name.trim()),
         hospitalPreference: hospitalPreference.trim() || null,
         hospitalAddress: hospitalAddress.trim() || null,
@@ -219,39 +229,35 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
             </Stack>
           </SectionCard>
 
-          {/* Current Medications */}
+          {/* Current Medications — read-only, synced from Medications page */}
           <SectionCard icon={<MedicationIcon />} label="Current Medications" color="primary.light">
-            <Stack spacing={1.5}>
-              {medications.map((med, i) => (
-                <Box key={i} sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-                  <TextField
-                    label="Medication"
-                    size="small"
-                    value={med.name}
-                    onChange={(e) => setMedications(medications.map((m, j) => j === i ? { ...m, name: e.target.value } : m))}
-                    sx={{ flex: 2 }}
-                  />
-                  <TextField
-                    label="Dosage"
-                    size="small"
-                    value={med.dosage}
-                    onChange={(e) => setMedications(medications.map((m, j) => j === i ? { ...m, dosage: e.target.value } : m))}
-                    sx={{ flex: 1 }}
-                  />
-                  <IconButton size="small" onClick={() => setMedications(medications.filter((_, j) => j !== i))}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              ))}
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                size="small"
-                onClick={() => setMedications([...medications, { name: '', dosage: '' }])}
-              >
-                Add Medication
-              </Button>
-            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+              Medications sync automatically from the Medications page.
+            </Typography>
+            {activeMeds.length > 0 ? (
+              <Stack spacing={0.5} sx={{ mb: 1.5 }}>
+                {activeMeds.map((med) => (
+                  <Box key={med.id} sx={{ bgcolor: 'grey.50', borderRadius: 1, px: 2, py: 1 }}>
+                    <Typography variant="body2">
+                      <strong>{med.name}</strong> — {med.dosage}
+                      {med.frequency && <Typography component="span" color="text.secondary"> ({med.frequency})</Typography>}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                No active medications. Add medications from the Medications page.
+              </Typography>
+            )}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<MedicationIcon />}
+              onClick={() => window.open('/medications', '_blank')}
+            >
+              Manage Medications
+            </Button>
           </SectionCard>
 
           {/* Medical & Insurance */}

@@ -20,10 +20,11 @@ import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useCircle } from '../../contexts/CircleContext';
+import { subscribeMedications } from '../../services/medicationService';
 import { formatDate } from '../../utils/dateUtils';
 import { CircleRole } from '../../constants';
 import { hasMinRole } from '../../utils/roleUtils';
-import type { EmergencyProfile } from '../../types';
+import type { EmergencyProfile, Medication } from '../../types';
 import EmergencyProfileEditDialog from './EmergencyProfileEditDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import EmptyState from '../shared/EmptyState';
@@ -42,9 +43,11 @@ function SectionHeader({ icon, label, color = 'text.primary' }: { icon: React.Re
 export default function EmergencyQuickAccessPage() {
   const { activeCircle, role } = useCircle();
   const [profile, setProfile] = useState<EmergencyProfile | null>(null);
+  const [activeMeds, setActiveMeds] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
 
+  // Subscribe to emergency profile
   useEffect(() => {
     if (!activeCircle) return;
     const unsubscribe = onSnapshot(
@@ -65,6 +68,26 @@ export default function EmergencyQuickAccessPage() {
           if (cached) setProfile(JSON.parse(cached));
         } catch { /* ignore */ }
         setLoading(false);
+      }
+    );
+    return unsubscribe;
+  }, [activeCircle?.id]);
+
+  // Subscribe to medications — auto-sync active meds
+  useEffect(() => {
+    if (!activeCircle) return;
+    const unsubscribe = subscribeMedications(
+      activeCircle.id,
+      (meds) => {
+        const active = meds.filter((m) => m.isActive);
+        setActiveMeds(active);
+        try { localStorage.setItem(`emergency_meds_${activeCircle.id}`, JSON.stringify(active)); } catch { /* ignore */ }
+      },
+      () => {
+        try {
+          const cached = localStorage.getItem(`emergency_meds_${activeCircle.id}`);
+          if (cached) setActiveMeds(JSON.parse(cached));
+        } catch { /* ignore */ }
       }
     );
     return unsubscribe;
@@ -145,14 +168,15 @@ export default function EmergencyQuickAccessPage() {
         </Card>
       )}
 
-      {/* Current Medications */}
-      {profile.currentMedications?.length > 0 && (
+      {/* Current Medications — auto-synced from medication tracker */}
+      {activeMeds.length > 0 && (
         <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'primary.light' }}>
           <CardContent>
             <SectionHeader icon={<MedicationIcon />} label="Current Medications" color="primary.main" />
-            {profile.currentMedications.map((m, i) => (
-              <Typography key={i} variant="body1" sx={{ py: 0.5 }}>
+            {activeMeds.map((m) => (
+              <Typography key={m.id} variant="body1" sx={{ py: 0.5 }}>
                 <strong>{m.name}</strong> <Typography component="span" color="text.secondary">— {m.dosage}</Typography>
+                {m.frequency && <Typography component="span" color="text.secondary"> ({m.frequency})</Typography>}
               </Typography>
             ))}
           </CardContent>
