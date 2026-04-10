@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Box, Typography, Button, Stack, Card, CardContent } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import PrintIcon from '@mui/icons-material/Print';
@@ -11,12 +12,25 @@ import DoctorPrepReport from './DoctorPrepReport';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
 export default function DoctorPrepPage() {
+  const [searchParams] = useSearchParams();
   const { activeCircle } = useCircle();
   const { showMessage } = useSnackbar();
-  const [startDate, setStartDate] = useState<Dayjs>(dayjs().subtract(30, 'day'));
-  const [endDate, setEndDate] = useState<Dayjs>(dayjs());
+
+  const fromParam = searchParams.get('from');
+  const toParam = searchParams.get('to');
+  const [startDate, setStartDate] = useState<Dayjs>(fromParam ? dayjs(fromParam) : dayjs().subtract(30, 'day'));
+  const [endDate, setEndDate] = useState<Dayjs>(toParam ? dayjs(toParam) : dayjs());
+  const [autoGenerate, setAutoGenerate] = useState(Boolean(fromParam && toParam));
   const [data, setData] = useState<DoctorPrepData | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Auto-generate when linked from an appointment
+  useEffect(() => {
+    if (autoGenerate && activeCircle) {
+      setAutoGenerate(false);
+      handleGenerate();
+    }
+  }, [autoGenerate, activeCircle]);
 
   const handleGenerate = async () => {
     if (!activeCircle) return;

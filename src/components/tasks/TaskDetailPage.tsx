@@ -30,6 +30,9 @@ import EmailIcon from '@mui/icons-material/Email';
 import LinkIcon from '@mui/icons-material/Link';
 import LockIcon from '@mui/icons-material/Lock';
 import PeopleIcon from '@mui/icons-material/People';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import SummarizeIcon from '@mui/icons-material/Summarize';
+import dayjs from 'dayjs';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -234,6 +237,47 @@ export default function TaskDetailPage() {
                     </Tooltip>
                   ))}
                 </AvatarGroup>
+              </Box>
+            )}
+
+            {/* Appointment details */}
+            {task.subtype === 'appointment' && task.appointmentDetails && (
+              <Box sx={{ p: 2, bgcolor: 'primary.50', borderRadius: 2, border: 1, borderColor: 'primary.light' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <LocalHospitalIcon color="primary" fontSize="small" />
+                  <Typography variant="subtitle2" color="primary">Doctor Appointment</Typography>
+                </Box>
+                {task.appointmentDetails.doctorName && (
+                  <Typography variant="body2">Doctor: <strong>{task.appointmentDetails.doctorName}</strong></Typography>
+                )}
+                {task.appointmentDetails.location && (
+                  <Typography variant="body2">Location: {task.appointmentDetails.location}</Typography>
+                )}
+                {task.appointmentDetails.appointmentType && (
+                  <Chip
+                    label={task.appointmentDetails.appointmentType.replace('_', ' ')}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ mt: 0.5, textTransform: 'capitalize' }}
+                  />
+                )}
+                {task.dueDate && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<SummarizeIcon />}
+                    sx={{ mt: 1.5 }}
+                    onClick={() => {
+                      const apptDate = dayjs(task.dueDate!.toDate());
+                      const from = apptDate.subtract(30, 'day').format('YYYY-MM-DD');
+                      const to = apptDate.format('YYYY-MM-DD');
+                      navigate(`/doctor-prep?from=${from}&to=${to}`);
+                    }}
+                  >
+                    Prepare for Visit
+                  </Button>
+                )}
               </Box>
             )}
 

@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { TaskCategory, TaskPriority, TaskStatus, TaskVisibility, RecurrenceFrequency } from '../constants';
+import { TaskCategory, TaskPriority, TaskStatus, TaskVisibility, TaskSubtype, RecurrenceFrequency } from '../constants';
 
 export interface PointOfContact {
   name: string;
@@ -23,6 +23,12 @@ export interface Task {
   resourceLinks: string[];
   rationale: string | null;
   pointsOfContact: PointOfContact[];
+  subtype?: TaskSubtype;
+  appointmentDetails?: {
+    doctorName: string;
+    location: string;
+    appointmentType: string;
+  } | null;
   recurrence: {
     frequency: RecurrenceFrequency;
   } | null;

@@ -98,6 +98,23 @@ export const TaskVisibility = {
 } as const;
 export type TaskVisibility = (typeof TaskVisibility)[keyof typeof TaskVisibility];
 
+export const TaskSubtype = {
+  APPOINTMENT: 'appointment',
+} as const;
+export type TaskSubtype = (typeof TaskSubtype)[keyof typeof TaskSubtype];
+
+export const AppointmentType = {
+  NEUROLOGY: 'neurology',
+  PRIMARY_CARE: 'primary_care',
+  CARDIOLOGY: 'cardiology',
+  DENTIST: 'dentist',
+  SPECIALIST: 'specialist',
+  LAB_WORK: 'lab_work',
+  THERAPY: 'therapy',
+  OTHER: 'other',
+} as const;
+export type AppointmentType = (typeof AppointmentType)[keyof typeof AppointmentType];
+
 export const RecurrenceFrequency = {
   DAILY: 'daily',
   WEEKLY: 'weekly',

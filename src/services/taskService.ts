@@ -44,6 +44,8 @@ export interface CreateTaskData {
   resourceLinks: string[];
   rationale: string | null;
   pointsOfContact: { name: string; phone: string; email: string }[];
+  subtype?: string;
+  appointmentDetails?: { doctorName: string; location: string; appointmentType: string } | null;
   recurrence?: { frequency: string } | null;
 }
 

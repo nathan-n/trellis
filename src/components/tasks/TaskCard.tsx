@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import PeopleIcon from '@mui/icons-material/People';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../utils/dateUtils';
 import { useCircleMembers } from '../../hooks/useCircleMembers';
@@ -72,6 +73,9 @@ export default function TaskCard({ task }: TaskCardProps) {
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
             <Chip label={categoryLabels[task.category] ?? task.category} size="small" variant="outlined" />
             <Chip label={statusLabels[task.status] ?? task.status} size="small" variant="outlined" />
+            {task.subtype === 'appointment' && (
+              <Chip icon={<LocalHospitalIcon />} label={task.appointmentDetails?.appointmentType?.replace('_', ' ') ?? 'Appointment'} size="small" color="primary" variant="outlined" sx={{ textTransform: 'capitalize' }} />
+            )}
             {task.recurrence && (
               <Chip label={`Repeats ${task.recurrence.frequency}`} size="small" color="secondary" variant="outlined" />
             )}

@@ -17,12 +17,14 @@ import {
   IconButton,
   Autocomplete,
   Divider,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs, { type Dayjs } from 'dayjs';
-import { TaskCategory, TaskPriority, TaskStatus } from '../../constants';
+import { TaskCategory, TaskPriority, TaskStatus, TaskSubtype } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -59,6 +61,10 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
   const [recurrenceFreq, setRecurrenceFreq] = useState<string>('');
   const [visibility, setVisibility] = useState<string>('circle');
   const [visibleToUids, setVisibleToUids] = useState<string[]>([]);
+  const [isAppointment, setIsAppointment] = useState(false);
+  const [apptDoctorName, setApptDoctorName] = useState('');
+  const [apptLocation, setApptLocation] = useState('');
+  const [apptType, setApptType] = useState<string>('other');
 
   const isEdit = Boolean(task);
   const isCreator = !task || task.createdByUid === userProfile?.uid;
@@ -79,6 +85,10 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
       setRecurrenceFreq(task.recurrence?.frequency ?? '');
       setVisibility(task.visibility ?? 'circle');
       setVisibleToUids(task.visibleToUids ?? []);
+      setIsAppointment(task.subtype === TaskSubtype.APPOINTMENT);
+      setApptDoctorName(task.appointmentDetails?.doctorName ?? '');
+      setApptLocation(task.appointmentDetails?.location ?? '');
+      setApptType(task.appointmentDetails?.appointmentType ?? 'other');
     } else {
       resetForm();
     }
@@ -99,6 +109,10 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
     setRecurrenceFreq('');
     setVisibility('circle');
     setVisibleToUids([]);
+    setIsAppointment(false);
+    setApptDoctorName('');
+    setApptLocation('');
+    setApptType('other');
   };
 
   const handleSave = async () => {
@@ -124,6 +138,12 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
         recurrence: recurrenceFreq ? { frequency: recurrenceFreq } : null,
         visibility,
         visibleToUids: visibility === 'specific' ? visibleToUids : [],
+        subtype: isAppointment ? TaskSubtype.APPOINTMENT : undefined,
+        appointmentDetails: isAppointment ? {
+          doctorName: apptDoctorName.trim(),
+          location: apptLocation.trim(),
+          appointmentType: apptType,
+        } : null,
       };
 
       if (isEdit && task) {
@@ -227,6 +247,47 @@ export default function TaskCreateEditDialog({ open, onClose, task }: TaskCreate
               </Select>
             </FormControl>
           </Box>
+
+          {/* Appointment toggle — shown when category is medical */}
+          {category === TaskCategory.MEDICAL && (
+            <>
+              <FormControlLabel
+                control={<Switch checked={isAppointment} onChange={(e) => setIsAppointment(e.target.checked)} />}
+                label="This is a doctor appointment"
+              />
+              {isAppointment && (
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <TextField
+                    label="Doctor Name"
+                    value={apptDoctorName}
+                    onChange={(e) => setApptDoctorName(e.target.value)}
+                    size="small"
+                    sx={{ flex: 1, minWidth: 180 }}
+                  />
+                  <TextField
+                    label="Office/Clinic Location"
+                    value={apptLocation}
+                    onChange={(e) => setApptLocation(e.target.value)}
+                    size="small"
+                    sx={{ flex: 1, minWidth: 180 }}
+                  />
+                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <InputLabel>Appointment Type</InputLabel>
+                    <Select value={apptType} label="Appointment Type" onChange={(e) => setApptType(e.target.value)}>
+                      <MenuItem value="neurology">Neurology</MenuItem>
+                      <MenuItem value="primary_care">Primary Care</MenuItem>
+                      <MenuItem value="cardiology">Cardiology</MenuItem>
+                      <MenuItem value="dentist">Dentist</MenuItem>
+                      <MenuItem value="specialist">Specialist</MenuItem>
+                      <MenuItem value="lab_work">Lab Work</MenuItem>
+                      <MenuItem value="therapy">Therapy</MenuItem>
+                      <MenuItem value="other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+            </>
+          )}
 
           <Autocomplete
             multiple
