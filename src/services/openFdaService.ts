@@ -16,11 +16,11 @@ function setCache(key: string, data: unknown) {
   cache.set(key, { data, ts: Date.now() });
 }
 
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
-function truncate(text: string, max: number): string {
+export function truncate(text: string, max: number): string {
   const clean = stripHtml(text);
   if (clean.length <= max) return clean;
   const cut = clean.slice(0, max);
@@ -131,7 +131,7 @@ export async function fetchDrugDetails(splId: string): Promise<OpenFdaMetadata |
 
 // ─── Interaction Cross-Check ─────────────────────────────────────────────────
 
-function searchTextForDrugName(text: string, names: string[]): string | null {
+export function searchTextForDrugName(text: string, names: string[]): string | null {
   const lower = text.toLowerCase();
   for (const name of names) {
     if (name.length < 3) continue;

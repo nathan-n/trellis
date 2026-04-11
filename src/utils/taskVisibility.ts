@@ -16,3 +16,17 @@ export function canUserSeeTask(
 
   return false;
 }
+
+export function computeVisibleToUids(
+  visibility: string,
+  creatorUid: string,
+  assigneeUids: string[],
+  explicitUids: string[] = []
+): string[] {
+  if (visibility === 'circle') return [];
+  const uids = new Set<string>([creatorUid, ...assigneeUids]);
+  if (visibility === 'specific') {
+    explicitUids.forEach((uid) => uids.add(uid));
+  }
+  return [...uids];
+}

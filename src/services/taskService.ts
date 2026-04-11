@@ -16,6 +16,7 @@ import { db } from '../config/firebase';
 import type { Task, TaskComment, TaskAttachment } from '../types';
 import { buildSearchTerms } from '../utils/searchUtils';
 import { toYYYYMM } from '../utils/dateUtils';
+import { computeVisibleToUids } from '../utils/taskVisibility';
 import { writeAuditEntry } from './auditService';
 import { uploadFile, deleteFile } from './storageService';
 import { v4 as uuidv4 } from 'uuid';
@@ -49,19 +50,6 @@ export interface CreateTaskData {
   recurrence?: { frequency: string } | null;
 }
 
-function computeVisibleToUids(
-  visibility: string,
-  creatorUid: string,
-  assigneeUids: string[],
-  explicitUids: string[] = []
-): string[] {
-  if (visibility === 'circle') return [];
-  const uids = new Set<string>([creatorUid, ...assigneeUids]);
-  if (visibility === 'specific') {
-    explicitUids.forEach((uid) => uids.add(uid));
-  }
-  return [...uids];
-}
 
 export async function createTask(
   circleId: string,
