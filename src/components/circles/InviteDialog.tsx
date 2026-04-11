@@ -12,7 +12,11 @@ import {
   MenuItem,
   Stack,
   Typography,
+  Box,
+  Alert,
+  IconButton,
 } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { CircleRole } from '../../constants';
 import { getRoleLabel } from '../../utils/roleUtils';
 import { useAuth } from '../../contexts/AuthContext';
@@ -31,6 +35,7 @@ export default function InviteDialog({ open, onClose }: InviteDialogProps) {
   const { showMessage } = useSnackbar();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<CircleRole>(CircleRole.FAMILY);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const handleInvite = async () => {
@@ -46,10 +51,9 @@ export default function InviteDialog({ open, onClose }: InviteDialogProps) {
         userProfile.displayName,
         role
       );
-      showMessage(`Invitation sent to ${email}`, 'success');
-      // TODO: In the future, send an email with the invitation link
-      console.log(`Invitation link: ${window.location.origin}/invite/${invitationId}`);
-      handleClose();
+      const link = `${window.location.origin}/invite/${invitationId}`;
+      setInviteLink(link);
+      showMessage('Invitation created — share the link below', 'success');
     } catch (err) {
       console.error('Invite error:', err);
       showMessage('Failed to send invitation', 'error');
@@ -61,7 +65,16 @@ export default function InviteDialog({ open, onClose }: InviteDialogProps) {
   const handleClose = () => {
     setEmail('');
     setRole(CircleRole.FAMILY);
+    setInviteLink(null);
     onClose();
+  };
+
+  const handleCopyLink = () => {
+    if (inviteLink) {
+      navigator.clipboard.writeText(inviteLink).then(() => {
+        showMessage('Link copied to clipboard', 'success');
+      });
+    }
   };
 
   return (
@@ -92,12 +105,34 @@ export default function InviteDialog({ open, onClose }: InviteDialogProps) {
             </Select>
           </FormControl>
         </Stack>
+
+        {inviteLink && (
+          <Alert severity="success" sx={{ mt: 3 }}>
+            <Typography variant="body2" fontWeight={600} gutterBottom>
+              Share this link with {email}:
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'grey.50', borderRadius: 1, p: 1 }}>
+              <Typography variant="body2" sx={{ flex: 1, wordBreak: 'break-all', fontSize: '0.8rem' }}>
+                {inviteLink}
+              </Typography>
+              <IconButton size="small" onClick={handleCopyLink} title="Copy link">
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Alert>
+        )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleInvite} variant="contained" disabled={!email.trim() || saving}>
-          {saving ? 'Sending...' : 'Send Invitation'}
-        </Button>
+        {inviteLink ? (
+          <Button onClick={handleClose} variant="contained">Done</Button>
+        ) : (
+          <>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleInvite} variant="contained" disabled={!email.trim() || saving}>
+              {saving ? 'Sending...' : 'Send Invitation'}
+            </Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );

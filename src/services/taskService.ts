@@ -73,17 +73,32 @@ export async function createTask(
   const visibility = data.visibility ?? 'circle';
   const visibleToUids = computeVisibleToUids(visibility, userId, data.assigneeUids, data.visibleToUids ?? []);
 
-  const docRef = await addDoc(tasksCol(circleId), {
-    ...data,
+  // Strip undefined values — Firestore rejects them
+  const taskData: Record<string, unknown> = {
+    title: data.title,
+    description: data.description,
+    category: data.category,
+    priority: data.priority,
+    status: data.status,
+    assigneeUids: data.assigneeUids,
     visibility,
     visibleToUids,
     dueDate: data.dueDate ? Timestamp.fromDate(data.dueDate) : null,
     dueDateYYYYMM: data.dueDate ? toYYYYMM(data.dueDate) : null,
+    location: data.location,
+    resourceLinks: data.resourceLinks,
+    rationale: data.rationale,
+    pointsOfContact: data.pointsOfContact,
+    recurrence: data.recurrence ?? null,
     searchTerms,
     createdByUid: userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  });
+  };
+  if (data.subtype) taskData.subtype = data.subtype;
+  if (data.appointmentDetails) taskData.appointmentDetails = data.appointmentDetails;
+
+  const docRef = await addDoc(tasksCol(circleId), taskData);
 
   await writeAuditEntry(circleId, userId, userName, 'task.create', 'task', docRef.id, {
     title: data.title,

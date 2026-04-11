@@ -32,11 +32,11 @@ service cloud.firestore {
     // Invitations
     match /invitations/{invitationId} {
       allow read: if request.auth != null && (
-        request.auth.token.email == resource.data.inviteeEmail
+        request.auth.token.email.lower() == resource.data.inviteeEmail
         || isCircleMember(resource.data.circleId)
       );
       allow create: if request.auth != null && hasMinRole(request.resource.data.circleId, 'admin');
-      allow update: if request.auth != null && request.auth.token.email == resource.data.inviteeEmail;
+      allow update: if request.auth != null && request.auth.token.email.lower() == resource.data.inviteeEmail;
     }
 
     // Circles

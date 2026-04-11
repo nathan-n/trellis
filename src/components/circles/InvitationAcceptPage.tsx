@@ -10,7 +10,7 @@ import { InvitationStatus } from '../../constants';
 
 export default function InvitationAcceptPage() {
   const { invitationId } = useParams<{ invitationId: string }>();
-  const { firebaseUser, userProfile, signIn, refreshProfile } = useAuth();
+  const { firebaseUser, userProfile, signIn, logOut, refreshProfile } = useAuth();
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
   const [invitation, setInvitation] = useState<Invitation | null>(null);
@@ -116,6 +116,15 @@ export default function InvitationAcceptPage() {
             <Button variant="contained" size="large" fullWidth onClick={signIn}>
               Sign in with Google to Accept
             </Button>
+          ) : userProfile && invitation.inviteeEmail !== userProfile.email.toLowerCase() ? (
+            <Box>
+              <Typography color="error" sx={{ mb: 2 }}>
+                This invitation was sent to <strong>{invitation.inviteeEmail}</strong> but you're signed in as <strong>{userProfile.email}</strong>. Please sign in with the correct account.
+              </Typography>
+              <Button variant="outlined" fullWidth onClick={logOut}>
+                Sign Out
+              </Button>
+            </Box>
           ) : (
             <Stack spacing={2}>
               <Button
