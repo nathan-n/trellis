@@ -57,3 +57,14 @@ export interface TaskAttachment {
   uploadedAt: Timestamp;
   sizeBytes: number;
 }
+
+export interface DoctorQuestion {
+  id: string;
+  text: string;
+  answered: boolean;
+  answerNotes: string | null;
+  addedByUid: string;
+  addedByName: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}

@@ -48,6 +48,7 @@ import type { Task } from '../../types';
 import TaskCreateEditDialog from './TaskCreateEditDialog';
 import TaskComments from './TaskComments';
 import TaskAttachments from './TaskAttachments';
+import TaskQuestions from './TaskQuestions';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
@@ -272,12 +273,15 @@ export default function TaskDetailPage() {
                       const apptDate = dayjs(task.dueDate!.toDate());
                       const from = apptDate.subtract(30, 'day').format('YYYY-MM-DD');
                       const to = apptDate.format('YYYY-MM-DD');
-                      navigate(`/doctor-prep?from=${from}&to=${to}`);
+                      navigate(`/doctor-prep?from=${from}&to=${to}&taskId=${task.id}`);
                     }}
                   >
                     Prepare for Visit
                   </Button>
                 )}
+                <Box sx={{ mt: 2 }}>
+                  <TaskQuestions taskId={task.id} />
+                </Box>
               </Box>
             )}
 

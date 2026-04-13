@@ -94,6 +94,20 @@ service cloud.firestore {
           allow create: if request.auth != null && hasMinRole(circleId, 'professional');
           allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
         }
+
+        // Doctor questions — any circle member can add/update, inherits task visibility for read
+        match /questions/{questionId} {
+          allow read: if request.auth != null && isCircleMember(circleId) && (
+            !('visibility' in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data)
+            || get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibility == 'circle'
+            || getCircleRole(circleId) == 'admin'
+            || request.auth.uid == get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.createdByUid
+            || (request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibleToUids)
+          );
+          allow create: if request.auth != null && isCircleMember(circleId);
+          allow update: if request.auth != null && isCircleMember(circleId);
+          allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        }
       }
 
       // Visits

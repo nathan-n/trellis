@@ -1,14 +1,18 @@
 import { Box, Typography, Divider, Table, TableBody, TableCell, TableHead, TableRow, Chip, Stack } from '@mui/material';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import type { DoctorPrepData } from '../../services/doctorPrepService';
+import type { DoctorQuestion } from '../../types';
 import { useCircle } from '../../contexts/CircleContext';
 
 interface DoctorPrepReportProps {
   data: DoctorPrepData;
   startDate: string;
   endDate: string;
+  questions?: DoctorQuestion[];
 }
 
-export default function DoctorPrepReport({ data, startDate, endDate }: DoctorPrepReportProps) {
+export default function DoctorPrepReport({ data, startDate, endDate, questions }: DoctorPrepReportProps) {
   const { activeCircle } = useCircle();
 
   // Mood summary
@@ -126,6 +130,42 @@ export default function DoctorPrepReport({ data, startDate, endDate }: DoctorPre
                 <Typography variant="body2">{log.generalNotes}</Typography>
               </Box>
             ))}
+          <Divider sx={{ my: 2 }} />
+        </>
+      )}
+
+      {/* Questions for the Doctor */}
+      {questions && questions.length > 0 && (
+        <>
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            Questions to Discuss
+          </Typography>
+          {questions.filter((q) => !q.answered).map((q) => (
+            <Box key={q.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+              <CheckBoxOutlineBlankIcon sx={{ fontSize: '1.1rem', mt: 0.2, color: 'text.secondary' }} />
+              <Typography variant="body2">{q.text}</Typography>
+            </Box>
+          ))}
+          {questions.some((q) => q.answered) && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Previously Answered
+              </Typography>
+              {questions.filter((q) => q.answered).map((q) => (
+                <Box key={q.id} sx={{ mb: 1, opacity: 0.7 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <CheckBoxIcon sx={{ fontSize: '1.1rem', mt: 0.2, color: 'success.main' }} />
+                    <Typography variant="body2" sx={{ textDecoration: 'line-through' }}>{q.text}</Typography>
+                  </Box>
+                  {q.answerNotes && (
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 3.5, fontStyle: 'italic' }}>
+                      {q.answerNotes}
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
           <Divider sx={{ my: 2 }} />
         </>
       )}
