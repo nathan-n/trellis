@@ -84,14 +84,25 @@ export default function DoctorPrepPage() {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>Doctor Visit Prep</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      {/* Global print styles — hide everything except the report */}
+      <style>{`
+        @media print {
+          body { margin: 0; padding: 0; }
+          nav, header, .MuiDrawer-root, .MuiAppBar-root, .MuiToolbar-root { display: none !important; }
+          main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+          .no-print { display: none !important; }
+          .doctor-prep-report { box-shadow: none !important; border: none !important; }
+          @page { margin: 0.6in 0.8in; size: letter; }
+        }
+      `}</style>
+      <Typography variant="h5" gutterBottom className="no-print">Doctor Visit Prep</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }} className="no-print">
         {doctorName
           ? `Preparing for appointment with ${doctorName}`
           : 'Generate a summary of care logs, medications, and observations for a date range to bring to a doctor appointment.'}
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3 }} className="no-print">
         <CardContent>
           <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
             <DatePicker
@@ -128,14 +139,14 @@ export default function DoctorPrepPage() {
 
       {/* Questions section — only when linked from an appointment */}
       {taskIdParam && activeCircle && (
-        <Card sx={{ mb: 3 }}>
+        <Card sx={{ mb: 3 }} className="no-print">
           <CardContent>
             <TaskQuestions taskId={taskIdParam} />
           </CardContent>
         </Card>
       )}
 
-      {loading && <LoadingSpinner message="Gathering care data..." />}
+      {loading && <Box className="no-print"><LoadingSpinner message="Gathering care data..." /></Box>}
 
       {data && (
         <Card>
