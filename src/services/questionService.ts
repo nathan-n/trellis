@@ -5,7 +5,6 @@ import {
   updateDoc,
   deleteDoc,
   query,
-  orderBy,
   onSnapshot,
   getDocs,
   serverTimestamp,
@@ -63,15 +62,16 @@ export function subscribeQuestions(
   onData: (questions: DoctorQuestion[]) => void,
   onError: (err: Error) => void
 ): Unsubscribe {
-  const q = query(questionsCol(circleId, taskId), orderBy('createdAt', 'asc'));
+  // No orderBy — serverTimestamp is null on pending writes, which breaks ordered queries.
+  // Sort client-side instead, with stable insertion order (no reordering on check).
   return onSnapshot(
-    q,
+    query(questionsCol(circleId, taskId)),
     (snap) => {
       const questions = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as DoctorQuestion);
-      // Sort: unanswered first, then answered
       questions.sort((a, b) => {
-        if (a.answered !== b.answered) return a.answered ? 1 : -1;
-        return 0;
+        const aTime = a.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
+        const bTime = b.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
+        return aTime - bTime;
       });
       onData(questions);
     },
@@ -83,7 +83,12 @@ export async function fetchQuestions(
   circleId: string,
   taskId: string
 ): Promise<DoctorQuestion[]> {
-  const q = query(questionsCol(circleId, taskId), orderBy('createdAt', 'asc'));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as DoctorQuestion);
+  const snap = await getDocs(query(questionsCol(circleId, taskId)));
+  const questions = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as DoctorQuestion);
+  questions.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
+    const bTime = b.createdAt?.toMillis?.() ?? Number.MAX_SAFE_INTEGER;
+    return aTime - bTime;
+  });
+  return questions;
 }
