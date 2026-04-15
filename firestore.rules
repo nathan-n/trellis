@@ -31,21 +31,30 @@ service cloud.firestore {
             .hasOnly(['displayName', 'activeCircleId', 'updatedAt', 'circleIds']);
     }
 
-    // Invitations — status-only updates by invitee (F2, F14)
+    // Invitations — invitee can accept/decline, admin can revoke
     match /invitations/{invitationId} {
       allow read: if request.auth != null && (
         request.auth.token.email.lower() == resource.data.inviteeEmail
         || isCircleMember(resource.data.circleId)
       );
       allow create: if request.auth != null && hasMinRole(request.resource.data.circleId, 'admin');
-      allow update: if request.auth != null
-        && request.auth.token.email.lower() == resource.data.inviteeEmail
-        && resource.data.status == 'pending'
-        && request.resource.data.status in ['accepted', 'declined']
-        && request.resource.data.role == resource.data.role
-        && request.resource.data.circleId == resource.data.circleId
-        && request.resource.data.invitedByUid == resource.data.invitedByUid
-        && request.resource.data.inviteeEmail == resource.data.inviteeEmail;
+      allow update: if request.auth != null && (
+        // Invitee can accept or decline their own pending invitation
+        (
+          request.auth.token.email.lower() == resource.data.inviteeEmail
+          && resource.data.status == 'pending'
+          && request.resource.data.status in ['accepted', 'declined']
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.circleId == resource.data.circleId
+          && request.resource.data.invitedByUid == resource.data.invitedByUid
+          && request.resource.data.inviteeEmail == resource.data.inviteeEmail
+        )
+        // Admin can revoke (set to expired)
+        || (
+          hasMinRole(resource.data.circleId, 'admin')
+          && request.resource.data.status == 'expired'
+        )
+      );
     }
 
     // Circles
