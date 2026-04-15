@@ -163,6 +163,12 @@ export async function acceptInvitation(
     throw new Error('Invitation not found or already processed');
   }
 
+  // Mark invitation as accepted FIRST (invitee has permission for this)
+  await updateDoc(doc(db, 'invitations', invitationId), {
+    status: InvitationStatus.ACCEPTED,
+    acceptedAt: serverTimestamp(),
+  });
+
   // Add user as circle member
   const memberRef = doc(db, 'circles', invitation.circleId, 'members', userId);
   await setDoc(memberRef, {
@@ -175,12 +181,6 @@ export async function acceptInvitation(
     invitedByUid: invitation.invitedByUid,
   });
 
-  // Atomic increment — no read needed, no race condition
-  await updateDoc(doc(db, 'circles', invitation.circleId), {
-    memberCount: increment(1),
-    updatedAt: serverTimestamp(),
-  });
-
   // Update user's circle list
   await updateDoc(doc(db, 'users', userId), {
     circleIds: arrayUnion(invitation.circleId),
@@ -188,11 +188,9 @@ export async function acceptInvitation(
     updatedAt: serverTimestamp(),
   });
 
-  // Mark invitation as accepted
-  await updateDoc(doc(db, 'invitations', invitationId), {
-    status: InvitationStatus.ACCEPTED,
-    acceptedAt: serverTimestamp(),
-  });
+  // Note: memberCount increment skipped — requires admin role in Firestore rules.
+  // The member list is the source of truth; memberCount is denormalized and may drift.
+  // A Cloud Function could handle this atomically in the future.
 }
 
 export async function declineInvitation(invitationId: string): Promise<void> {
