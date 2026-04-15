@@ -158,39 +158,59 @@ export async function acceptInvitation(
   userName: string,
   userPhoto: string | null
 ): Promise<void> {
+  console.log('[acceptInvitation] Starting for invitation:', invitationId, 'user:', userId, 'email:', userEmail);
+
   const invitation = await getInvitation(invitationId);
   if (!invitation || invitation.status !== InvitationStatus.PENDING) {
+    console.error('[acceptInvitation] Invitation not found or not pending. Status:', invitation?.status);
     throw new Error('Invitation not found or already processed');
   }
+  console.log('[acceptInvitation] Invitation loaded. CircleId:', invitation.circleId, 'Role:', invitation.role, 'InviteeEmail:', invitation.inviteeEmail);
 
-  // Mark invitation as accepted FIRST (invitee has permission for this)
-  await updateDoc(doc(db, 'invitations', invitationId), {
-    status: InvitationStatus.ACCEPTED,
-    acceptedAt: serverTimestamp(),
-  });
+  // Step 1: Mark invitation as accepted
+  try {
+    await updateDoc(doc(db, 'invitations', invitationId), {
+      status: InvitationStatus.ACCEPTED,
+      acceptedAt: serverTimestamp(),
+    });
+    console.log('[acceptInvitation] Step 1 OK: invitation marked accepted');
+  } catch (err) {
+    console.error('[acceptInvitation] Step 1 FAILED: update invitation status', err);
+    throw err;
+  }
 
-  // Add user as circle member
-  const memberRef = doc(db, 'circles', invitation.circleId, 'members', userId);
-  await setDoc(memberRef, {
-    uid: userId,
-    email: userEmail,
-    displayName: userName,
-    photoURL: userPhoto,
-    role: invitation.role,
-    joinedAt: serverTimestamp(),
-    invitedByUid: invitation.invitedByUid,
-  });
+  // Step 2: Add user as circle member
+  try {
+    const memberRef = doc(db, 'circles', invitation.circleId, 'members', userId);
+    await setDoc(memberRef, {
+      uid: userId,
+      email: userEmail,
+      displayName: userName,
+      photoURL: userPhoto,
+      role: invitation.role,
+      joinedAt: serverTimestamp(),
+      invitedByUid: invitation.invitedByUid,
+    });
+    console.log('[acceptInvitation] Step 2 OK: member doc created');
+  } catch (err) {
+    console.error('[acceptInvitation] Step 2 FAILED: create member doc', err);
+    throw err;
+  }
 
-  // Update user's circle list
-  await updateDoc(doc(db, 'users', userId), {
-    circleIds: arrayUnion(invitation.circleId),
-    activeCircleId: invitation.circleId,
-    updatedAt: serverTimestamp(),
-  });
+  // Step 3: Update user's circle list
+  try {
+    await updateDoc(doc(db, 'users', userId), {
+      circleIds: arrayUnion(invitation.circleId),
+      activeCircleId: invitation.circleId,
+      updatedAt: serverTimestamp(),
+    });
+    console.log('[acceptInvitation] Step 3 OK: user profile updated');
+  } catch (err) {
+    console.error('[acceptInvitation] Step 3 FAILED: update user profile', err);
+    throw err;
+  }
 
-  // Note: memberCount increment skipped — requires admin role in Firestore rules.
-  // The member list is the source of truth; memberCount is denormalized and may drift.
-  // A Cloud Function could handle this atomically in the future.
+  console.log('[acceptInvitation] Complete!');
 }
 
 export async function declineInvitation(invitationId: string): Promise<void> {
