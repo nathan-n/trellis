@@ -15,6 +15,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../utils/dateUtils';
 import { useCircleMembers } from '../../hooks/useCircleMembers';
+import { TASK_STATUS_LABELS, TASK_CATEGORY_LABELS } from '../../constants';
 import type { Task } from '../../types';
 
 const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
@@ -24,19 +25,8 @@ const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> =
   low: 'default',
 };
 
-const statusLabels: Record<string, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  blocked: 'Blocked',
-  done: 'Done',
-};
-
-const categoryLabels: Record<string, string> = {
-  medical: 'Medical',
-  legal: 'Legal',
-  financial: 'Financial',
-  general: 'General',
-};
+const statusLabels = TASK_STATUS_LABELS;
+const categoryLabels = TASK_CATEGORY_LABELS;
 
 interface TaskCardProps {
   task: Task;

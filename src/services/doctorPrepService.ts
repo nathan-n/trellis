@@ -37,22 +37,24 @@ export async function fetchDoctorPrepData(
   const medsSnap = await getDocs(medsQ);
   const medications = medsSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as Medication);
 
-  // Administration logs for each medication in date range
+  // Administration logs for each medication in date range — parallel fetches
   const administrationLogs = new Map<string, AdministrationLog[]>();
-  for (const med of medications) {
-    const adminQ = query(
-      collection(db, 'circles', circleId, 'medications', med.id, 'administrationLog'),
-      where('administeredDateYYYYMMDD', '>=', startDate),
-      where('administeredDateYYYYMMDD', '<=', endDate),
-      orderBy('administeredDateYYYYMMDD', 'asc')
-    );
-    const adminSnap = await getDocs(adminQ);
-    if (!adminSnap.empty) {
-      const logs = adminSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as AdministrationLog);
-      logs.sort((a, b) => (a.administeredAt?.toMillis?.() ?? 0) - (b.administeredAt?.toMillis?.() ?? 0));
-      administrationLogs.set(med.id, logs);
-    }
-  }
+  await Promise.all(
+    medications.map(async (med) => {
+      const adminQ = query(
+        collection(db, 'circles', circleId, 'medications', med.id, 'administrationLog'),
+        where('administeredDateYYYYMMDD', '>=', startDate),
+        where('administeredDateYYYYMMDD', '<=', endDate),
+        orderBy('administeredDateYYYYMMDD', 'asc')
+      );
+      const adminSnap = await getDocs(adminQ);
+      if (!adminSnap.empty) {
+        const logs = adminSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as AdministrationLog);
+        logs.sort((a, b) => (a.administeredAt?.toMillis?.() ?? 0) - (b.administeredAt?.toMillis?.() ?? 0));
+        administrationLogs.set(med.id, logs);
+      }
+    })
+  );
 
   // Completed tasks in date range
   const tasksQ = query(

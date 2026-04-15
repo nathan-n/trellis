@@ -15,7 +15,6 @@ import { toYYYYMM } from '../utils/dateUtils';
 import { writeAuditEntry } from './auditService';
 import { uploadFile, deleteFile } from './storageService';
 import type { Expense } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
 function expensesCol(circleId: string) {
   return collection(db, 'circles', circleId, 'expenses');
@@ -40,7 +39,7 @@ export async function createExpense(
   let receiptDownloadURL: string | null = null;
 
   if (receiptFile) {
-    const fileId = uuidv4();
+    const fileId = crypto.randomUUID();
     const path = `circles/${circleId}/expenses/${fileId}_${receiptFile.name}`;
     const result = await uploadFile(path, receiptFile);
     receiptStoragePath = result.storagePath;

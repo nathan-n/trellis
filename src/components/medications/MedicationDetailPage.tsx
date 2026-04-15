@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Button, Chip, Stack, TextField,
@@ -49,6 +49,7 @@ export default function MedicationDetailPage() {
   const [notes, setNotes] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [dirty, setDirty] = useState(false);
+  const dirtyRef = useRef(false);
 
   // Dose logging
   const [logSkipped, setLogSkipped] = useState(false);
@@ -65,7 +66,7 @@ export default function MedicationDetailPage() {
         if (snap.exists()) {
           const data = { id: snap.id, ...snap.data() } as Medication;
           setMed(data);
-          if (!dirty) {
+          if (!dirtyRef.current) {
             setDosage(data.dosage);
             setFrequency(data.frequency);
             setPrescribingDoctor(data.prescribingDoctor ?? '');
@@ -115,7 +116,7 @@ export default function MedicationDetailPage() {
         notes: notes.trim() || null,
         isActive,
       });
-      setDirty(false);
+      setDirty(false); dirtyRef.current = false;
       showMessage('Medication updated', 'success');
     } catch {
       showMessage('Failed to update', 'error');
@@ -156,7 +157,7 @@ export default function MedicationDetailPage() {
     }
   };
 
-  const markDirty = () => setDirty(true);
+  const markDirty = () => { setDirty(true); dirtyRef.current = true; };
   const canEdit = role && hasMinRole(role, CircleRole.FAMILY);
   const canDelete = role && hasMinRole(role, CircleRole.ADMIN);
   const isRefillSoon = med?.refillDate && dayjs(med.refillDate.toDate()).diff(dayjs(), 'day') <= 7;

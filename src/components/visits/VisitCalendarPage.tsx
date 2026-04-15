@@ -163,7 +163,7 @@ export default function VisitCalendarPage() {
       setCreateDefaultEndDate(null);
       setCreateOpen(true);
     }
-  }, [viewMode]);
+  }, [viewMode, activeCircle, userProfile]);
 
   const quickAddVisit = async (clickDate: Date) => {
     if (!activeCircle || !userProfile) return;

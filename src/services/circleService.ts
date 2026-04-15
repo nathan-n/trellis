@@ -11,13 +11,13 @@ import {
   serverTimestamp,
   arrayUnion,
   arrayRemove,
+  increment,
   Timestamp,
   orderBy,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { CircleRole, InvitationStatus } from '../constants';
 import type { Circle, CircleMember, Invitation } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function createCircle(
   userId: string,
@@ -26,7 +26,7 @@ export async function createCircle(
   userPhoto: string | null,
   data: { name: string; patientName: string; patientDob?: Date | null; timezone?: string }
 ): Promise<string> {
-  const circleId = uuidv4();
+  const circleId = crypto.randomUUID();
   const circleRef = doc(db, 'circles', circleId);
 
   await setDoc(circleRef, {
@@ -87,18 +87,19 @@ export async function updateMemberRole(
 export async function removeMember(circleId: string, memberId: string): Promise<void> {
   await deleteDoc(doc(db, 'circles', circleId, 'members', memberId));
 
-  // Update the member count
-  const circle = await getCircle(circleId);
-  if (circle) {
-    await updateDoc(doc(db, 'circles', circleId), {
-      memberCount: circle.memberCount - 1,
-      updatedAt: serverTimestamp(),
-    });
-  }
+  // Atomic decrement — no read needed, no race condition
+  await updateDoc(doc(db, 'circles', circleId), {
+    memberCount: increment(-1),
+    updatedAt: serverTimestamp(),
+  });
 
-  // Remove circle from user's list
-  await updateDoc(doc(db, 'users', memberId), {
+  // Remove circle from user's list and clear activeCircleId if it points here
+  const userRef = doc(db, 'users', memberId);
+  const userSnap = await getDoc(userRef);
+  const userData = userSnap.data();
+  await updateDoc(userRef, {
     circleIds: arrayRemove(circleId),
+    ...(userData?.activeCircleId === circleId ? { activeCircleId: null } : {}),
     updatedAt: serverTimestamp(),
   });
 }
@@ -112,7 +113,7 @@ export async function createInvitation(
   invitedByName: string,
   role: CircleRole
 ): Promise<string> {
-  const invitationId = uuidv4();
+  const invitationId = crypto.randomUUID();
   const invRef = doc(db, 'invitations', invitationId);
 
   const expiresAt = new Date();
@@ -174,14 +175,11 @@ export async function acceptInvitation(
     invitedByUid: invitation.invitedByUid,
   });
 
-  // Update circle member count
-  const circle = await getCircle(invitation.circleId);
-  if (circle) {
-    await updateDoc(doc(db, 'circles', invitation.circleId), {
-      memberCount: circle.memberCount + 1,
-      updatedAt: serverTimestamp(),
-    });
-  }
+  // Atomic increment — no read needed, no race condition
+  await updateDoc(doc(db, 'circles', invitation.circleId), {
+    memberCount: increment(1),
+    updatedAt: serverTimestamp(),
+  });
 
   // Update user's circle list
   await updateDoc(doc(db, 'users', userId), {

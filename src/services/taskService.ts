@@ -19,7 +19,6 @@ import { toYYYYMM } from '../utils/dateUtils';
 import { computeVisibleToUids } from '../utils/taskVisibility';
 import { writeAuditEntry } from './auditService';
 import { uploadFile, deleteFile } from './storageService';
-import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import type { RecurrenceFrequency } from '../constants';
 
@@ -326,7 +325,7 @@ export async function addAttachment(
   uploadedByUid: string,
   file: File
 ): Promise<string> {
-  const fileId = uuidv4();
+  const fileId = crypto.randomUUID();
   const storagePath = `circles/${circleId}/tasks/${taskId}/${fileId}_${file.name}`;
   const { downloadURL } = await uploadFile(storagePath, file);
 

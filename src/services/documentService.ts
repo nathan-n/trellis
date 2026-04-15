@@ -13,7 +13,6 @@ import { db } from '../config/firebase';
 import { uploadFile, deleteFile } from './storageService';
 import { writeAuditEntry } from './auditService';
 import type { VaultDocument } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
 function docsCol(circleId: string) {
   return collection(db, 'circles', circleId, 'documents');
@@ -26,7 +25,7 @@ export async function uploadDocument(
   file: File,
   data: { title: string; category: string; description: string | null }
 ): Promise<string> {
-  const fileId = uuidv4();
+  const fileId = crypto.randomUUID();
   const storagePath = `circles/${circleId}/documents/${fileId}_${file.name}`;
   const { downloadURL } = await uploadFile(storagePath, file);
 

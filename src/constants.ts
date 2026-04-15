@@ -143,4 +143,27 @@ export const ResourceType = {
 } as const;
 export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
 
+// ─── Labels (centralized to avoid duplication across components) ─────────────
+
+export const TASK_CATEGORY_LABELS: Record<string, string> = {
+  medical: 'Medical',
+  legal: 'Legal',
+  financial: 'Financial',
+  general: 'General',
+};
+
+export const TASK_PRIORITY_LABELS: Record<string, string> = {
+  urgent: 'Urgent',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+};
+
+export const TASK_STATUS_LABELS: Record<string, string> = {
+  todo: 'To Do',
+  in_progress: 'In Progress',
+  blocked: 'Blocked',
+  done: 'Done',
+};
+
 export const SIDEBAR_WIDTH = 260;
