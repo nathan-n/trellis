@@ -63,6 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logOut = async () => {
+    // Clear sensitive cached data (F4: PHI in localStorage)
+    try {
+      const keysToRemove = Object.keys(localStorage).filter(
+        (k) => k.startsWith('emergency_') || k.startsWith('trellis_viewed_') || k.startsWith('trellis_visit_')
+      );
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+    } catch { /* ignore */ }
     await firebaseSignOut(auth);
     setUserProfile(null);
   };

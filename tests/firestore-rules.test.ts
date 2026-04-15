@@ -132,26 +132,33 @@ describe('tasks', () => {
   });
 
   describe('create by role', () => {
-    const taskData = { title: 'New task', visibility: 'circle', visibleToUids: [], createdByUid: ADMIN_UID, status: 'todo' };
+    function taskDataFor(uid: string) {
+      return { title: 'New task', visibility: 'circle', visibleToUids: [], createdByUid: uid, status: 'todo' };
+    }
 
     it('allows professional to create', async () => {
       const db = getDb(PROFESSIONAL_UID);
-      await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskData));
+      await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskDataFor(PROFESSIONAL_UID)));
     });
 
     it('allows family to create', async () => {
       const db = getDb(FAMILY_UID);
-      await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskData));
+      await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskDataFor(FAMILY_UID)));
     });
 
     it('allows admin to create', async () => {
       const db = getDb(ADMIN_UID);
-      await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskData));
+      await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskDataFor(ADMIN_UID)));
     });
 
     it('denies readonly from creating', async () => {
       const db = getDb(READONLY_UID);
-      await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskData));
+      await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskDataFor(READONLY_UID)));
+    });
+
+    it('denies spoofed createdByUid (F9)', async () => {
+      const db = getDb(PROFESSIONAL_UID);
+      await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskDataFor(ADMIN_UID)));
     });
 
     it('denies non-member from creating', async () => {
@@ -273,9 +280,14 @@ describe('audit log', () => {
     await assertSucceeds(getDoc(doc(db, 'circles', CIRCLE_ID, 'auditLog', 'a1')));
   });
 
-  it('allows any member to create', async () => {
+  it('allows any member to create with matching actorUid', async () => {
     const db = getDb(READONLY_UID);
     await assertSucceeds(addDoc(collection(db, 'circles', CIRCLE_ID, 'auditLog'), { action: 'test', actorUid: READONLY_UID }));
+  });
+
+  it('denies create with spoofed actorUid (F6)', async () => {
+    const db = getDb(READONLY_UID);
+    await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'auditLog'), { action: 'test', actorUid: ADMIN_UID }));
   });
 
   it('denies update (append-only)', async () => {
