@@ -71,7 +71,22 @@ export default function WellbeingCheckinCard() {
     }
   };
 
-  if (!shouldPrompt && !showForm) return null;
+  // Always show something — prominent card for weekly nudge, subtle link otherwise
+  if (!shouldPrompt && !showForm) {
+    return (
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          size="small"
+          color="secondary"
+          startIcon={<FavoriteIcon sx={{ fontSize: '0.9rem' }} />}
+          onClick={() => setShowForm(true)}
+          sx={{ textTransform: 'none', fontSize: '0.8rem' }}
+        >
+          How are you doing? Check in
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Card sx={{ mb: 3, border: 1, borderColor: 'secondary.light' }}>

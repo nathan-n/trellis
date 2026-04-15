@@ -168,9 +168,12 @@ service cloud.firestore {
         allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
       }
 
-      // Wellbeing Check-ins (private to author)
+      // Wellbeing Check-ins (private to author, admin can view for sparklines)
       match /wellbeingCheckins/{checkinId} {
-        allow read: if request.auth != null && request.auth.uid == resource.data.authorUid;
+        allow read: if request.auth != null && (
+          request.auth.uid == resource.data.authorUid
+          || getCircleRole(circleId) == 'admin'
+        );
         allow create: if request.auth != null && isCircleMember(circleId);
       }
 

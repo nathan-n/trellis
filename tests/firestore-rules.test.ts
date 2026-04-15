@@ -239,9 +239,9 @@ describe('wellbeing check-ins', () => {
     await assertFails(getDoc(doc(db, 'circles', CIRCLE_ID, 'wellbeingCheckins', 'wc1')));
   });
 
-  it('denies admin from reading others check-ins', async () => {
+  it('allows admin to read others check-ins (for sparklines)', async () => {
     const db = getDb(ADMIN_UID);
-    await assertFails(getDoc(doc(db, 'circles', CIRCLE_ID, 'wellbeingCheckins', 'wc1')));
+    await assertSucceeds(getDoc(doc(db, 'circles', CIRCLE_ID, 'wellbeingCheckins', 'wc1')));
   });
 
   it('allows any member to create', async () => {

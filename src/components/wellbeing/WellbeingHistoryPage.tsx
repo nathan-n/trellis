@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { subscribeMyCheckins } from '../../services/wellbeingService';
 import type { WellbeingCheckin } from '../../types/wellbeing';
+import WellbeingCheckinCard from './WellbeingCheckinCard';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
@@ -39,10 +40,15 @@ export default function WellbeingHistoryPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-        <FavoriteIcon color="secondary" />
-        <Typography variant="h5">Your Wellbeing</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <FavoriteIcon color="secondary" />
+          <Typography variant="h5">Your Wellbeing</Typography>
+        </Box>
       </Box>
+
+      {/* Inline check-in form */}
+      <WellbeingCheckinCard />
 
       {/* Crisis Support & Resources Link */}
       <Card sx={{ mb: 3 }}>

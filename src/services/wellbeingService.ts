@@ -58,6 +58,22 @@ export async function getLastCheckin(
   return { id: doc.id, ...doc.data() } as WellbeingCheckin;
 }
 
+export async function fetchRecentCheckins(
+  circleId: string,
+  userId: string,
+  limitCount = 8
+): Promise<WellbeingCheckin[]> {
+  const q = query(
+    checkinsCol(circleId),
+    where('authorUid', '==', userId),
+    orderBy('createdAt', 'desc'),
+    limit(limitCount)
+  );
+  const snap = await getDocs(q);
+  const results = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as WellbeingCheckin);
+  return results.reverse(); // chronological order for sparkline
+}
+
 export function subscribeMyCheckins(
   circleId: string,
   userId: string,

@@ -33,7 +33,10 @@ import {
 import { CircleRole, InvitationStatus } from '../../constants';
 import { getRoleLabel } from '../../utils/roleUtils';
 import { formatDate, formatDateTime } from '../../utils/dateUtils';
+import { fetchRecentCheckins } from '../../services/wellbeingService';
 import type { CircleMember, Invitation } from '../../types';
+import type { WellbeingCheckin } from '../../types/wellbeing';
+import Sparkline from '../shared/Sparkline';
 import InviteDialog from './InviteDialog';
 
 const inviteStatusConfig: Record<string, { label: string; color: 'warning' | 'success' | 'default' | 'error' }> = {
@@ -66,6 +69,7 @@ export default function CircleSettingsPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedMember, setSelectedMember] = useState<CircleMember | null>(null);
+  const [wellbeingData, setWellbeingData] = useState<Map<string, WellbeingCheckin[]>>(new Map());
 
   const isAdmin = role === CircleRole.ADMIN;
 
@@ -75,6 +79,24 @@ export default function CircleSettingsPage() {
       getCircleInvitations(activeCircle.id).then(setInvitations);
     }
   }, [activeCircle]);
+
+  // Fetch wellbeing sparkline data for each member (admin only)
+  useEffect(() => {
+    if (!activeCircle || !isAdmin || members.length === 0) return;
+    const loadWellbeing = async () => {
+      const data = new Map<string, WellbeingCheckin[]>();
+      await Promise.all(
+        members.map(async (member) => {
+          try {
+            const checkins = await fetchRecentCheckins(activeCircle.id, member.uid, 8);
+            if (checkins.length > 0) data.set(member.uid, checkins);
+          } catch { /* silently skip — may not have permission for non-existent data */ }
+        })
+      );
+      setWellbeingData(data);
+    };
+    loadWellbeing();
+  }, [activeCircle?.id, isAdmin, members]);
 
   const handleRoleChange = async (memberId: string, newRole: CircleRole) => {
     if (!activeCircle) return;
@@ -184,6 +206,23 @@ export default function CircleSettingsPage() {
                       <Typography variant="caption" color="text.secondary" component="span">
                         Last active: {formatLastActive(member.lastActiveAt)}
                       </Typography>
+                      {isAdmin && (() => {
+                        const checkins = wellbeingData.get(member.uid);
+                        if (!checkins || checkins.length < 2) return (
+                          <Typography variant="caption" color="text.secondary" component="span" sx={{ mt: 0.5 }}>
+                            Wellbeing: No data
+                          </Typography>
+                        );
+                        return (
+                          <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                            <Typography variant="caption" color="text.secondary" component="span">Stress:</Typography>
+                            <Sparkline
+                              values={checkins.map((c) => c.stressLevel)}
+                              markers={checkins.map((c) => c.feelingOverwhelmed)}
+                            />
+                          </Box>
+                        );
+                      })()}
                     </Box>
                   }
                 />
