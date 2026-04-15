@@ -15,18 +15,20 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
   return (
     <AppBar
       position="fixed"
-      color="default"
-      elevation={1}
+      elevation={0}
       sx={{
         width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
         ml: { md: `${SIDEBAR_WIDTH}px` },
+        bgcolor: 'background.paper',
+        borderBottom: 1,
+        borderColor: 'divider',
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ gap: 1 }}>
         <IconButton
           edge="start"
           onClick={onMenuToggle}
-          sx={{ mr: 2, display: { md: 'none' } }}
+          sx={{ mr: 1, display: { md: 'none' } }}
         >
           <MenuIcon />
         </IconButton>
@@ -35,18 +37,31 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              color: 'text.secondary',
+              fontWeight: 500,
+            }}
+          >
             {userProfile?.displayName}
           </Typography>
           <Avatar
             src={userProfile?.photoURL || undefined}
-            sx={{ width: 32, height: 32 }}
+            sx={{
+              width: 34,
+              height: 34,
+              bgcolor: 'primary.main',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+            }}
           >
             {userProfile?.displayName?.[0]?.toUpperCase()}
           </Avatar>
           <Tooltip title="Sign out">
-            <IconButton onClick={logOut} size="small">
+            <IconButton onClick={logOut} size="small" sx={{ color: 'text.secondary' }}>
               <LogoutIcon fontSize="small" />
             </IconButton>
           </Tooltip>

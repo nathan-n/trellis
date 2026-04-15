@@ -6,10 +6,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
   Box,
   Typography,
-  Divider,
   Badge,
 } from '@mui/material';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
@@ -38,27 +36,36 @@ interface NavItem {
   path: string;
   icon: React.ReactElement;
   minRole?: CircleRole;
+  section?: string;
 }
 
 const navItems: NavItem[] = [
-  { label: 'My Next Priority', path: '/my-next', icon: <PriorityHighIcon /> },
-  { label: 'Tasks', path: '/tasks', icon: <TaskAltIcon /> },
-  { label: 'Task Calendar', path: '/tasks/calendar', icon: <CalendarMonthIcon /> },
-  { label: 'Visit Schedule', path: '/visits', icon: <EventIcon /> },
-  { label: 'Medications', path: '/medications', icon: <MedicationIcon /> },
-  { label: 'Care Log', path: '/care-log', icon: <NoteAltIcon /> },
-  { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon /> },
-  { label: 'Documents', path: '/documents', icon: <FolderIcon /> },
-  { label: 'Resources', path: '/resources', icon: <MenuBookIcon /> },
-  { label: 'Expenses', path: '/expenses', icon: <ReceiptLongIcon /> },
-  { label: 'Doctor Prep', path: '/doctor-prep', icon: <SummarizeIcon /> },
-  { label: 'Activity', path: '/activity', icon: <TimelineIcon /> },
-  { label: 'My Wellbeing', path: '/wellbeing', icon: <FavoriteIcon /> },
+  { label: 'My Next Priority', path: '/my-next', icon: <PriorityHighIcon />, section: 'overview' },
+  { label: 'Activity', path: '/activity', icon: <TimelineIcon />, section: 'overview' },
+  { label: 'Tasks', path: '/tasks', icon: <TaskAltIcon />, section: 'manage' },
+  { label: 'Task Calendar', path: '/tasks/calendar', icon: <CalendarMonthIcon />, section: 'manage' },
+  { label: 'Visit Schedule', path: '/visits', icon: <EventIcon />, section: 'manage' },
+  { label: 'Medications', path: '/medications', icon: <MedicationIcon />, section: 'care' },
+  { label: 'Care Log', path: '/care-log', icon: <NoteAltIcon />, section: 'care' },
+  { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon />, section: 'care' },
+  { label: 'Doctor Prep', path: '/doctor-prep', icon: <SummarizeIcon />, section: 'care' },
+  { label: 'Documents', path: '/documents', icon: <FolderIcon />, section: 'resources' },
+  { label: 'Resources', path: '/resources', icon: <MenuBookIcon />, section: 'resources' },
+  { label: 'Expenses', path: '/expenses', icon: <ReceiptLongIcon />, section: 'resources' },
+  { label: 'My Wellbeing', path: '/wellbeing', icon: <FavoriteIcon />, section: 'you' },
 ];
 
 const adminItems: NavItem[] = [
   { label: 'Circle Settings', path: '/circle/settings', icon: <SettingsIcon />, minRole: CircleRole.ADMIN },
 ];
+
+const sectionLabels: Record<string, string> = {
+  overview: 'Overview',
+  manage: 'Coordinate',
+  care: 'Care',
+  resources: 'Reference',
+  you: 'You',
+};
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -79,53 +86,142 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
     onClose();
   };
 
+  // Group items by section
+  const sections = ['overview', 'manage', 'care', 'resources', 'you'];
+
   const drawer = (
-    <Box>
-      <Toolbar>
-        <Typography variant="h5" fontWeight={700} color="primary">
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Logo */}
+      <Box sx={{ px: 2.5, py: 2.5 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontFamily: '"Playfair Display", serif',
+            fontWeight: 800,
+            color: 'primary.main',
+            letterSpacing: '-0.5px',
+          }}
+        >
           Trellis
         </Typography>
-      </Toolbar>
-      <Divider />
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => handleNav(item.path)}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                {item.path === '/tasks' && unseenTaskCount > 0 ? (
-                  <Badge badgeContent={unseenTaskCount} color="info" max={99}>{item.icon}</Badge>
-                ) : item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {adminItems
-          .filter((item) => !item.minRole || (role && hasMinRole(role, item.minRole)))
-          .map((item) => (
-            <ListItem key={item.path} disablePadding>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => handleNav(item.path)}
+        {activeCircle && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+            {activeCircle.patientName}
+          </Typography>
+        )}
+      </Box>
+
+      {/* Navigation sections */}
+      <Box sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
+        {sections.map((section) => {
+          const items = navItems.filter((i) => i.section === section);
+          if (items.length === 0) return null;
+          return (
+            <Box key={section} sx={{ mb: 1 }}>
+              <Typography
+                variant="overline"
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  display: 'block',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: 'text.secondary',
+                  letterSpacing: '0.08em',
+                }}
               >
-                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-      </List>
+                {sectionLabels[section]}
+              </Typography>
+              <List dense disablePadding>
+                {items.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <ListItem key={item.path} disablePadding sx={{ px: 0.5 }}>
+                      <ListItemButton
+                        onClick={() => handleNav(item.path)}
+                        sx={{
+                          borderRadius: 2,
+                          mb: 0.25,
+                          py: 0.75,
+                          bgcolor: isActive ? 'primary.main' : 'transparent',
+                          color: isActive ? 'white' : 'text.primary',
+                          '&:hover': {
+                            bgcolor: isActive ? 'primary.dark' : 'action.hover',
+                          },
+                          '& .MuiListItemIcon-root': {
+                            color: isActive ? 'white' : 'text.secondary',
+                          },
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 36 }}>
+                          {item.path === '/tasks' && unseenTaskCount > 0 ? (
+                            <Badge badgeContent={unseenTaskCount} color="info" max={99}>
+                              {item.icon}
+                            </Badge>
+                          ) : item.icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={item.label}
+                          primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: isActive ? 600 : 400 }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </Box>
+          );
+        })}
+      </Box>
+
+      {/* Admin section at bottom */}
+      {adminItems
+        .filter((item) => !item.minRole || (role && hasMinRole(role, item.minRole)))
+        .length > 0 && (
+        <Box sx={{ px: 1, pb: 1.5, borderTop: 1, borderColor: 'divider', pt: 1 }}>
+          <List dense disablePadding>
+            {adminItems
+              .filter((item) => !item.minRole || (role && hasMinRole(role, item.minRole)))
+              .map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <ListItem key={item.path} disablePadding sx={{ px: 0.5 }}>
+                    <ListItemButton
+                      onClick={() => handleNav(item.path)}
+                      sx={{
+                        borderRadius: 2,
+                        py: 0.75,
+                        bgcolor: isActive ? 'primary.main' : 'transparent',
+                        color: isActive ? 'white' : 'text.secondary',
+                        '&:hover': { bgcolor: isActive ? 'primary.dark' : 'action.hover' },
+                        '& .MuiListItemIcon-root': { color: isActive ? 'white' : 'text.secondary' },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: isActive ? 600 : 400 }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+          </List>
+        </Box>
+      )}
     </Box>
   );
 
+  const drawerPaperSx = {
+    width: SIDEBAR_WIDTH,
+    boxSizing: 'border-box' as const,
+    bgcolor: 'background.paper',
+    borderRight: 1,
+    borderColor: 'divider',
+  };
+
   return (
     <Box component="nav" sx={{ width: { md: SIDEBAR_WIDTH }, flexShrink: { md: 0 } }}>
-      {/* Mobile drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -133,17 +229,16 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH },
+          '& .MuiDrawer-paper': drawerPaperSx,
         }}
       >
         {drawer}
       </Drawer>
-      {/* Desktop drawer */}
       <Drawer
         variant="permanent"
         sx={{
           display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, boxSizing: 'border-box' },
+          '& .MuiDrawer-paper': drawerPaperSx,
         }}
         open
       >
