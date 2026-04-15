@@ -10,6 +10,7 @@ import {
   Box,
   Typography,
   Divider,
+  Badge,
 } from '@mui/material';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -26,7 +27,10 @@ import FolderIcon from '@mui/icons-material/Folder';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { SIDEBAR_WIDTH, CircleRole } from '../../constants';
+import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
+import { useTasks } from '../../hooks/useTasks';
+import { useTaskViewed } from '../../hooks/useTaskViewed';
 import { hasMinRole } from '../../utils/roleUtils';
 
 interface NavItem {
@@ -64,7 +68,11 @@ interface SidebarProps {
 export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { role } = useCircle();
+  const { activeCircle, role } = useCircle();
+  const { userProfile } = useAuth();
+  const { tasks } = useTasks();
+  const { getUnseenCount } = useTaskViewed(activeCircle?.id, userProfile?.uid);
+  const unseenTaskCount = getUnseenCount(tasks);
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -86,7 +94,11 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               selected={location.pathname === item.path}
               onClick={() => handleNav(item.path)}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                {item.path === '/tasks' && unseenTaskCount > 0 ? (
+                  <Badge badgeContent={unseenTaskCount} color="info" max={99}>{item.icon}</Badge>
+                ) : item.icon}
+              </ListItemIcon>
               <ListItemText primary={item.label} />
             </ListItemButton>
           </ListItem>

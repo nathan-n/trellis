@@ -15,6 +15,9 @@ import AddIcon from '@mui/icons-material/Add';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import Fuse from 'fuse.js';
 import { useTasks } from '../../hooks/useTasks';
+import { useTaskViewed } from '../../hooks/useTaskViewed';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCircle } from '../../contexts/CircleContext';
 import { TaskCategory, TaskStatus } from '../../constants';
 import TaskCard from './TaskCard';
 import TaskSearchBar from './TaskSearchBar';
@@ -23,7 +26,10 @@ import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
 export default function TaskListPage() {
+  const { userProfile } = useAuth();
+  const { activeCircle } = useCircle();
   const { tasks, loading } = useTasks();
+  const { isTaskUnseen } = useTaskViewed(activeCircle?.id, userProfile?.uid);
   const [createOpen, setCreateOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -119,7 +125,7 @@ export default function TaskListPage() {
       ) : (
         <Stack spacing={1.5}>
           {filteredTasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} isUnseen={isTaskUnseen(task)} />
           ))}
         </Stack>
       )}

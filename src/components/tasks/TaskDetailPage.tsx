@@ -40,6 +40,7 @@ import { useCircle } from '../../contexts/CircleContext';
 import { canUserSeeTask } from '../../utils/taskVisibility';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useCircleMembers } from '../../hooks/useCircleMembers';
+import { useTaskViewed } from '../../hooks/useTaskViewed';
 import { deleteTask, completeRecurringTask, updateTask } from '../../services/taskService';
 import { formatDateTime } from '../../utils/dateUtils';
 import { CircleRole } from '../../constants';
@@ -79,6 +80,7 @@ export default function TaskDetailPage() {
   const { userProfile } = useAuth();
   const { activeCircle, role } = useCircle();
   const { showMessage } = useSnackbar();
+  const { markViewed } = useTaskViewed(activeCircle?.id, userProfile?.uid);
   const { members } = useCircleMembers();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
@@ -105,6 +107,11 @@ export default function TaskDetailPage() {
     );
     return unsubscribe;
   }, [activeCircle?.id, taskId]);
+
+  // Mark task as viewed when it loads
+  useEffect(() => {
+    if (task && taskId) markViewed(taskId);
+  }, [task?.id]);
 
   const handleComplete = async () => {
     if (!activeCircle || !task || !userProfile) return;

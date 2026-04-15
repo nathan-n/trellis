@@ -17,6 +17,7 @@ import { useCircle } from '../../contexts/CircleContext';
 import { subscribeMyPriorityTask } from '../../services/taskService';
 import { formatDateTime } from '../../utils/dateUtils';
 import type { Task } from '../../types';
+import { useTaskViewed } from '../../hooks/useTaskViewed';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import WellbeingCheckinCard from '../wellbeing/WellbeingCheckinCard';
 
@@ -38,6 +39,7 @@ export default function MyNextPriorityCard() {
   const { userProfile } = useAuth();
   const { activeCircle } = useCircle();
   const navigate = useNavigate();
+  const { isTaskUnseen } = useTaskViewed(activeCircle?.id, userProfile?.uid);
   const [task, setTask] = useState<Task | null | undefined>(undefined);
 
   useEffect(() => {
@@ -92,11 +94,14 @@ export default function MyNextPriorityCard() {
                 <Typography variant="h4" fontWeight={600}>
                   {task.title}
                 </Typography>
-                <Chip
-                  label={task.priority}
-                  color={priorityColors[task.priority] ?? 'default'}
-                  sx={{ textTransform: 'capitalize', fontSize: '0.9rem' }}
-                />
+                <Stack direction="row" spacing={1}>
+                  {isTaskUnseen(task) && <Chip label="New" size="small" color="info" />}
+                  <Chip
+                    label={task.priority}
+                    color={priorityColors[task.priority] ?? 'default'}
+                    sx={{ textTransform: 'capitalize', fontSize: '0.9rem' }}
+                  />
+                </Stack>
               </Box>
 
               {task.description && (

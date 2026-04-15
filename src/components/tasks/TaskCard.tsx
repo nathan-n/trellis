@@ -30,9 +30,10 @@ const categoryLabels = TASK_CATEGORY_LABELS;
 
 interface TaskCardProps {
   task: Task;
+  isUnseen?: boolean;
 }
 
-export default function TaskCard({ task }: TaskCardProps) {
+export default function TaskCard({ task, isUnseen }: TaskCardProps) {
   const navigate = useNavigate();
   const { members } = useCircleMembers();
 
@@ -43,9 +44,14 @@ export default function TaskCard({ task }: TaskCardProps) {
       <CardActionArea onClick={() => navigate(`/tasks/${task.id}`)}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ flex: 1 }}>
-              {task.title}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+              {isUnseen && (
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.main', flexShrink: 0 }} />
+              )}
+              <Typography variant="subtitle1" fontWeight={600}>
+                {task.title}
+              </Typography>
+            </Box>
             <Chip
               label={task.priority}
               size="small"
