@@ -40,7 +40,7 @@ export default function TaskCard({ task, isUnseen }: TaskCardProps) {
   const assignees = members.filter((m) => task.assigneeUids.includes(m.uid));
 
   return (
-    <Card>
+    <Card sx={isUnseen ? { borderLeft: 3, borderLeftColor: 'info.main', bgcolor: 'rgba(2, 136, 209, 0.04)' } : undefined}>
       <CardActionArea onClick={() => navigate(`/tasks/${task.id}`)}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
