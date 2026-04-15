@@ -106,8 +106,8 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
 
       {/* Sleep */}
       <Divider><Chip label="Sleep" size="small" /></Divider>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <FormControl size="small" sx={{ minWidth: 100, flex: '1 1 100px' }}>
           <InputLabel>Quality</InputLabel>
           <Select value={sleepQuality} label="Quality" onChange={(e) => setSleepQuality(e.target.value)}>
             <MenuItem value={SleepQuality.GOOD}>Good</MenuItem>
@@ -115,17 +115,17 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
             <MenuItem value={SleepQuality.POOR}>Poor</MenuItem>
           </Select>
         </FormControl>
-        <TextField label="Hours Slept" type="number" size="small" value={sleepHours} onChange={(e) => setSleepHours(e.target.value)} sx={{ width: 120 }} />
-        <TextField label="Sleep Notes" size="small" value={sleepNotes} onChange={(e) => setSleepNotes(e.target.value)} sx={{ flex: 1 }} />
+        <TextField label="Hours" type="number" size="small" value={sleepHours} onChange={(e) => setSleepHours(e.target.value)} sx={{ flex: '1 1 80px', maxWidth: 120 }} />
+        <TextField label="Sleep Notes" size="small" value={sleepNotes} onChange={(e) => setSleepNotes(e.target.value)} sx={{ flex: '2 1 150px' }} />
       </Box>
 
       {/* Meals */}
       <Divider><Chip label="Meals" size="small" /></Divider>
       {meals.map((meal, i) => (
-        <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <TextField label="Time" size="small" value={meal.time} onChange={(e) => setMeals(meals.map((m, j) => j === i ? { ...m, time: e.target.value } : m))} sx={{ width: 100 }} />
-          <TextField label="Description" size="small" value={meal.description} onChange={(e) => setMeals(meals.map((m, j) => j === i ? { ...m, description: e.target.value } : m))} sx={{ flex: 1 }} />
-          <FormControl size="small" sx={{ minWidth: 100 }}>
+        <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField label="Time" size="small" value={meal.time} onChange={(e) => setMeals(meals.map((m, j) => j === i ? { ...m, time: e.target.value } : m))} sx={{ flex: '1 1 70px', maxWidth: 100 }} />
+          <TextField label="Description" size="small" value={meal.description} onChange={(e) => setMeals(meals.map((m, j) => j === i ? { ...m, description: e.target.value } : m))} sx={{ flex: '3 1 150px' }} />
+          <FormControl size="small" sx={{ flex: '1 1 80px', maxWidth: 110 }}>
             <Select value={meal.amount} onChange={(e) => setMeals(meals.map((m, j) => j === i ? { ...m, amount: e.target.value as MealEntry['amount'] } : m))}>
               <MenuItem value={MealAmount.FULL}>Full</MenuItem>
               <MenuItem value={MealAmount.PARTIAL}>Partial</MenuItem>
@@ -140,10 +140,10 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
       {/* Hydration */}
       <Divider><Chip label="Hydration" size="small" /></Divider>
       {hydration.map((h, i) => (
-        <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <TextField label="Time" size="small" value={h.time} onChange={(e) => setHydration(hydration.map((hh, j) => j === i ? { ...hh, time: e.target.value } : hh))} sx={{ width: 100 }} />
-          <TextField label="Amount" size="small" value={h.amount} onChange={(e) => setHydration(hydration.map((hh, j) => j === i ? { ...hh, amount: e.target.value } : hh))} sx={{ width: 100 }} placeholder="8oz" />
-          <TextField label="Type" size="small" value={h.type} onChange={(e) => setHydration(hydration.map((hh, j) => j === i ? { ...hh, type: e.target.value } : hh))} sx={{ flex: 1 }} placeholder="water, juice, etc." />
+        <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+          <TextField label="Time" size="small" value={h.time} onChange={(e) => setHydration(hydration.map((hh, j) => j === i ? { ...hh, time: e.target.value } : hh))} sx={{ flex: '1 1 70px', maxWidth: 100 }} />
+          <TextField label="Amount" size="small" value={h.amount} onChange={(e) => setHydration(hydration.map((hh, j) => j === i ? { ...hh, amount: e.target.value } : hh))} sx={{ flex: '1 1 70px', maxWidth: 100 }} placeholder="8oz" />
+          <TextField label="Type" size="small" value={h.type} onChange={(e) => setHydration(hydration.map((hh, j) => j === i ? { ...hh, type: e.target.value } : hh))} sx={{ flex: '2 1 120px' }} placeholder="water, juice, etc." />
           <IconButton size="small" onClick={() => setHydration(hydration.filter((_, j) => j !== i))}><DeleteIcon fontSize="small" /></IconButton>
         </Box>
       ))}

@@ -40,16 +40,16 @@ export default function CareLogPage() {
         </Button>
       </Box>
 
-      <Stack direction="row" spacing={2} sx={{ mb: 3, alignItems: 'center' }}>
+      <Stack direction="row" spacing={1} sx={{ mb: 3, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
         <DatePicker
           label="Date"
           value={date}
           onChange={(v) => v && setDate(v)}
           maxDate={dayjs()}
-          slotProps={{ textField: { size: 'small' } }}
+          slotProps={{ textField: { size: 'small', sx: { minWidth: 140 } } }}
         />
         <Button size="small" onClick={() => setDate(dayjs())}>Today</Button>
-        <Button size="small" onClick={() => setDate(date.subtract(1, 'day'))}>Previous</Button>
+        <Button size="small" onClick={() => setDate(date.subtract(1, 'day'))}>Prev</Button>
         <Button size="small" onClick={() => setDate(date.add(1, 'day'))} disabled={date.isSame(dayjs(), 'day')}>Next</Button>
       </Stack>
 

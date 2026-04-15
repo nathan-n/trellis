@@ -34,10 +34,11 @@ export default function AppShell() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, sm: 3 },
           width: { md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
           minHeight: '100vh',
           bgcolor: 'background.default',
+          overflowX: 'hidden',
         }}
       >
         <Toolbar />

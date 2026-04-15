@@ -263,8 +263,8 @@ export default function CircleSettingsPage() {
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {inv.inviteeEmail}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+                          <Typography component="span" variant="body2" sx={{ mr: 0.5 }}>{inv.inviteeEmail}</Typography>
                           <Chip label={config.label} size="small" color={config.color} />
                           <Chip label={getRoleLabel(inv.role)} size="small" variant="outlined" />
                         </Box>

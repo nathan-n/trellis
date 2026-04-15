@@ -141,18 +141,18 @@ export default function DocumentVaultPage() {
                   <Typography variant="subtitle2" fontWeight={600} noWrap>
                     {document.title}
                   </Typography>
-                  <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap" sx={{ gap: 0.5 }}>
                     <Chip
                       label={categoryLabels[document.category] ?? document.category}
                       size="small"
                       color={categoryColors[document.category] ?? 'default'}
                       variant="outlined"
                     />
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" noWrap>
                       {document.fileName} — {formatFileSize(document.sizeBytes)}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Uploaded {formatDate(document.uploadedAt)} by {document.uploadedByName}
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      {formatDate(document.uploadedAt)} by {document.uploadedByName}
                     </Typography>
                   </Stack>
                   {document.description && (
