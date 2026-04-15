@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3A7D44"/>
+      <stop offset="35%" stop-color="#2D6B37"/>
+      <stop offset="65%" stop-color="#1B5E20"/>
+      <stop offset="100%" stop-color="#524470"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Subtle dot pattern -->
+  <g opacity="0.04">
+    <circle cx="60" cy="60" r="2" fill="white"/>
+    <circle cx="120" cy="60" r="2" fill="white"/>
+    <circle cx="180" cy="60" r="2" fill="white"/>
+    <circle cx="240" cy="60" r="2" fill="white"/>
+    <circle cx="300" cy="60" r="2" fill="white"/>
+    <circle cx="60" cy="120" r="2" fill="white"/>
+    <circle cx="120" cy="120" r="2" fill="white"/>
+    <circle cx="180" cy="120" r="2" fill="white"/>
+    <circle cx="240" cy="120" r="2" fill="white"/>
+    <circle cx="300" cy="120" r="2" fill="white"/>
+  </g>
+  <!-- Logo -->
+  <text x="100" y="260" font-family="Georgia, serif" font-weight="800" font-size="72" fill="white">Trellis</text>
+  <!-- Tagline -->
+  <text x="100" y="340" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="36" fill="rgba(255,255,255,0.9)">Caregiving, coordinated.</text>
+  <!-- Description -->
+  <text x="100" y="410" font-family="Arial, Helvetica, sans-serif" font-weight="300" font-size="22" fill="rgba(255,255,255,0.7)">Coordinate tasks, visits, medications, and daily care</text>
+  <text x="100" y="445" font-family="Arial, Helvetica, sans-serif" font-weight="300" font-size="22" fill="rgba(255,255,255,0.7)">for loved ones with Alzheimer's — together.</text>
+  <!-- Feature pills -->
+  <g transform="translate(100, 490)">
+    <rect x="0" y="0" width="80" height="30" rx="15" fill="rgba(255,255,255,0.15)"/>
+    <text x="40" y="20" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.8)" text-anchor="middle">Tasks</text>
+    <rect x="95" y="0" width="75" height="30" rx="15" fill="rgba(255,255,255,0.15)"/>
+    <text x="132" y="20" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.8)" text-anchor="middle">Visits</text>
+    <rect x="185" y="0" width="115" height="30" rx="15" fill="rgba(255,255,255,0.15)"/>
+    <text x="242" y="20" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.8)" text-anchor="middle">Medications</text>
+    <rect x="315" y="0" width="105" height="30" rx="15" fill="rgba(255,255,255,0.15)"/>
+    <text x="367" y="20" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.8)" text-anchor="middle">Care Logs</text>
+    <rect x="435" y="0" width="115" height="30" rx="15" fill="rgba(255,255,255,0.15)"/>
+    <text x="492" y="20" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.8)" text-anchor="middle">Emergency</text>
+  </g>
+  <!-- URL -->
+  <text x="100" y="580" font-family="Arial, sans-serif" font-size="16" fill="rgba(255,255,255,0.5)">trellis.necaise.co</text>
+</svg>

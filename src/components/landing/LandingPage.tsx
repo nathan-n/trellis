@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
   Box,
@@ -187,6 +187,10 @@ export default function LandingPage() {
   const { firebaseUser, loading, signIn } = useAuth();
   const { showMessage } = useSnackbar();
   const [signingIn, setSigningIn] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Trellis — Caregiving, Coordinated';
+  }, []);
 
   if (!loading && firebaseUser) {
     return <Navigate to="/" replace />;

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /select-circle
+Disallow: /circle/
+
+Sitemap: https://trellis.necaise.co/sitemap.xml
