@@ -38,6 +38,10 @@ import MockDoctorPrep from './mocks/MockDoctorPrep';
 import MockExpenses from './mocks/MockExpenses';
 import MockActivityFeed from './mocks/MockActivityFeed';
 import MockWellbeing from './mocks/MockWellbeing';
+import MockDocumentVault from './mocks/MockDocumentVault';
+import MockResources from './mocks/MockResources';
+import FolderIcon from '@mui/icons-material/Folder';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 // ─── Feature section data ────────────────────────────────────────────────────
 
@@ -54,7 +58,7 @@ const features: Feature[] = [
     title: 'Task Management',
     headline: 'Nothing falls through the cracks',
     description:
-      'Track medical, legal, and everyday tasks with priorities, assignees, due dates, and points of contact. Add comments, attach documents, and set recurring schedules for things that happen regularly.',
+      'Track medical, legal, and everyday tasks with priorities, assignees, and due dates. Set recurring schedules for regular tasks, control visibility (circle-wide, private, or specific people), and schedule doctor appointments that link directly to visit prep reports.',
     icon: <TaskAltIcon />,
     mock: <MockTaskList />,
   },
@@ -62,7 +66,7 @@ const features: Feature[] = [
     title: 'Visit Scheduling',
     headline: 'See who is helping and when',
     description:
-      'Coordinate family visits on a shared calendar. Monthly view for periodic check-ins, or switch to coverage mode for shift-based care. Automatic gap detection highlights days with no coverage.',
+      'Coordinate family visits on a shared calendar. Click a day to quick-add, drag across days for multi-day visits. Mark visits as confirmed or tentative. Monthly view for periodic check-ins, or switch to coverage mode with automatic gap detection.',
     icon: <CalendarMonthIcon />,
     mock: <MockVisitCalendar />,
   },
@@ -70,7 +74,7 @@ const features: Feature[] = [
     title: 'Medication Tracking',
     headline: 'Every dose accounted for',
     description:
-      'Maintain the full medication list with dosages, prescribing doctors, and pharmacy details. Log each dose as given or skipped with timestamps. Get alerts when refills are due.',
+      'Search medications from the FDA drug database with auto-populated side effects, interactions, and dosage suggestions. Log each dose as given or skipped. Get refill alerts and automatic interaction warnings when adding new medications.',
     icon: <MedicationIcon />,
     mock: <MockMedications />,
   },
@@ -86,7 +90,7 @@ const features: Feature[] = [
     title: 'Emergency Quick Access',
     headline: 'Critical info in seconds',
     description:
-      'One-tap access to patient info, allergies, medications, emergency contacts, and insurance details. High-contrast design built to hand to a paramedic. Works offline.',
+      'One-tap access to patient info, allergies, medications, emergency contacts, and insurance details. Medications sync automatically from the medication tracker. Cached offline for when you need it most.',
     icon: <LocalHospitalIcon />,
     mock: <MockEmergency />,
   },
@@ -94,9 +98,25 @@ const features: Feature[] = [
     title: 'Doctor Visit Prep',
     headline: 'Walk in prepared, not guessing',
     description:
-      'Auto-generate a printable care summary for any date range. Medication adherence, mood patterns, behavioral observations, and sleep data — all in one report for the doctor.',
+      'Auto-generate a printable care summary with medication adherence, mood patterns, and behavioral observations. Collect questions from the whole family before the appointment and track the doctor\'s answers after.',
     icon: <SummarizeIcon />,
     mock: <MockDoctorPrep />,
+  },
+  {
+    title: 'Document Vault',
+    headline: 'Important papers, always accessible',
+    description:
+      'Store and organize legal documents, insurance cards, medical records, and identification. Categorized for quick access — never scramble for a POA or insurance policy number again.',
+    icon: <FolderIcon />,
+    mock: <MockDocumentVault />,
+  },
+  {
+    title: 'Caregiver Resources',
+    headline: 'Help is closer than you think',
+    description:
+      'Build a shared library of local services, online guides, support groups, hotlines, government programs, and financial aid. Color-coded by type so the right resource is always a glance away.',
+    icon: <MenuBookIcon />,
+    mock: <MockResources />,
   },
   {
     title: 'Expense Tracking',
@@ -118,7 +138,7 @@ const features: Feature[] = [
     title: 'Caregiver Wellbeing',
     headline: 'You matter too',
     description:
-      'Gentle weekly check-ins on your stress, sleep, and emotional state. Private to you — no one else sees your responses. Links to the Alzheimer\'s Association helpline and support resources.',
+      'Check in on your stress, sleep, and emotional state whenever you need to. Admins can see wellbeing trends across the circle to ensure no one is burning out. Links to the Alzheimer\'s Association helpline and support resources.',
     icon: <FavoriteIcon />,
     mock: <MockWellbeing />,
   },
