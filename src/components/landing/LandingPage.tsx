@@ -221,7 +221,7 @@ export default function LandingPage() {
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <Box
         sx={{
-          background: 'linear-gradient(160deg, #2E7D32 0%, #1B5E20 50%, #005005 100%)',
+          background: 'linear-gradient(135deg, #3A7D44 0%, #2D6B37 35%, #1B5E20 65%, #524470 100%)',
           color: 'white',
           pt: { xs: 8, md: 12 },
           pb: { xs: 10, md: 14 },
@@ -253,7 +253,7 @@ export default function LandingPage() {
                 }}
               >
                 Caregiving,{' '}
-                <Box component="span" sx={{ color: '#A5D6A7' }}>
+                <Box component="span" sx={{ color: '#D4E8D1' }}>
                   coordinated.
                 </Box>
               </Typography>
@@ -420,7 +420,7 @@ export default function LandingPage() {
                       width: 80,
                       height: 80,
                       borderRadius: '50%',
-                      bgcolor: 'primary.main',
+                      background: 'linear-gradient(135deg, #3A7D44, #524470)',
                       color: 'white',
                       display: 'flex',
                       alignItems: 'center',
@@ -501,7 +501,7 @@ export default function LandingPage() {
         sx={{
           py: { xs: 8, md: 12 },
           px: 2,
-          background: 'linear-gradient(160deg, #2E7D32 0%, #1B5E20 100%)',
+          background: 'linear-gradient(135deg, #3A7D44 0%, #2D6B37 40%, #524470 100%)',
           color: 'white',
           textAlign: 'center',
         }}
@@ -519,7 +519,7 @@ export default function LandingPage() {
       </Box>
 
       {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <Box sx={{ py: 3, px: 2, textAlign: 'center', bgcolor: '#1B5E20', color: 'rgba(255,255,255,0.6)' }}>
+      <Box sx={{ py: 3, px: 2, textAlign: 'center', bgcolor: '#3D3555', color: 'rgba(255,255,255,0.6)' }}>
         <Typography variant="body2">
           Trellis — Caregiving coordination for your family
         </Typography>

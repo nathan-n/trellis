@@ -1,21 +1,24 @@
 import { createTheme } from '@mui/material/styles';
 
+const serifFont = '"Playfair Display", "Georgia", serif';
+const sansFont = '"Inter", "Helvetica", "Arial", sans-serif';
+
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2E7D32', // Forest green — growth, nature, trellis
-      light: '#60ad5e',
-      dark: '#005005',
+      main: '#3A7D44', // Warm organic green
+      light: '#6DB97B',
+      dark: '#1B5E20',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#5C6BC0', // Indigo — calm, trust
-      light: '#8e99f3',
-      dark: '#26418f',
+      main: '#7C6F9B', // Warm muted purple
+      light: '#A99BC5',
+      dark: '#524470',
       contrastText: '#fff',
     },
     error: {
-      main: '#D32F2F',
+      main: '#C62828',
     },
     warning: {
       main: '#F9A825',
@@ -24,14 +27,27 @@ const theme = createTheme({
       main: '#388E3C',
     },
     background: {
-      default: '#F5F5F0',
+      default: '#FAF8F5', // Warm cream
       paper: '#FFFFFF',
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: sansFont,
+    h1: {
+      fontFamily: serifFont,
+      fontWeight: 700,
+    },
+    h2: {
+      fontFamily: serifFont,
+      fontWeight: 700,
+    },
+    h3: {
+      fontFamily: serifFont,
+      fontWeight: 700,
+    },
     h4: {
-      fontWeight: 600,
+      fontFamily: serifFont,
+      fontWeight: 700,
     },
     h5: {
       fontWeight: 600,
@@ -41,21 +57,30 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
+          textTransform: 'none' as const,
           fontWeight: 600,
+          borderRadius: 24,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)',
+          boxShadow: '0 2px 8px rgba(60,50,40,0.07), 0 1px 3px rgba(60,50,40,0.05)',
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
         },
       },
     },
