@@ -50,9 +50,11 @@ const theme = createTheme({
       fontWeight: 700,
     },
     h5: {
+      fontFamily: serifFont,
       fontWeight: 600,
     },
     h6: {
+      fontFamily: serifFont,
       fontWeight: 600,
     },
   },
@@ -74,6 +76,31 @@ const theme = createTheme({
         root: {
           boxShadow: '0 2px 8px rgba(60,50,40,0.07), 0 1px 3px rgba(60,50,40,0.05)',
           borderRadius: 12,
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 16,
+          borderTop: '4px solid #3A7D44',
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          fontFamily: '"Playfair Display", "Georgia", serif',
+          fontWeight: 700,
+          fontSize: '1.25rem',
+          paddingBottom: 4,
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          padding: '12px 24px 20px',
         },
       },
     },
