@@ -16,7 +16,7 @@ export default function MockExpenses() {
       </Box>
       <Stack spacing={0.5}>
         {expenses.map((e, i) => (
-          <Card key={i} variant="outlined" sx={{ borderRadius: 1.5 }}>
+          <Card key={i} variant="outlined">
             <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 }, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

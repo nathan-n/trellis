@@ -20,7 +20,7 @@ export default function MockDocumentVault() {
     <MockDevice title="Document Vault">
       <Stack spacing={0.5}>
         {docs.map((d, i) => (
-          <Card key={i} variant="outlined" sx={{ borderRadius: 1.5 }}>
+          <Card key={i} variant="outlined">
             <CardContent sx={{ py: 1, px: 1.5, '&:last-child': { pb: 1 }, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ color: 'text.secondary' }}>{d.icon}</Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>

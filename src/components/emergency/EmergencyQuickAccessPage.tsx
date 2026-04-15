@@ -29,7 +29,7 @@ import EmergencyProfileEditDialog from './EmergencyProfileEditDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import EmptyState from '../shared/EmptyState';
 
-const cardSx = { borderRadius: 3, mb: 2 };
+const cardSx = { mb: 2 }; // borderRadius inherited from theme (12px)
 
 function SectionHeader({ icon, label, color = 'text.primary' }: { icon: React.ReactNode; label: string; color?: string }) {
   return (

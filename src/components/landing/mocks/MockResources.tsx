@@ -17,7 +17,7 @@ export default function MockResources() {
     <MockDevice title="Caregiver Resources">
       <Stack spacing={0.5}>
         {resources.map((r, i) => (
-          <Card key={i} variant="outlined" sx={{ borderRadius: 1.5, borderLeft: 3, borderLeftColor: r.color }}>
+          <Card key={i} variant="outlined" sx={{ borderLeft: 3, borderLeftColor: r.color }}>
             <CardContent sx={{ py: 1, px: 1.5, '&:last-child': { pb: 1 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.3 }}>
                 <Box sx={{ color: r.color, display: 'flex' }}>{r.icon}</Box>

@@ -34,7 +34,7 @@ export default function MockMedications() {
     <MockDevice title="Medications">
       <Stack spacing={1}>
         {meds.map((med, i) => (
-          <Card key={i} variant="outlined" sx={{ borderRadius: 1.5 }}>
+          <Card key={i} variant="outlined">
             <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>

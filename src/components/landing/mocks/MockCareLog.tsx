@@ -6,7 +6,7 @@ export default function MockCareLog() {
     <MockDevice title="Daily Care Log — Apr 6">
       <Stack spacing={1}>
         {/* Shift handoff entry */}
-        <Card variant="outlined" sx={{ borderRadius: 1.5, borderLeft: 3, borderLeftColor: 'primary.main' }}>
+        <Card variant="outlined" sx={{ borderLeft: 3, borderLeftColor: 'primary.main' }}>
           <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <Avatar sx={{ width: 22, height: 22, fontSize: '0.6rem', bgcolor: 'primary.main' }}>S</Avatar>
@@ -33,7 +33,7 @@ export default function MockCareLog() {
           </CardContent>
         </Card>
         {/* Regular entry */}
-        <Card variant="outlined" sx={{ borderRadius: 1.5 }}>
+        <Card variant="outlined">
           <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
               <Avatar sx={{ width: 22, height: 22, fontSize: '0.6rem', bgcolor: 'secondary.main' }}>N</Avatar>

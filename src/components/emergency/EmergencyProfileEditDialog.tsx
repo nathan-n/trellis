@@ -42,7 +42,7 @@ const relationshipOptions = ['Spouse', 'Son', 'Daughter', 'Sibling', 'Parent', '
 
 function SectionCard({ icon, label, color, children }: { icon: React.ReactNode; label: string; color: string; children: React.ReactNode }) {
   return (
-    <Card variant="outlined" sx={{ borderLeft: 4, borderLeftColor: color, borderRadius: 2 }}>
+    <Card variant="outlined" sx={{ borderLeft: 4, borderLeftColor: color }}>
       <CardContent sx={{ py: 2, px: 2.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, color }}>
           {icon}
@@ -145,7 +145,7 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
         <Stack spacing={2.5} sx={{ mt: 1 }}>
 
           {/* Patient Info */}
-          <Card variant="outlined" sx={{ borderRadius: 2 }}>
+          <Card variant="outlined">
             <CardContent sx={{ py: 2, px: 2.5 }}>
               <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>Patient Information</Typography>
               <Stack spacing={2}>

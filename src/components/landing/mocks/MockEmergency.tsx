@@ -7,17 +7,17 @@ export default function MockEmergency() {
   return (
     <MockDevice title="Emergency Information">
       {/* Patient card — warm green */}
-      <Card sx={{ mb: 1, bgcolor: '#2E7D32', color: 'white', borderRadius: 2 }}>
+      <Card sx={{ mb: 1, bgcolor: '#3A7D44', color: 'white' }}>
         <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
           <Typography variant="body1" fontWeight={700} sx={{ fontSize: '1rem' }}>Margaret Johnson</Typography>
           <Typography variant="caption" sx={{ opacity: 0.9 }}>DOB: March 14, 1948</Typography>
           <Box sx={{ mt: 0.5 }}>
-            <Chip label="Blood Type: A+" sx={{ bgcolor: 'white', color: '#2E7D32', fontWeight: 700, fontSize: '0.7rem', height: 22 }} />
+            <Chip label="Blood Type: A+" sx={{ bgcolor: 'white', color: '#3A7D44', fontWeight: 700, fontSize: '0.7rem', height: 22 }} />
           </Box>
         </CardContent>
       </Card>
       {/* Allergies — amber accent */}
-      <Card sx={{ mb: 1, borderLeft: 3, borderLeftColor: '#F9A825', borderRadius: 2 }}>
+      <Card sx={{ mb: 1, borderLeft: 3, borderLeftColor: '#F9A825' }}>
         <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
             <WarningAmberIcon sx={{ fontSize: '0.8rem', color: '#F57F17' }} />
@@ -36,9 +36,9 @@ export default function MockEmergency() {
           <Chip label="Hypertension" size="small" color="secondary" variant="outlined" sx={{ height: 20, fontSize: '0.6rem' }} />
           <Chip label="Type 2 Diabetes" size="small" color="secondary" variant="outlined" sx={{ height: 20, fontSize: '0.6rem' }} />
         </Box>
-        <Card variant="outlined" sx={{ borderRadius: 2, borderLeft: 3, borderLeftColor: '#2E7D32' }}>
+        <Card variant="outlined" sx={{ borderLeft: 3, borderLeftColor: '#3A7D44' }}>
           <CardContent sx={{ py: 1, px: 2, '&:last-child': { pb: 1 } }}>
-            <Typography variant="caption" fontWeight={600} sx={{ fontSize: '0.65rem', color: '#2E7D32' }}>Emergency Contacts</Typography>
+            <Typography variant="caption" fontWeight={600} sx={{ fontSize: '0.65rem', color: '#3A7D44' }}>Emergency Contacts</Typography>
             {[
               { name: 'Nathan (Son)', phone: '(555) 123-4567' },
               { name: 'Sarah (Daughter)', phone: '(555) 987-6543' },

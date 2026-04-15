@@ -19,7 +19,7 @@ export default function MockActivityFeed() {
     <MockDevice title="Activity">
       <Stack spacing={0.5}>
         {entries.map((e, i) => (
-          <Card key={i} variant="outlined" sx={{ borderRadius: 1.5 }}>
+          <Card key={i} variant="outlined">
             <CardContent sx={{ py: 1, px: 1.5, '&:last-child': { pb: 1 }, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Avatar sx={{ width: 24, height: 24, bgcolor: e.color }}>
                 {e.icon}

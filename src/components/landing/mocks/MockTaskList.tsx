@@ -40,7 +40,7 @@ export default function MockTaskList() {
     <MockDevice title="Tasks">
       <Stack spacing={1}>
         {tasks.map((task, i) => (
-          <Card key={i} variant="outlined" sx={{ borderRadius: 1.5 }}>
+          <Card key={i} variant="outlined">
             <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
                 <Typography variant="body2" fontWeight={600} sx={{ flex: 1, fontSize: '0.8rem' }}>

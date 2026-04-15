@@ -6,7 +6,7 @@ export default function MockWellbeing() {
   return (
     <MockDevice title="My Wellbeing">
       {/* Check-in card */}
-      <Card sx={{ mb: 1.5, border: 1, borderColor: 'secondary.light', borderRadius: 1.5 }}>
+      <Card sx={{ mb: 1.5, border: 1, borderColor: 'secondary.light' }}>
         <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
             <FavoriteIcon sx={{ color: 'secondary.main', fontSize: '1rem' }} />
