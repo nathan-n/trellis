@@ -72,7 +72,11 @@ service cloud.firestore {
           // Self-join: user creating their own member doc, cannot grant admin
           || (request.auth.uid == memberId && request.resource.data.role != 'admin')
         );
-        allow update: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow update: if request.auth != null && (
+          hasMinRole(circleId, 'admin')
+          // Self-update own doc (e.g., retry after partial acceptance), cannot escalate to admin
+          || (request.auth.uid == memberId && request.resource.data.role != 'admin')
+        );
         allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
       }
 

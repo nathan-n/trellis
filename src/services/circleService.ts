@@ -161,22 +161,30 @@ export async function acceptInvitation(
   console.log('[acceptInvitation] Starting for invitation:', invitationId, 'user:', userId, 'email:', userEmail);
 
   const invitation = await getInvitation(invitationId);
-  if (!invitation || invitation.status !== InvitationStatus.PENDING) {
-    console.error('[acceptInvitation] Invitation not found or not pending. Status:', invitation?.status);
-    throw new Error('Invitation not found or already processed');
+  if (!invitation) {
+    console.error('[acceptInvitation] Invitation not found');
+    throw new Error('Invitation not found');
   }
-  console.log('[acceptInvitation] Invitation loaded. CircleId:', invitation.circleId, 'Role:', invitation.role, 'InviteeEmail:', invitation.inviteeEmail);
+  if (invitation.status !== InvitationStatus.PENDING && invitation.status !== InvitationStatus.ACCEPTED) {
+    console.error('[acceptInvitation] Invitation not actionable. Status:', invitation.status);
+    throw new Error('Invitation has been declined or revoked');
+  }
+  console.log('[acceptInvitation] Invitation loaded. CircleId:', invitation.circleId, 'Role:', invitation.role, 'Status:', invitation.status);
 
-  // Step 1: Mark invitation as accepted
-  try {
-    await updateDoc(doc(db, 'invitations', invitationId), {
-      status: InvitationStatus.ACCEPTED,
-      acceptedAt: serverTimestamp(),
-    });
-    console.log('[acceptInvitation] Step 1 OK: invitation marked accepted');
-  } catch (err) {
-    console.error('[acceptInvitation] Step 1 FAILED: update invitation status', err);
-    throw err;
+  // Step 1: Mark invitation as accepted (skip if already accepted from a previous partial attempt)
+  if (invitation.status === InvitationStatus.PENDING) {
+    try {
+      await updateDoc(doc(db, 'invitations', invitationId), {
+        status: InvitationStatus.ACCEPTED,
+        acceptedAt: serverTimestamp(),
+      });
+      console.log('[acceptInvitation] Step 1 OK: invitation marked accepted');
+    } catch (err) {
+      console.error('[acceptInvitation] Step 1 FAILED: update invitation status', err);
+      throw err;
+    }
+  } else {
+    console.log('[acceptInvitation] Step 1 SKIPPED: invitation already accepted, retrying remaining steps');
   }
 
   // Step 2: Add user as circle member
