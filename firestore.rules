@@ -63,11 +63,13 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow update: if request.auth != null && hasMinRole(circleId, 'admin');
 
-      // Members — admin can manage, self-join only with matching uid (F3 hardened)
+      // Members — admin can manage, self-join with non-admin role
       match /members/{memberId} {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && (
-          hasMinRole(circleId, 'admin')
+          // Existing admin adding a member
+          (isCircleMember(circleId) && hasMinRole(circleId, 'admin'))
+          // Self-join: user creating their own member doc, cannot grant admin
           || (request.auth.uid == memberId && request.resource.data.role != 'admin')
         );
         allow update: if request.auth != null && hasMinRole(circleId, 'admin');
