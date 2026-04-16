@@ -26,6 +26,14 @@ export interface TaskViewedStore {
    * as empty.
    */
   refresh(key: string, newValue: string | null): void;
+  /**
+   * Merge remote IDs into the local Set WITHOUT replacing existing local
+   * writes. Used by the Firestore sync hook so that unsynced local marks
+   * are preserved while new IDs from other devices are surfaced. If all
+   * remoteIds are already present locally (subset), this is a no-op — no
+   * notify, no localStorage write.
+   */
+  setRemoteState(key: string, remoteIds: string[]): void;
 }
 
 const STORAGE_KEY_PREFIX = 'trellis_viewed_tasks_';
@@ -101,7 +109,25 @@ export function createTaskViewedStore(storage: StorageLike): TaskViewedStore {
     } catch { /* ignore parse errors */ }
   }
 
-  return { getStorageKey, getSet, subscribe, addToSet, refresh };
+  function setRemoteState(key: string, remoteIds: string[]) {
+    const current = getSet(key);
+    // No-op fast path: all remoteIds are already local.
+    let hasNew = false;
+    for (const id of remoteIds) {
+      if (!current.has(id)) { hasNew = true; break; }
+    }
+    if (!hasNew) return;
+    // Merge: union of current (local) + remote. Never delete local items.
+    const next = new Set(current);
+    for (const id of remoteIds) next.add(id);
+    cache.set(key, next);
+    try {
+      storage.setItem(key, JSON.stringify([...next]));
+    } catch { /* ignore */ }
+    notify(key);
+  }
+
+  return { getStorageKey, getSet, subscribe, addToSet, refresh, setRemoteState };
 }
 
 // ─── Default singleton ─────────────────────────────────────────────────────

@@ -5,12 +5,17 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
+import { useTaskViewedSync } from '../../hooks/useTaskViewedSync';
 import { SIDEBAR_WIDTH } from '../../constants';
 
 export default function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { userProfile } = useAuth();
   const { activeCircle, loading } = useCircle();
+
+  // Cross-device sync of task-viewed state (member doc viewedTaskIds).
+  // Mounted once at shell level; safe to call before activeCircle resolves.
+  useTaskViewedSync();
 
   // While circle data is loading, show spinner — never redirect prematurely
   if (loading) {

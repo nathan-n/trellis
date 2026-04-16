@@ -185,3 +185,85 @@ describe('createTaskViewedStore.isolation', () => {
     expect(b.getSet(key).has('task-1')).toBe(false);
   });
 });
+
+describe('createTaskViewedStore.setRemoteState (merge semantics)', () => {
+  it('merges remote IDs into local without replacing local writes', () => {
+    // The core invariant: unsynced local state must survive a remote sync.
+    const store = createTaskViewedStore(makeMockStorage());
+    const key = store.getStorageKey('c', 'u');
+
+    // Local has task-1 (e.g., just marked viewed, not yet sent to Firestore)
+    store.addToSet(key, 'task-1');
+
+    // Remote snapshot arrives with task-2 (from another device) — task-1 NOT in it
+    store.setRemoteState(key, ['task-2']);
+
+    const set = store.getSet(key);
+    expect(set.has('task-1')).toBe(true);  // local write preserved
+    expect(set.has('task-2')).toBe(true);  // remote ID added
+    expect(set.size).toBe(2);
+  });
+
+  it('notifies subscribers when new remote IDs are added', () => {
+    const store = createTaskViewedStore(makeMockStorage());
+    const key = store.getStorageKey('c', 'u');
+    let notified = 0;
+    store.subscribe(key, () => { notified += 1; });
+
+    store.setRemoteState(key, ['remote-1', 'remote-2']);
+
+    expect(notified).toBe(1);
+    expect(store.getSet(key).size).toBe(2);
+  });
+
+  it('is a no-op when all remote IDs are already in local (subset)', () => {
+    // Sidebar shouldn't flicker when a snapshot round-trips stale data.
+    const storage = makeMockStorage();
+    const store = createTaskViewedStore(storage);
+    const key = store.getStorageKey('c', 'u');
+
+    store.addToSet(key, 'task-1');
+    store.addToSet(key, 'task-2');
+    const persistedAfterLocal = storage.inspect()[key];
+
+    let notified = 0;
+    store.subscribe(key, () => { notified += 1; });
+
+    // Remote is a strict subset of local
+    store.setRemoteState(key, ['task-1']);
+
+    expect(notified).toBe(0);
+    // Storage value should be untouched (no rewrite)
+    expect(storage.inspect()[key]).toBe(persistedAfterLocal);
+    // Set still holds both local items
+    expect(store.getSet(key).size).toBe(2);
+  });
+
+  it('persists merged state to localStorage', () => {
+    const storage = makeMockStorage();
+    const store = createTaskViewedStore(storage);
+    const key = store.getStorageKey('c', 'u');
+
+    store.addToSet(key, 'local-a');
+    store.setRemoteState(key, ['remote-b', 'remote-c']);
+
+    const persisted = JSON.parse(storage.inspect()[key]);
+    expect(persisted.sort()).toEqual(['local-a', 'remote-b', 'remote-c'].sort());
+  });
+
+  it('handles an empty remote list correctly (no-op when local is non-empty)', () => {
+    // Defensive: remote member doc with no viewedTaskIds field yet should
+    // not clobber the local Set.
+    const store = createTaskViewedStore(makeMockStorage());
+    const key = store.getStorageKey('c', 'u');
+    store.addToSet(key, 'local-only');
+
+    let notified = 0;
+    store.subscribe(key, () => { notified += 1; });
+
+    store.setRemoteState(key, []);
+
+    expect(notified).toBe(0);
+    expect(store.getSet(key).has('local-only')).toBe(true);
+  });
+});

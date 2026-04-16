@@ -515,6 +515,51 @@ describe('visits', () => {
   });
 });
 
+// ─── Members (viewedTaskIds self-write) ─────────────────────────────────────
+
+describe('member viewedTaskIds (cross-device task-viewed sync)', () => {
+  // Uses the existing member self-update rule clause:
+  //   (request.auth.uid == memberId && request.resource.data.role != 'admin')
+  // No firestore.rules change required — these tests lock in that the rule
+  // permits a member to write viewedTaskIds on their own doc only.
+
+  it('allows a member to write viewedTaskIds to their own doc', async () => {
+    const db = getDb(FAMILY_UID);
+    await assertSucceeds(
+      updateDoc(doc(db, 'circles', CIRCLE_ID, 'members', FAMILY_UID), {
+        viewedTaskIds: ['task-1', 'task-2'],
+      })
+    );
+  });
+
+  it('allows a professional to write viewedTaskIds to their own doc', async () => {
+    const db = getDb(PROFESSIONAL_UID);
+    await assertSucceeds(
+      updateDoc(doc(db, 'circles', CIRCLE_ID, 'members', PROFESSIONAL_UID), {
+        viewedTaskIds: ['task-a'],
+      })
+    );
+  });
+
+  it('denies a member from writing viewedTaskIds on ANOTHER member doc', async () => {
+    const db = getDb(FAMILY_UID);
+    await assertFails(
+      updateDoc(doc(db, 'circles', CIRCLE_ID, 'members', PROFESSIONAL_UID), {
+        viewedTaskIds: ['task-stolen'],
+      })
+    );
+  });
+
+  it('denies a non-member from writing viewedTaskIds to any member doc', async () => {
+    const db = getDb(OUTSIDER_UID);
+    await assertFails(
+      updateDoc(doc(db, 'circles', CIRCLE_ID, 'members', FAMILY_UID), {
+        viewedTaskIds: ['task-1'],
+      })
+    );
+  });
+});
+
 // ─── Cross-cutting ───────────────────────────────────────────────────────────
 
 describe('cross-cutting', () => {
