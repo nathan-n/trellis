@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Button,
   Stack,
   FormControl,
   InputLabel,
@@ -11,24 +10,26 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import Fuse from 'fuse.js';
 import { useTasks } from '../../hooks/useTasks';
 import { useTaskViewed } from '../../hooks/useTaskViewed';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
-import { TaskCategory, TaskStatus } from '../../constants';
+import { TaskCategory, TaskStatus, CircleRole } from '../../constants';
+import { hasMinRole } from '../../utils/roleUtils';
 import TaskCard from './TaskCard';
 import TaskSearchBar from './TaskSearchBar';
 import TaskCreateEditDialog from './TaskCreateEditDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import AddFab from '../shared/AddFab';
 
 export default function TaskListPage() {
   const { userProfile } = useAuth();
-  const { activeCircle } = useCircle();
+  const { activeCircle, role } = useCircle();
   const { tasks, loading } = useTasks();
+  const canCreate = Boolean(role && hasMinRole(role, CircleRole.PROFESSIONAL));
   const { isTaskUnseen } = useTaskViewed(activeCircle?.id, userProfile?.uid);
   const [createOpen, setCreateOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,11 +74,8 @@ export default function TaskListPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ mb: 3 }}>
         <Typography variant="h5">Tasks</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-          New Task
-        </Button>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
@@ -123,7 +121,7 @@ export default function TaskListPage() {
           onAction={tasks.length === 0 ? () => setCreateOpen(true) : undefined}
         />
       ) : (
-        <Stack spacing={1.5}>
+        <Stack spacing={1.5} sx={{ pb: 10 }}>
           {filteredTasks.map((task) => (
             <TaskCard key={task.id} task={task} isUnseen={isTaskUnseen(task)} />
           ))}
@@ -131,6 +129,8 @@ export default function TaskListPage() {
       )}
 
       <TaskCreateEditDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+
+      <AddFab label="New Task" onClick={() => setCreateOpen(true)} visible={canCreate} />
     </Box>
   );
 }

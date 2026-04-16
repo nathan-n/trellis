@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Button,
   Card,
   CardContent,
   Stack,
@@ -11,7 +10,6 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import FolderIcon from '@mui/icons-material/Folder';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -30,6 +28,7 @@ import DocumentUploadDialog from './DocumentUploadDialog';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import AddFab from '../shared/AddFab';
 
 const categoryLabels: Record<string, string> = {
   legal: 'Legal',
@@ -99,13 +98,8 @@ export default function DocumentVaultPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ mb: 2 }}>
         <Typography variant="h5">Document Vault</Typography>
-        {role && hasMinRole(role, CircleRole.FAMILY) && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUploadOpen(true)}>
-            Upload Document
-          </Button>
-        )}
       </Box>
 
       <ToggleButtonGroup
@@ -130,7 +124,7 @@ export default function DocumentVaultPage() {
           onAction={docs.length === 0 ? () => setUploadOpen(true) : undefined}
         />
       ) : (
-        <Stack spacing={1.5}>
+        <Stack spacing={1.5} sx={{ pb: 10 }}>
           {filtered.map((document) => (
             <Card key={document.id}>
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5 }}>
@@ -192,6 +186,12 @@ export default function DocumentVaultPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         destructive
+      />
+
+      <AddFab
+        label="Upload Document"
+        onClick={() => setUploadOpen(true)}
+        visible={Boolean(role && hasMinRole(role, CircleRole.FAMILY))}
       />
     </Box>
   );

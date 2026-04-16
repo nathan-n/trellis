@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import {
-  Box, Typography, Button, Card, CardContent, Stack, Chip,
+  Box, Typography, Card, CardContent, Stack, Chip,
   IconButton, ToggleButtonGroup, ToggleButton, Tabs, Tab,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -23,6 +22,7 @@ import ExpenseCreateDialog from './ExpenseCreateDialog';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import AddFab from '../shared/AddFab';
 
 const categoryLabels: Record<string, string> = {
   medical: 'Medical', supplies: 'Supplies', home_modification: 'Home Mod',
@@ -81,13 +81,8 @@ export default function ExpenseListPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ mb: 2 }}>
         <Typography variant="h5">Expenses</Typography>
-        {role && hasMinRole(role, CircleRole.FAMILY) && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
-            Add Expense
-          </Button>
-        )}
       </Box>
 
       <Tabs
@@ -125,7 +120,7 @@ export default function ExpenseListPage() {
         />
       ) : null}
       {filtered.length > 0 && (
-        <Stack spacing={1}>
+        <Stack spacing={1} sx={{ pb: 10 }}>
           {filtered.map((expense) => (
             <Card key={expense.id} variant="outlined">
               <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 }, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -169,6 +164,13 @@ export default function ExpenseListPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         destructive
+      />
+
+      {/* FAB visible on both List and Summary tabs so users can add from either */}
+      <AddFab
+        label="Add Expense"
+        onClick={() => setCreateOpen(true)}
+        visible={Boolean(role && hasMinRole(role, CircleRole.FAMILY))}
       />
     </Box>
   );
