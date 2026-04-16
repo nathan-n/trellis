@@ -7,29 +7,9 @@ import { fetchCareLogsPage } from '../../services/careLogService';
 import type { CareLog } from '../../types';
 import CareLogTimeline from './CareLogTimeline';
 import CareLogFilterBar, { emptyFilters, type CareLogFilters } from './CareLogFilterBar';
+import { matchesFilters } from '../../utils/careLogFilters';
 
 const PAGE_SIZE = 30;
-
-function matchesFilters(log: CareLog, f: CareLogFilters): boolean {
-  if (f.mood && log.mood !== f.mood) return false;
-  if (f.authorUid && log.authorUid !== f.authorUid) return false;
-  if (f.handoffOnly && !log.isShiftHandoff) return false;
-  if (f.text) {
-    const q = f.text.toLowerCase();
-    const haystack = [
-      log.generalNotes ?? '',
-      log.moodNotes ?? '',
-      log.shiftSummary ?? '',
-      log.authorName ?? '',
-      ...(log.behaviors ?? []),
-      ...(log.activities ?? []),
-    ]
-      .join(' ')
-      .toLowerCase();
-    if (!haystack.includes(q)) return false;
-  }
-  return true;
-}
 
 function dayHeader(dateStr: string): string {
   const d = dayjs(dateStr);
