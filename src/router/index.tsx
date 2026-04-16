@@ -13,7 +13,7 @@ const CircleSettingsPage = lazy(() => import('../components/circles/CircleSettin
 const TaskListPage = lazy(() => import('../components/tasks/TaskListPage'));
 const TaskDetailPage = lazy(() => import('../components/tasks/TaskDetailPage'));
 const TaskCalendarView = lazy(() => import('../components/tasks/TaskCalendarView'));
-const MyNextPriorityCard = lazy(() => import('../components/tasks/MyNextPriorityCard'));
+const DashboardPage = lazy(() => import('../components/dashboard/DashboardPage'));
 const VisitCalendarPage = lazy(() => import('../components/visits/VisitCalendarPage'));
 const MedicationListPage = lazy(() => import('../components/medications/MedicationListPage'));
 const MedicationDetailPage = lazy(() => import('../components/medications/MedicationDetailPage'));
@@ -56,7 +56,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/my-next" replace /> },
-      { path: 'my-next', element: <Lazy><MyNextPriorityCard /></Lazy> },
+      { path: 'my-next', element: <Lazy><DashboardPage /></Lazy> },
       { path: 'tasks', element: <Lazy><TaskListPage /></Lazy> },
       { path: 'tasks/:taskId', element: <Lazy><TaskDetailPage /></Lazy> },
       { path: 'tasks/calendar', element: <Lazy><TaskCalendarView /></Lazy> },
