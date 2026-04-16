@@ -6,7 +6,6 @@ import TodaySnapshotCard from './TodaySnapshotCard';
 import MyTasksCard from './MyTasksCard';
 import UpcomingVisitsCard from './UpcomingVisitsCard';
 import CircleHealthCard from './CircleHealthCard';
-import MonthSpendCard from './MonthSpendCard';
 
 export default function DashboardPage() {
   const { role } = useCircle();
@@ -32,14 +31,14 @@ export default function DashboardPage() {
         </Grid>
       </Grid>
 
-      {/* Row 2 (admin only): circle-wide insights */}
+      {/* Row 2 (admin only): circle-wide wellbeing signal. Expenses are
+          intentionally NOT shown on the home dashboard — running spend
+          totals on a caregiver's landing page are demoralizing. They live
+          in the Expenses view where users can visit intentionally. */}
       {isAdmin && (
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
             <CircleHealthCard />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <MonthSpendCard />
           </Grid>
         </Grid>
       )}

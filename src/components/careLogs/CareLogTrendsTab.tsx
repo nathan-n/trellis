@@ -168,14 +168,18 @@ export default function CareLogTrendsTab({ onJumpToDay }: Props) {
             <CardContent>
               <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>Mood distribution by week</Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, fontStyle: 'italic' }}>
-                One bar segment per day — days with multiple entries use the day's worst mood.
+                Grouped into week-long buckets (Monday–Sunday). One bar segment per day — days with multiple entries use the day's worst mood.
               </Typography>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={weeklyMood}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="weekLabel" tick={{ fontSize: 12 }} />
+                  <XAxis
+                    dataKey="weekLabel"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(v: string) => `Wk of ${v}`}
+                  />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <RechartsTooltip />
+                  <RechartsTooltip labelFormatter={(label) => `Week of ${label}`} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   {(Object.keys(moodLabels) as Mood[]).map((m) => (
                     <Bar key={m} dataKey={m} stackId="mood" fill={moodColors[m]} name={moodLabels[m]} />
