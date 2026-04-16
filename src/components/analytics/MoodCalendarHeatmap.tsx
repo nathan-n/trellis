@@ -87,6 +87,19 @@ function DayTooltipContent({ value }: { value: DayValue }) {
     return null;
   })();
 
+  // Build chronological mood timeline for multi-entry days.
+  // Shows the sequence ("8:30am Calm → 4:15pm Agitated → 8:00pm Calm") —
+  // more useful for pattern-spotting than just knowing there were multiple moods.
+  const timeline = value.logs.length > 1
+    ? value.logs
+        .slice()
+        .sort((a, b) => (a.logTimestamp?.toMillis?.() ?? 0) - (b.logTimestamp?.toMillis?.() ?? 0))
+        .map((l) => ({
+          mood: l.mood,
+          time: l.logTimestamp?.toDate ? dayjs(l.logTimestamp.toDate()).format('h:mma') : '',
+        }))
+    : null;
+
   if (!value.mood || value.logs.length === 0) {
     return (
       <Box sx={{ p: 1.25, minWidth: 180 }}>
@@ -142,6 +155,24 @@ function DayTooltipContent({ value }: { value: DayValue }) {
         <Typography variant="caption" sx={{ display: 'block', mt: 0.5, opacity: 0.8 }}>
           Logged by {authors.join(', ')}
         </Typography>
+      )}
+
+      {timeline && (
+        <Box sx={{ mt: 0.75 }}>
+          <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', mb: 0.25 }}>
+            Mood timeline
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px', alignItems: 'center' }}>
+            {timeline.map((t, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 7, height: 7, bgcolor: moodColors[t.mood], borderRadius: '50%' }} />
+                <Typography variant="caption" sx={{ fontSize: 10.5 }}>
+                  {t.time} {moodLabels[t.mood]}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       )}
 
       {(topBehaviors.length > 0 || topActivities.length > 0 || avgSleep != null || totalMeals > 0) && (
@@ -295,6 +326,44 @@ export default function MoodCalendarHeatmap({ logs, startDate, endDate, onDayCli
           const dv = v as DayValue | null;
           if (dv && onDayClick) onDayClick(dv.date);
         }}
+        transformDayElement={((rectEl: unknown, v: unknown): React.ReactNode => {
+          const dv = v as DayValue | null;
+          const element = rectEl as React.ReactElement<{
+            x?: number | string;
+            y?: number | string;
+            width?: number | string;
+            height?: number | string;
+          }>;
+          // Add a tiny indicator dot in the corner for days with >1 entry.
+          // Makes multi-entry days scannable without hovering; the tooltip
+          // then reveals the full mood timeline.
+          if (!dv || dv.count <= 1) return element;
+          const x = Number(element.props.x ?? 0);
+          const y = Number(element.props.y ?? 0);
+          const w = Number(element.props.width ?? 0);
+          const h = Number(element.props.height ?? 0);
+          // Bottom-right corner, nudged inward. White outer ring + dark inner dot
+          // so it reads on both light and dark cells.
+          return (
+            <g>
+              {element}
+              <circle
+                cx={x + w - 3}
+                cy={y + h - 3}
+                r={2}
+                fill="rgba(255,255,255,0.9)"
+                pointerEvents="none"
+              />
+              <circle
+                cx={x + w - 3}
+                cy={y + h - 3}
+                r={1}
+                fill="rgba(30,28,32,0.75)"
+                pointerEvents="none"
+              />
+            </g>
+          );
+        }) as unknown as React.ComponentProps<typeof CalendarHeatmap>['transformDayElement']}
       />
       </Box>
 
@@ -341,6 +410,31 @@ export default function MoodCalendarHeatmap({ logs, startDate, endDate, onDayCli
           <Box sx={{ width: 12, height: 12, bgcolor: emptyColor, borderRadius: 0.5 }} />
           <Typography variant="caption" color="text.secondary">No entry</Typography>
         </Box>
+        <Tooltip title="Day with more than one entry — hover to see the mood timeline" arrow>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: 0.5,
+                bgcolor: moodColors.calm,
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  right: 1,
+                  bottom: 1,
+                  width: 4,
+                  height: 4,
+                  borderRadius: '50%',
+                  bgcolor: 'rgba(30,28,32,0.75)',
+                  border: '1px solid rgba(255,255,255,0.9)',
+                },
+              }}
+            />
+            <Typography variant="caption" color="text.secondary">Multiple entries</Typography>
+          </Box>
+        </Tooltip>
       </Stack>
     </Box>
   );
