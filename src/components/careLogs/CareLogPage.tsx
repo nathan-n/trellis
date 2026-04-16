@@ -3,13 +3,16 @@ import { Box, Typography, Button, Stack, Tabs, Tab } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
 import dayjs, { type Dayjs } from 'dayjs';
+import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
-import { subscribeCareLogsByDate } from '../../services/careLogService';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { subscribeCareLogsByDate, deleteCareLog } from '../../services/careLogService';
 import type { CareLog } from '../../types';
 import CareLogEntryForm from './CareLogEntryForm';
 import CareLogTimeline from './CareLogTimeline';
 import CareLogHistoryView from './CareLogHistoryView';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import ConfirmDialog from '../shared/ConfirmDialog';
 
 // Lazy-load Trends tab so recharts + react-calendar-heatmap only load when needed
 const CareLogTrendsTab = lazy(() => import('./CareLogTrendsTab'));
@@ -18,13 +21,34 @@ type ViewMode = 'day' | 'history' | 'trends';
 
 export default function CareLogPage() {
   const { activeCircle } = useCircle();
+  const { userProfile } = useAuth();
+  const { showMessage } = useSnackbar();
   const [viewMode, setViewMode] = useState<ViewMode>('day');
   const [date, setDate] = useState<Dayjs>(dayjs());
   const [logs, setLogs] = useState<CareLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<CareLog | null>(null);
 
   const dateStr = date.format('YYYY-MM-DD');
+
+  const handleDelete = async () => {
+    if (!deleteTarget || !activeCircle || !userProfile) return;
+    try {
+      await deleteCareLog(
+        activeCircle.id,
+        deleteTarget.id,
+        userProfile.uid,
+        userProfile.displayName,
+        deleteTarget.logDate
+      );
+      showMessage('Care log entry removed', 'success');
+    } catch (err) {
+      console.error('Delete care log error:', err);
+      showMessage('Failed to remove entry', 'error');
+    }
+    setDeleteTarget(null);
+  };
 
   useEffect(() => {
     if (!activeCircle || viewMode !== 'day') return;
@@ -80,11 +104,13 @@ export default function CareLogPage() {
             </Box>
           )}
 
-          {loading ? <LoadingSpinner /> : <CareLogTimeline logs={logs} />}
+          {loading ? <LoadingSpinner /> : (
+            <CareLogTimeline logs={logs} onDelete={setDeleteTarget} />
+          )}
         </>
       )}
 
-      {viewMode === 'history' && <CareLogHistoryView />}
+      {viewMode === 'history' && <CareLogHistoryView onDeleteRequest={setDeleteTarget} />}
 
       {viewMode === 'trends' && (
         <Suspense fallback={<LoadingSpinner />}>
@@ -96,6 +122,20 @@ export default function CareLogPage() {
           />
         </Suspense>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Remove Care Log Entry"
+        message={
+          deleteTarget
+            ? `Remove ${deleteTarget.authorName}'s ${dayjs(deleteTarget.logTimestamp.toDate()).format('MMM D, h:mm A')} entry? This cannot be undone.`
+            : ''
+        }
+        confirmLabel="Remove"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        destructive
+      />
     </Box>
   );
 }

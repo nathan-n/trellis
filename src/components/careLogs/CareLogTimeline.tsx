@@ -7,9 +7,16 @@ import {
   Stack,
   Avatar,
   Divider,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { formatDateTime } from '../../utils/dateUtils';
 import type { CareLog } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCircle } from '../../contexts/CircleContext';
+import { CircleRole } from '../../constants';
 
 const moodColors: Record<string, 'success' | 'error' | 'warning' | 'info' | 'default'> = {
   calm: 'success',
@@ -22,9 +29,14 @@ const moodColors: Record<string, 'success' | 'error' | 'warning' | 'info' | 'def
 
 interface CareLogTimelineProps {
   logs: CareLog[];
+  onEdit?: (log: CareLog) => void;
+  onDelete?: (log: CareLog) => void;
 }
 
-export default function CareLogTimeline({ logs }: CareLogTimelineProps) {
+export default function CareLogTimeline({ logs, onEdit, onDelete }: CareLogTimelineProps) {
+  const { userProfile } = useAuth();
+  const { role } = useCircle();
+  const isAdmin = role === CircleRole.ADMIN;
   if (logs.length === 0) {
     return (
       <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
@@ -48,9 +60,25 @@ export default function CareLogTimeline({ logs }: CareLogTimelineProps) {
                 </Typography>
                 {log.isShiftHandoff && <Chip label="Shift Handoff" size="small" color="primary" />}
               </Box>
-              <Typography variant="caption" color="text.secondary">
-                {formatDateTime(log.logTimestamp)}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" color="text.secondary">
+                  {formatDateTime(log.logTimestamp)}
+                </Typography>
+                {(isAdmin || log.authorUid === userProfile?.uid) && onEdit && (
+                  <Tooltip title="Edit entry" arrow>
+                    <IconButton size="small" onClick={() => onEdit(log)} sx={{ ml: 0.5 }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {(isAdmin || log.authorUid === userProfile?.uid) && onDelete && (
+                  <Tooltip title="Delete entry" arrow>
+                    <IconButton size="small" color="error" onClick={() => onDelete(log)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
             </Box>
 
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1.5 }}>

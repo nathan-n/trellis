@@ -175,7 +175,12 @@ service cloud.firestore {
       match /careLogs/{logId} {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && hasMinRole(circleId, 'professional');
-        allow update: if request.auth != null && request.auth.uid == resource.data.authorUid;
+        allow update: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.authorUid
+        );
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.authorUid
+        );
       }
 
       // Emergency Profile

@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   query,
   where,
@@ -69,6 +70,19 @@ export async function updateCareLog(
   await updateDoc(doc(db, 'circles', circleId, 'careLogs', logId), {
     ...data,
     updatedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteCareLog(
+  circleId: string,
+  logId: string,
+  userId: string,
+  userName: string,
+  logDate?: string
+): Promise<void> {
+  await deleteDoc(doc(db, 'circles', circleId, 'careLogs', logId));
+  await writeAuditEntry(circleId, userId, userName, 'careLog.delete', 'careLog', logId, {
+    logDate: logDate ?? null,
   });
 }
 

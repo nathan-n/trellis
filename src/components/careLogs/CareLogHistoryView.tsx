@@ -42,7 +42,11 @@ function dayHeader(dateStr: string): string {
   return d.format('MMM D, YYYY');
 }
 
-export default function CareLogHistoryView() {
+interface Props {
+  onDeleteRequest?: (log: CareLog) => void;
+}
+
+export default function CareLogHistoryView({ onDeleteRequest }: Props = {}) {
   const { activeCircle } = useCircle();
   const [logs, setLogs] = useState<CareLog[]>([]);
   const [cursor, setCursor] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
@@ -189,7 +193,7 @@ export default function CareLogHistoryView() {
                 </Typography>
                 <Divider sx={{ flex: 1, ml: 1 }} />
               </Box>
-              <CareLogTimeline logs={dayLogs} />
+              <CareLogTimeline logs={dayLogs} onDelete={onDeleteRequest} />
             </Box>
           ))}
         </Box>
