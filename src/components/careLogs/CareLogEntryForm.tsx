@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -21,9 +21,10 @@ import { Mood, SleepQuality, MealAmount } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { createCareLog } from '../../services/careLogService';
+import { createCareLog, fetchCareLogVocabulary } from '../../services/careLogService';
 import type { MealEntry, HydrationEntry } from '../../types';
 import dayjs from 'dayjs';
+import ChipInput from '../shared/ChipInput';
 
 interface CareLogEntryFormProps {
   date: string;
@@ -48,9 +49,25 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
   const [sleepQuality, setSleepQuality] = useState<string>(SleepQuality.FAIR);
   const [sleepHours, setSleepHours] = useState('');
   const [sleepNotes, setSleepNotes] = useState('');
-  const [behaviors, setBehaviors] = useState('');
-  const [activities, setActivities] = useState('');
+  const [behaviors, setBehaviors] = useState<string[]>([]);
+  const [activities, setActivities] = useState<string[]>([]);
+  const [behaviorSuggestions, setBehaviorSuggestions] = useState<string[]>([]);
+  const [activitySuggestions, setActivitySuggestions] = useState<string[]>([]);
   const [generalNotes, setGeneralNotes] = useState('');
+
+  // Load the circle's recent vocabulary (last 90d) once on mount.
+  useEffect(() => {
+    if (!activeCircle) return;
+    let cancelled = false;
+    fetchCareLogVocabulary(activeCircle.id)
+      .then((vocab) => {
+        if (cancelled) return;
+        setBehaviorSuggestions(vocab.behaviors);
+        setActivitySuggestions(vocab.activities);
+      })
+      .catch(() => { /* suggestions are a nice-to-have, don't block the form */ });
+    return () => { cancelled = true; };
+  }, [activeCircle?.id]);
   const [isShiftHandoff, setIsShiftHandoff] = useState(false);
   const [shiftSummary, setShiftSummary] = useState('');
 
@@ -73,8 +90,8 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
           hoursSlept: sleepHours ? parseFloat(sleepHours) : null,
           notes: sleepNotes.trim() || null,
         },
-        behaviors: behaviors.split(',').map((b) => b.trim()).filter(Boolean),
-        activities: activities.split(',').map((a) => a.trim()).filter(Boolean),
+        behaviors,
+        activities,
         generalNotes: generalNotes.trim() || null,
         isShiftHandoff,
         shiftSummary: isShiftHandoff ? shiftSummary.trim() || null : null,
@@ -151,8 +168,22 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
 
       {/* Behaviors & Activities */}
       <Divider><Chip label="Observations" size="small" /></Divider>
-      <TextField label="Behaviors (comma-separated)" size="small" fullWidth value={behaviors} onChange={(e) => setBehaviors(e.target.value)} placeholder="sundowning, wandering, repetitive questions" />
-      <TextField label="Activities (comma-separated)" size="small" fullWidth value={activities} onChange={(e) => setActivities(e.target.value)} placeholder="walk, music, puzzles" />
+      <ChipInput
+        label="Behaviors"
+        placeholder="e.g. sundowning, wandering"
+        values={behaviors}
+        onChange={setBehaviors}
+        suggestions={behaviorSuggestions}
+        chipColor="warning"
+      />
+      <ChipInput
+        label="Activities"
+        placeholder="e.g. walk, music, puzzles"
+        values={activities}
+        onChange={setActivities}
+        suggestions={activitySuggestions}
+        chipColor="primary"
+      />
       <TextField label="General Notes" value={generalNotes} onChange={(e) => setGeneralNotes(e.target.value)} fullWidth multiline rows={3} />
 
       {/* Shift Handoff */}

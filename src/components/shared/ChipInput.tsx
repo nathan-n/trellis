@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, TextField, Chip, Typography } from '@mui/material';
+import { Box, TextField, Chip, Typography, Autocomplete } from '@mui/material';
 
 interface ChipInputProps {
   label: string;
@@ -7,9 +7,102 @@ interface ChipInputProps {
   values: string[];
   onChange: (values: string[]) => void;
   chipColor?: 'default' | 'primary' | 'secondary' | 'warning' | 'error' | 'info' | 'success';
+  /**
+   * Optional list of suggested values to autocomplete from (e.g., past values).
+   * When provided, ChipInput renders as an MUI Autocomplete with free-solo input.
+   * When omitted, falls back to the simpler TextField-based chip input.
+   */
+  suggestions?: string[];
+  /** Optional helper text under the input; defaults to a sensible prompt. */
+  helperText?: string;
 }
 
-export default function ChipInput({ label, placeholder, values, onChange, chipColor = 'default' }: ChipInputProps) {
+export default function ChipInput({
+  label,
+  placeholder,
+  values,
+  onChange,
+  chipColor = 'default',
+  suggestions,
+  helperText,
+}: ChipInputProps) {
+  // ── Autocomplete variant (with past-value suggestions) ───────────────────
+  if (suggestions !== undefined) {
+    // Exclude already-selected values from dropdown options.
+    const availableOptions = suggestions.filter(
+      (s) => !values.some((v) => v.toLowerCase() === s.toLowerCase())
+    );
+    return (
+      <Box>
+        <Autocomplete
+          multiple
+          freeSolo
+          size="small"
+          options={availableOptions}
+          value={values}
+          onChange={(_, newValues) => {
+            // Normalize: trim, drop empties, dedupe case-insensitively.
+            const seen = new Set<string>();
+            const next: string[] = [];
+            for (const raw of newValues) {
+              const v = (typeof raw === 'string' ? raw : '').trim();
+              if (!v) continue;
+              const key = v.toLowerCase();
+              if (seen.has(key)) continue;
+              seen.add(key);
+              next.push(v);
+            }
+            onChange(next);
+          }}
+          renderTags={(vals, getTagProps) =>
+            vals.map((option, index) => {
+              const { key, ...chipProps } = getTagProps({ index });
+              return (
+                <Chip
+                  key={key}
+                  label={option}
+                  size="small"
+                  color={chipColor}
+                  sx={{ fontWeight: 500 }}
+                  {...chipProps}
+                />
+              );
+            })
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={label}
+              placeholder={values.length === 0 ? placeholder : ''}
+              helperText={helperText ?? 'Select from suggestions or type to add your own'}
+            />
+          )}
+        />
+      </Box>
+    );
+  }
+
+  // ── Simple variant (original behavior, unchanged) ────────────────────────
+  return <SimpleChipInput
+    label={label}
+    placeholder={placeholder}
+    values={values}
+    onChange={onChange}
+    chipColor={chipColor}
+    helperText={helperText}
+  />;
+}
+
+interface SimpleProps {
+  label: string;
+  placeholder: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  chipColor: 'default' | 'primary' | 'secondary' | 'warning' | 'error' | 'info' | 'success';
+  helperText?: string;
+}
+
+function SimpleChipInput({ label, placeholder, values, onChange, chipColor, helperText }: SimpleProps) {
   const [inputValue, setInputValue] = useState('');
 
   const addValue = (raw: string) => {
@@ -47,7 +140,7 @@ export default function ChipInput({ label, placeholder, values, onChange, chipCo
         size="small"
       />
       <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-        Press Enter or comma to add
+        {helperText ?? 'Press Enter or comma to add'}
       </Typography>
       {values.length > 0 && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>

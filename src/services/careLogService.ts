@@ -114,6 +114,44 @@ export interface CareLogPage {
 }
 
 /**
+ * Fetch the circle's recent care-log vocabulary — unique behaviors and
+ * activities from the last 90 days, sorted by frequency (most-used first).
+ * Used to populate autocomplete suggestions in CareLogEntryForm so
+ * caregivers don't drift on terminology ("sundowning" vs "sun downing").
+ */
+export async function fetchCareLogVocabulary(
+  circleId: string
+): Promise<{ behaviors: string[]; activities: string[] }> {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 90);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const logs = await fetchCareLogsInRange(circleId, fmt(start), fmt(end));
+
+  const tally = (key: 'behaviors' | 'activities'): string[] => {
+    const counts = new Map<string, { display: string; count: number }>();
+    for (const l of logs) {
+      for (const raw of l[key] ?? []) {
+        const v = (raw ?? '').trim();
+        if (!v) continue;
+        const norm = v.toLowerCase();
+        const existing = counts.get(norm);
+        if (existing) existing.count += 1;
+        else counts.set(norm, { display: v, count: 1 });
+      }
+    }
+    return [...counts.values()]
+      .sort((a, b) => b.count - a.count || a.display.localeCompare(b.display))
+      .map((e) => e.display);
+  };
+
+  return {
+    behaviors: tally('behaviors'),
+    activities: tally('activities'),
+  };
+}
+
+/**
  * Fetch all care logs whose logDate is within the given inclusive range.
  * Used by the Trends view. Uses the existing (logDate asc, logTimestamp desc)
  * composite index.
