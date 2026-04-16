@@ -9,7 +9,12 @@ import {
   onSnapshot,
   serverTimestamp,
   Timestamp,
+  limit,
+  startAfter,
+  getDocs,
   type Unsubscribe,
+  type QueryDocumentSnapshot,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { writeAuditEntry } from './auditService';
@@ -100,4 +105,35 @@ export function subscribeRecentCareLogs(
     },
     onError
   );
+}
+
+export interface CareLogPage {
+  logs: CareLog[];
+  lastDoc: QueryDocumentSnapshot<DocumentData> | null;
+  hasMore: boolean;
+}
+
+/**
+ * Paginated fetch of care logs ordered by logTimestamp desc.
+ * Used by the "All Entries" history view for infinite scrolling.
+ * Pass the previous page's lastDoc as cursor to get the next page.
+ */
+export async function fetchCareLogsPage(
+  circleId: string,
+  pageSize: number,
+  cursor: QueryDocumentSnapshot<DocumentData> | null
+): Promise<CareLogPage> {
+  const base = query(
+    careLogsCol(circleId),
+    orderBy('logTimestamp', 'desc'),
+    ...(cursor ? [startAfter(cursor)] : []),
+    limit(pageSize)
+  );
+  const snap = await getDocs(base);
+  const docs = snap.docs;
+  return {
+    logs: docs.map((d) => ({ id: d.id, ...d.data() }) as CareLog),
+    lastDoc: docs.length > 0 ? docs[docs.length - 1] : null,
+    hasMore: docs.length === pageSize,
+  };
 }
