@@ -191,6 +191,18 @@ function DayTooltipContent({ value }: { value: DayValue }) {
 // ─── Main component ────────────────────────────────────────────────────────
 
 export default function MoodCalendarHeatmap({ logs, startDate, endDate, onDayClick }: Props) {
+  // Cap the heatmap's visual width so cells stay crisp on desktop.
+  // react-calendar-heatmap scales SVG to container width — without a cap,
+  // a 90-day grid on a 1100px card produces huge cartoonish cells.
+  // Target ~36-40px per week column; still shrinks below this on narrow screens.
+  const maxWidth = useMemo(() => {
+    const numDays = Math.ceil((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+    const numWeeks = Math.ceil(numDays / 7) + 1; // +1 to account for partial weeks
+    const cellTarget = 40;
+    const labelColumn = 40;
+    return numWeeks * cellTarget + labelColumn;
+  }, [startDate, endDate]);
+
   // Build values array: one entry per day in range; aggregate logs by date.
   const values = useMemo<DayValue[]>(() => {
     const byDate = new Map<string, CareLog[]>();
@@ -259,6 +271,7 @@ export default function MoodCalendarHeatmap({ logs, startDate, endDate, onDayCli
         }}
       />
 
+      <Box sx={{ maxWidth: `${maxWidth}px`, width: '100%' }}>
       <CalendarHeatmap
         startDate={startDate}
         endDate={endDate}
@@ -283,6 +296,7 @@ export default function MoodCalendarHeatmap({ logs, startDate, endDate, onDayCli
           if (dv && onDayClick) onDayClick(dv.date);
         }}
       />
+      </Box>
 
       {/* Rich hover tooltip via Popper — anchors to the hovered SVG rect */}
       <Popper
