@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Box, Typography, Button, Stack, Tabs, Tab } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
@@ -11,7 +11,10 @@ import CareLogTimeline from './CareLogTimeline';
 import CareLogHistoryView from './CareLogHistoryView';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
-type ViewMode = 'day' | 'history';
+// Lazy-load Trends tab so recharts + react-calendar-heatmap only load when needed
+const CareLogTrendsTab = lazy(() => import('./CareLogTrendsTab'));
+
+type ViewMode = 'day' | 'history' | 'trends';
 
 export default function CareLogPage() {
   const { activeCircle } = useCircle();
@@ -53,9 +56,10 @@ export default function CareLogPage() {
       >
         <Tab value="day" label="Day" />
         <Tab value="history" label="All Entries" />
+        <Tab value="trends" label="Trends" />
       </Tabs>
 
-      {viewMode === 'day' ? (
+      {viewMode === 'day' && (
         <>
           <Stack direction="row" spacing={1} sx={{ mb: 3, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
             <DatePicker
@@ -78,8 +82,19 @@ export default function CareLogPage() {
 
           {loading ? <LoadingSpinner /> : <CareLogTimeline logs={logs} />}
         </>
-      ) : (
-        <CareLogHistoryView />
+      )}
+
+      {viewMode === 'history' && <CareLogHistoryView />}
+
+      {viewMode === 'trends' && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <CareLogTrendsTab
+            onJumpToDay={(d) => {
+              setDate(dayjs(d));
+              setViewMode('day');
+            }}
+          />
+        </Suspense>
       )}
     </Box>
   );

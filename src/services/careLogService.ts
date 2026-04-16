@@ -114,6 +114,27 @@ export interface CareLogPage {
 }
 
 /**
+ * Fetch all care logs whose logDate is within the given inclusive range.
+ * Used by the Trends view. Uses the existing (logDate asc, logTimestamp desc)
+ * composite index.
+ */
+export async function fetchCareLogsInRange(
+  circleId: string,
+  startDate: string, // YYYY-MM-DD inclusive
+  endDate: string    // YYYY-MM-DD inclusive
+): Promise<CareLog[]> {
+  const q = query(
+    careLogsCol(circleId),
+    where('logDate', '>=', startDate),
+    where('logDate', '<=', endDate),
+    orderBy('logDate', 'asc'),
+    orderBy('logTimestamp', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as CareLog);
+}
+
+/**
  * Paginated fetch of care logs ordered by logTimestamp desc.
  * Used by the "All Entries" history view for infinite scrolling.
  * Pass the previous page's lastDoc as cursor to get the next page.
