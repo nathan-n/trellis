@@ -29,6 +29,7 @@ import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import AddFab from '../shared/AddFab';
+import DocumentPreviewDialog from './DocumentPreviewDialog';
 
 const categoryLabels: Record<string, string> = {
   legal: 'Legal',
@@ -67,6 +68,7 @@ export default function DocumentVaultPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<VaultDocument | null>(null);
+  const [previewTarget, setPreviewTarget] = useState<VaultDocument | null>(null);
 
   useEffect(() => {
     if (!activeCircle) return;
@@ -126,7 +128,29 @@ export default function DocumentVaultPage() {
       ) : (
         <Stack spacing={1.5} sx={{ pb: 10 }}>
           {filtered.map((document) => (
-            <Card key={document.id}>
+            <Card
+              key={document.id}
+              onClick={() => setPreviewTarget(document)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setPreviewTarget(document);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Preview ${document.title}`}
+              sx={{
+                cursor: 'pointer',
+                transition: 'box-shadow 120ms ease, transform 120ms ease',
+                '&:hover': { boxShadow: 3 },
+                '&:focus-visible': {
+                  outline: '2px solid',
+                  outlineColor: 'primary.main',
+                  outlineOffset: 2,
+                },
+              }}
+            >
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5 }}>
                 <Box sx={{ color: 'text.secondary' }}>
                   <FileIcon type={document.fileType} />
@@ -162,11 +186,18 @@ export default function DocumentVaultPage() {
                     href={document.downloadURL}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Download ${document.title}`}
                   >
                     <DownloadIcon fontSize="small" />
                   </IconButton>
                   {((role && hasMinRole(role, CircleRole.ADMIN)) || document.uploadedByUid === userProfile?.uid) && (
-                    <IconButton size="small" color="error" onClick={() => setDeleteTarget(document)}>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(document); }}
+                      aria-label={`Delete ${document.title}`}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   )}
@@ -192,6 +223,11 @@ export default function DocumentVaultPage() {
         label="Upload Document"
         onClick={() => setUploadOpen(true)}
         visible={Boolean(role && hasMinRole(role, CircleRole.FAMILY))}
+      />
+
+      <DocumentPreviewDialog
+        document={previewTarget}
+        onClose={() => setPreviewTarget(null)}
       />
     </Box>
   );
