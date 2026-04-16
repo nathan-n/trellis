@@ -13,9 +13,6 @@ import {
 import FolderIcon from '@mui/icons-material/Folder';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
-import DescriptionIcon from '@mui/icons-material/Description';
-import ImageIcon from '@mui/icons-material/Image';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -30,6 +27,7 @@ import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import AddFab from '../shared/AddFab';
 import DocumentPreviewDialog from './DocumentPreviewDialog';
+import DocumentThumbnail from './DocumentThumbnail';
 
 const categoryLabels: Record<string, string> = {
   legal: 'Legal',
@@ -46,12 +44,6 @@ const categoryColors: Record<string, 'error' | 'primary' | 'success' | 'info' | 
   identification: 'info',
   other: 'default',
 };
-
-function FileIcon({ type }: { type: string }) {
-  if (type.startsWith('image/')) return <ImageIcon />;
-  if (type === 'application/pdf') return <PictureAsPdfIcon />;
-  return <DescriptionIcon />;
-}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -152,9 +144,7 @@ export default function DocumentVaultPage() {
               }}
             >
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5 }}>
-                <Box sx={{ color: 'text.secondary' }}>
-                  <FileIcon type={document.fileType} />
-                </Box>
+                <DocumentThumbnail document={document} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="subtitle2" fontWeight={600} noWrap>
                     {document.title}
