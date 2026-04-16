@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Box, Typography, Button, Stack, Tabs, Tab } from '@mui/material';
+import { Box, Typography, Button, Stack, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
@@ -29,6 +30,7 @@ export default function CareLogPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CareLog | null>(null);
+  const [editTarget, setEditTarget] = useState<CareLog | null>(null);
 
   const dateStr = date.format('YYYY-MM-DD');
 
@@ -105,12 +107,14 @@ export default function CareLogPage() {
           )}
 
           {loading ? <LoadingSpinner /> : (
-            <CareLogTimeline logs={logs} onDelete={setDeleteTarget} />
+            <CareLogTimeline logs={logs} onDelete={setDeleteTarget} onEdit={setEditTarget} />
           )}
         </>
       )}
 
-      {viewMode === 'history' && <CareLogHistoryView onDeleteRequest={setDeleteTarget} />}
+      {viewMode === 'history' && (
+        <CareLogHistoryView onDeleteRequest={setDeleteTarget} onEditRequest={setEditTarget} />
+      )}
 
       {viewMode === 'trends' && (
         <Suspense fallback={<LoadingSpinner />}>
@@ -136,6 +140,33 @@ export default function CareLogPage() {
         onCancel={() => setDeleteTarget(null)}
         destructive
       />
+
+      {/* Edit dialog */}
+      <Dialog
+        open={Boolean(editTarget)}
+        onClose={() => setEditTarget(null)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Edit Care Log Entry
+          <IconButton size="small" onClick={() => setEditTarget(null)}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {editTarget && (
+            <CareLogEntryForm
+              date={editTarget.logDate}
+              editLog={editTarget}
+              onCreated={() => setEditTarget(null)}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditTarget(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -21,14 +21,16 @@ import { Mood, SleepQuality, MealAmount } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { createCareLog, fetchCareLogVocabulary } from '../../services/careLogService';
-import type { MealEntry, HydrationEntry } from '../../types';
+import { createCareLog, updateCareLog, fetchCareLogVocabulary } from '../../services/careLogService';
+import type { MealEntry, HydrationEntry, CareLog } from '../../types';
 import dayjs from 'dayjs';
 import ChipInput from '../shared/ChipInput';
 
 interface CareLogEntryFormProps {
   date: string;
   onCreated: () => void;
+  /** When provided, form runs in edit mode and updates the given log instead of creating a new one. */
+  editLog?: CareLog;
 }
 
 const moodLabels: Record<string, string> = {
@@ -36,24 +38,29 @@ const moodLabels: Record<string, string> = {
   happy: 'Happy', withdrawn: 'Withdrawn', other: 'Other',
 };
 
-export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormProps) {
+export default function CareLogEntryForm({ date, onCreated, editLog }: CareLogEntryFormProps) {
   const { userProfile } = useAuth();
   const { activeCircle } = useCircle();
   const { showMessage } = useSnackbar();
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(editLog);
 
-  const [meals, setMeals] = useState<MealEntry[]>([]);
-  const [hydration, setHydration] = useState<HydrationEntry[]>([]);
-  const [mood, setMood] = useState<string>(Mood.CALM);
-  const [moodNotes, setMoodNotes] = useState('');
-  const [sleepQuality, setSleepQuality] = useState<string>(SleepQuality.FAIR);
-  const [sleepHours, setSleepHours] = useState('');
-  const [sleepNotes, setSleepNotes] = useState('');
-  const [behaviors, setBehaviors] = useState<string[]>([]);
-  const [activities, setActivities] = useState<string[]>([]);
+  // Seed state from editLog once at mount. No re-seeding on prop change to
+  // avoid clobbering in-progress user edits.
+  const [meals, setMeals] = useState<MealEntry[]>(() => editLog?.meals ?? []);
+  const [hydration, setHydration] = useState<HydrationEntry[]>(() => editLog?.hydration ?? []);
+  const [mood, setMood] = useState<string>(() => editLog?.mood ?? Mood.CALM);
+  const [moodNotes, setMoodNotes] = useState(() => editLog?.moodNotes ?? '');
+  const [sleepQuality, setSleepQuality] = useState<string>(() => editLog?.sleep?.quality ?? SleepQuality.FAIR);
+  const [sleepHours, setSleepHours] = useState(() => editLog?.sleep?.hoursSlept != null ? String(editLog.sleep.hoursSlept) : '');
+  const [sleepNotes, setSleepNotes] = useState(() => editLog?.sleep?.notes ?? '');
+  const [behaviors, setBehaviors] = useState<string[]>(() => editLog?.behaviors ?? []);
+  const [activities, setActivities] = useState<string[]>(() => editLog?.activities ?? []);
   const [behaviorSuggestions, setBehaviorSuggestions] = useState<string[]>([]);
   const [activitySuggestions, setActivitySuggestions] = useState<string[]>([]);
-  const [generalNotes, setGeneralNotes] = useState('');
+  const [generalNotes, setGeneralNotes] = useState(() => editLog?.generalNotes ?? '');
+  const [isShiftHandoff, setIsShiftHandoff] = useState(() => editLog?.isShiftHandoff ?? false);
+  const [shiftSummary, setShiftSummary] = useState(() => editLog?.shiftSummary ?? '');
 
   // Load the circle's recent vocabulary (last 90d) once on mount.
   useEffect(() => {
@@ -68,8 +75,6 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
       .catch(() => { /* suggestions are a nice-to-have, don't block the form */ });
     return () => { cancelled = true; };
   }, [activeCircle?.id]);
-  const [isShiftHandoff, setIsShiftHandoff] = useState(false);
-  const [shiftSummary, setShiftSummary] = useState('');
 
   const addMeal = () => setMeals([...meals, { time: dayjs().format('HH:mm'), description: '', amount: MealAmount.FULL }]);
   const addHydration = () => setHydration([...hydration, { time: dayjs().format('HH:mm'), amount: '', type: 'water' }]);
@@ -78,29 +83,36 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
     if (!activeCircle || !userProfile) return;
 
     setSaving(true);
+    const payload = {
+      logDate: isEdit && editLog ? editLog.logDate : date,
+      meals,
+      hydration,
+      mood: mood as typeof Mood[keyof typeof Mood],
+      moodNotes: moodNotes.trim() || null,
+      sleep: {
+        quality: sleepQuality as typeof SleepQuality[keyof typeof SleepQuality],
+        hoursSlept: sleepHours ? parseFloat(sleepHours) : null,
+        notes: sleepNotes.trim() || null,
+      },
+      behaviors,
+      activities,
+      generalNotes: generalNotes.trim() || null,
+      isShiftHandoff,
+      shiftSummary: isShiftHandoff ? shiftSummary.trim() || null : null,
+    };
+
     try {
-      await createCareLog(activeCircle.id, userProfile.uid, userProfile.displayName, {
-        logDate: date,
-        meals,
-        hydration,
-        mood: mood as typeof Mood[keyof typeof Mood],
-        moodNotes: moodNotes.trim() || null,
-        sleep: {
-          quality: sleepQuality as typeof SleepQuality[keyof typeof SleepQuality],
-          hoursSlept: sleepHours ? parseFloat(sleepHours) : null,
-          notes: sleepNotes.trim() || null,
-        },
-        behaviors,
-        activities,
-        generalNotes: generalNotes.trim() || null,
-        isShiftHandoff,
-        shiftSummary: isShiftHandoff ? shiftSummary.trim() || null : null,
-      });
-      showMessage('Care log entry saved', 'success');
+      if (isEdit && editLog) {
+        await updateCareLog(activeCircle.id, editLog.id, payload);
+        showMessage('Care log entry updated', 'success');
+      } else {
+        await createCareLog(activeCircle.id, userProfile.uid, userProfile.displayName, payload);
+        showMessage('Care log entry saved', 'success');
+      }
       onCreated();
     } catch (err) {
       console.error('Care log error:', err);
-      showMessage('Failed to save entry', 'error');
+      showMessage(isEdit ? 'Failed to update entry' : 'Failed to save entry', 'error');
     } finally {
       setSaving(false);
     }
@@ -108,7 +120,9 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
 
   return (
     <Stack spacing={2.5}>
-      <Typography variant="subtitle1" fontWeight={600}>New Care Log Entry</Typography>
+      <Typography variant="subtitle1" fontWeight={600}>
+        {isEdit ? 'Edit Care Log Entry' : 'New Care Log Entry'}
+      </Typography>
 
       {/* Mood */}
       <FormControl fullWidth size="small">
@@ -194,7 +208,7 @@ export default function CareLogEntryForm({ date, onCreated }: CareLogEntryFormPr
       )}
 
       <Button variant="contained" onClick={handleSubmit} disabled={saving} fullWidth>
-        {saving ? 'Saving...' : 'Save Entry'}
+        {saving ? (isEdit ? 'Saving changes...' : 'Saving...') : (isEdit ? 'Save changes' : 'Save Entry')}
       </Button>
     </Stack>
   );
