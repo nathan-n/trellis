@@ -1,13 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import {
   Box, Typography, Button, Card, CardContent, Stack, Chip,
-  IconButton, ToggleButtonGroup, ToggleButton,
+  IconButton, ToggleButtonGroup, ToggleButton, Tabs, Tab,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import DownloadIcon from '@mui/icons-material/Download';
 import dayjs from 'dayjs';
+
+// Lazy-load Summary tab so recharts only loads when requested
+const ExpenseSummaryTab = lazy(() => import('./ExpenseSummaryTab'));
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -39,6 +42,7 @@ export default function ExpenseListPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
   const [monthFilter, setMonthFilter] = useState(dayjs().format('YYYY-MM'));
+  const [viewMode, setViewMode] = useState<'list' | 'summary'>('list');
 
   useEffect(() => {
     if (!activeCircle) return;
@@ -86,6 +90,21 @@ export default function ExpenseListPage() {
         )}
       </Box>
 
+      <Tabs
+        value={viewMode}
+        onChange={(_, v) => setViewMode(v as 'list' | 'summary')}
+        sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+      >
+        <Tab value="list" label="List" />
+        <Tab value="summary" label="Summary" />
+      </Tabs>
+
+      {viewMode === 'summary' ? (
+        <Suspense fallback={<LoadingSpinner />}>
+          <ExpenseSummaryTab expenses={expenses} />
+        </Suspense>
+      ) : (
+      <>
       <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <ToggleButtonGroup value={monthFilter} exclusive onChange={(_, v) => v && setMonthFilter(v)} size="small">
           <ToggleButton value="all">All</ToggleButton>
@@ -104,7 +123,8 @@ export default function ExpenseListPage() {
           actionLabel={expenses.length === 0 ? 'Add Expense' : undefined}
           onAction={expenses.length === 0 ? () => setCreateOpen(true) : undefined}
         />
-      ) : (
+      ) : null}
+      {filtered.length > 0 && (
         <Stack spacing={1}>
           {filtered.map((expense) => (
             <Card key={expense.id} variant="outlined">
@@ -136,6 +156,8 @@ export default function ExpenseListPage() {
             </Card>
           ))}
         </Stack>
+      )}
+      </>
       )}
 
       <ExpenseCreateDialog open={createOpen} onClose={() => setCreateOpen(false)} />
