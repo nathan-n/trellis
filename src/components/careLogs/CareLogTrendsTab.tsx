@@ -54,11 +54,34 @@ function goodDaysRate(logs: CareLog[]): number {
 }
 
 function sleepStats(logs: CareLog[]): { avgHours: number; dominantQuality: string | null } {
-  const hoursVals = logs.map((l) => l.sleep?.hoursSlept).filter((h): h is number => typeof h === 'number' && h > 0);
-  const avgHours = hoursVals.length ? hoursVals.reduce((a, b) => a + b, 0) / hoursVals.length : 0;
-  const qualityCount = new Map<string, number>();
+  // Aggregate per-day first so over-logged days don't bias the average.
+  // Per-day sleep: mean of all non-null hoursSlept values on that day.
+  const hoursByDay = new Map<string, number[]>();
+  const qualityByDay = new Map<string, string[]>();
   for (const l of logs) {
-    if (l.sleep?.quality) qualityCount.set(l.sleep.quality, (qualityCount.get(l.sleep.quality) ?? 0) + 1);
+    const h = l.sleep?.hoursSlept;
+    if (typeof h === 'number' && h > 0) {
+      const arr = hoursByDay.get(l.logDate) ?? [];
+      arr.push(h);
+      hoursByDay.set(l.logDate, arr);
+    }
+    if (l.sleep?.quality) {
+      const arr = qualityByDay.get(l.logDate) ?? [];
+      arr.push(l.sleep.quality);
+      qualityByDay.set(l.logDate, arr);
+    }
+  }
+  const dayAverages: number[] = [];
+  for (const [, hrs] of hoursByDay) {
+    dayAverages.push(hrs.reduce((a, b) => a + b, 0) / hrs.length);
+  }
+  const avgHours = dayAverages.length ? dayAverages.reduce((a, b) => a + b, 0) / dayAverages.length : 0;
+
+  // Dominant quality per day = first recorded; then tally across days.
+  const qualityCount = new Map<string, number>();
+  for (const [, qs] of qualityByDay) {
+    const q = qs[0];
+    if (q) qualityCount.set(q, (qualityCount.get(q) ?? 0) + 1);
   }
   let dominant: string | null = null;
   let max = 0;
@@ -80,19 +103,33 @@ function mealCompletion(logs: CareLog[]): number {
   return safeDivide(completed, total);
 }
 
-function topBehavior(logs: CareLog[]): { name: string | null; count: number } {
-  const counts = new Map<string, number>();
+// Count days where each behavior appeared (not total mentions). A behavior
+// logged twice on the same day counts once. Better reflects clinical pattern
+// ("wandering happened on 8 days") vs. "wandering was mentioned 12 times."
+function topBehavior(logs: CareLog[]): { name: string | null; dayCount: number } {
+  const daysByBehavior = new Map<string, Set<string>>();
   for (const l of logs) {
     for (const b of l.behaviors ?? []) {
-      counts.set(b, (counts.get(b) ?? 0) + 1);
+      const days = daysByBehavior.get(b) ?? new Set<string>();
+      days.add(l.logDate);
+      daysByBehavior.set(b, days);
     }
   }
   let name: string | null = null;
   let max = 0;
-  for (const [k, v] of counts) {
-    if (v > max) { max = v; name = k; }
+  for (const [k, days] of daysByBehavior) {
+    if (days.size > max) { max = days.size; name = k; }
   }
-  return { name, count: max };
+  return { name, dayCount: max };
+}
+
+// Day-count for a specific behavior in a given log set — used for delta comparisons.
+function behaviorDayCount(logs: CareLog[], behaviorName: string): number {
+  const days = new Set<string>();
+  for (const l of logs) {
+    if (l.behaviors?.includes(behaviorName)) days.add(l.logDate);
+  }
+  return days.size;
 }
 
 // For delta comparisons: same-sized prior window
@@ -116,18 +153,40 @@ interface WeeklyMoodDatum {
   other: number;
 }
 
+// Worst-mood-of-day severity scale — matches MoodCalendarHeatmap ordering so the
+// bar chart and heatmap tell the same story.
+const moodSeverityForWeekly: Record<Mood, number> = {
+  agitated: 5,
+  confused: 4,
+  withdrawn: 3,
+  other: 2,
+  calm: 1,
+  happy: 1,
+};
+
 function buildWeeklyMoodData(logs: CareLog[], startDate: dayjs.Dayjs, endDate: dayjs.Dayjs): WeeklyMoodDatum[] {
-  // Start each bucket on Monday aligned with startDate
+  // Collapse each day to its dominant (worst) mood first — one data point per day.
+  // This avoids over-counting from prolific loggers and matches per-day semantics
+  // used elsewhere (Good Days, Heatmap, CircleHealthCard).
+  const dayDominant = new Map<string, Mood>();
+  for (const l of logs) {
+    const prev = dayDominant.get(l.logDate);
+    if (!prev || moodSeverityForWeekly[l.mood] > moodSeverityForWeekly[prev]) {
+      dayDominant.set(l.logDate, l.mood);
+    }
+  }
+
   const anchor = startDate.startOf('week').add(1, 'day'); // dayjs default week starts Sun; use Mon
   const weeks: WeeklyMoodDatum[] = [];
   for (let w = anchor; w.isBefore(endDate) || w.isSame(endDate, 'day'); w = w.add(1, 'week')) {
     const weekEnd = w.add(6, 'day');
-    const wl = logs.filter((l) => {
-      const d = dayjs(l.logDate);
-      return (d.isSame(w, 'day') || d.isAfter(w, 'day')) && (d.isSame(weekEnd, 'day') || d.isBefore(weekEnd, 'day'));
-    });
     const counts: Record<Mood, number> = { calm: 0, happy: 0, confused: 0, withdrawn: 0, agitated: 0, other: 0 };
-    for (const l of wl) counts[l.mood] += 1;
+    for (const [dateStr, mood] of dayDominant) {
+      const d = dayjs(dateStr);
+      if ((d.isSame(w, 'day') || d.isAfter(w, 'day')) && (d.isSame(weekEnd, 'day') || d.isBefore(weekEnd, 'day'))) {
+        counts[mood] += 1;
+      }
+    }
     weeks.push({
       weekLabel: w.format('MMM D'),
       weekStart: w.format('YYYY-MM-DD'),
@@ -250,9 +309,7 @@ export default function CareLogTrendsTab({ onJumpToDay }: Props) {
     const curMeals = mealCompletion(logs);
     const priorMeals = mealCompletion(priorLogs);
     const curBehavior = topBehavior(logs);
-    const priorBehaviorCount = curBehavior.name
-      ? priorLogs.reduce((acc, l) => acc + (l.behaviors?.filter((b) => b === curBehavior.name).length ?? 0), 0)
-      : 0;
+    const priorBehaviorDays = curBehavior.name ? behaviorDayCount(priorLogs, curBehavior.name) : 0;
     return {
       goodDays: { value: curGood, delta: percentDelta(curGood, priorGood) },
       sleep: {
@@ -263,8 +320,8 @@ export default function CareLogTrendsTab({ onJumpToDay }: Props) {
       meals: { value: curMeals, delta: percentDelta(curMeals, priorMeals) },
       behavior: {
         name: curBehavior.name,
-        count: curBehavior.count,
-        delta: percentDelta(curBehavior.count, priorBehaviorCount),
+        dayCount: curBehavior.dayCount,
+        delta: percentDelta(curBehavior.dayCount, priorBehaviorDays),
       },
     };
   }, [logs, priorLogs]);
@@ -322,7 +379,9 @@ export default function CareLogTrendsTab({ onJumpToDay }: Props) {
               <MetricCard
                 label="Top Behavior"
                 value={metrics.behavior.name ?? '—'}
-                sublabel={metrics.behavior.count > 0 ? `Logged ${metrics.behavior.count}×` : 'None logged'}
+                sublabel={metrics.behavior.dayCount > 0
+                  ? `On ${metrics.behavior.dayCount} day${metrics.behavior.dayCount === 1 ? '' : 's'}`
+                  : 'None logged'}
                 deltaPct={metrics.behavior.delta}
                 inverted
                 accentColor={moodColors.agitated}
@@ -333,7 +392,10 @@ export default function CareLogTrendsTab({ onJumpToDay }: Props) {
           {/* Mood distribution stacked bar */}
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Mood distribution by week</Typography>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>Mood distribution by week</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5, fontStyle: 'italic' }}>
+                One bar segment per day — days with multiple entries use the day's worst mood.
+              </Typography>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={weeklyMood}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />

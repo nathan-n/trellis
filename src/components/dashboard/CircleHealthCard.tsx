@@ -57,8 +57,24 @@ export default function CircleHealthCard() {
         days.push(minWellness);
       }
     }
-    const hours = logs.map((l) => l.sleep?.hoursSlept).filter((h): h is number => typeof h === 'number' && h > 0);
-    const avg = hours.length ? hours.reduce((a, b) => a + b, 0) / hours.length : 0;
+    // Aggregate sleep hours per-day first, then average across days.
+    // Avoids bias from days with multiple entries where each reports sleep.
+    const hoursByDay = new Map<string, number[]>();
+    for (const l of logs) {
+      const h = l.sleep?.hoursSlept;
+      if (typeof h === 'number' && h > 0) {
+        const arr = hoursByDay.get(l.logDate) ?? [];
+        arr.push(h);
+        hoursByDay.set(l.logDate, arr);
+      }
+    }
+    const perDayAverages: number[] = [];
+    for (const [, hrs] of hoursByDay) {
+      perDayAverages.push(hrs.reduce((a, b) => a + b, 0) / hrs.length);
+    }
+    const avg = perDayAverages.length
+      ? perDayAverages.reduce((a, b) => a + b, 0) / perDayAverages.length
+      : 0;
     const moodCount = new Map<Mood, number>();
     for (const l of logs) {
       moodCount.set(l.mood as Mood, (moodCount.get(l.mood as Mood) ?? 0) + 1);
