@@ -163,7 +163,7 @@ describe('tasks', () => {
 
     it('denies non-member from creating', async () => {
       const db = getDb(OUTSIDER_UID);
-      await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskData));
+      await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'tasks'), taskDataFor(OUTSIDER_UID)));
     });
   });
 
@@ -307,7 +307,7 @@ describe('audit log', () => {
   });
 });
 
-// ─── Care Logs (author-only update) ──────────────────────────────────────────
+// ─── Care Logs (admin-or-author update + delete) ─────────────────────────────
 
 describe('care logs', () => {
   it('allows professional to create', async () => {
@@ -324,14 +324,135 @@ describe('care logs', () => {
     }));
   });
 
-  it('allows only author to update', async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'careLogs', 'cl1'), {
-        authorUid: PROFESSIONAL_UID, logDate: '2024-01-01', mood: 'calm',
+  describe('update (admin OR author)', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'careLogs', 'cl1'), {
+          authorUid: PROFESSIONAL_UID, logDate: '2024-01-01', mood: 'calm',
+        });
       });
     });
-    await assertSucceeds(updateDoc(doc(getDb(PROFESSIONAL_UID), 'circles', CIRCLE_ID, 'careLogs', 'cl1'), { mood: 'happy' }));
-    await assertFails(updateDoc(doc(getDb(ADMIN_UID), 'circles', CIRCLE_ID, 'careLogs', 'cl1'), { mood: 'agitated' }));
+
+    it('allows author to update their own', async () => {
+      const db = getDb(PROFESSIONAL_UID);
+      await assertSucceeds(updateDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1'), { mood: 'happy' }));
+    });
+
+    it('allows admin to update any entry', async () => {
+      const db = getDb(ADMIN_UID);
+      await assertSucceeds(updateDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1'), { mood: 'agitated' }));
+    });
+
+    it('denies a different non-admin member from updating', async () => {
+      const db = getDb(FAMILY_UID); // not admin, not author
+      await assertFails(updateDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1'), { mood: 'agitated' }));
+    });
+
+    it('denies non-member from updating', async () => {
+      const db = getDb(OUTSIDER_UID);
+      await assertFails(updateDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1'), { mood: 'agitated' }));
+    });
+  });
+
+  describe('delete (admin OR author)', () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'careLogs', 'cl1'), {
+          authorUid: PROFESSIONAL_UID, logDate: '2024-01-01', mood: 'calm',
+        });
+      });
+    });
+
+    it('allows author to delete their own', async () => {
+      const db = getDb(PROFESSIONAL_UID);
+      await assertSucceeds(deleteDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1')));
+    });
+
+    it('allows admin to delete any entry', async () => {
+      const db = getDb(ADMIN_UID);
+      await assertSucceeds(deleteDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1')));
+    });
+
+    it('denies a different non-admin member from deleting', async () => {
+      const db = getDb(FAMILY_UID);
+      await assertFails(deleteDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1')));
+    });
+
+    it('denies readonly from deleting', async () => {
+      const db = getDb(READONLY_UID);
+      await assertFails(deleteDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1')));
+    });
+
+    it('denies non-member from deleting', async () => {
+      const db = getDb(OUTSIDER_UID);
+      await assertFails(deleteDoc(doc(db, 'circles', CIRCLE_ID, 'careLogs', 'cl1')));
+    });
+  });
+});
+
+// ─── Circle soft-delete ──────────────────────────────────────────────────────
+
+describe('circle soft-delete', () => {
+  it('allows admin to mark circle deletedAt', async () => {
+    const db = getDb(ADMIN_UID);
+    await assertSucceeds(
+      updateDoc(doc(db, 'circles', CIRCLE_ID), { deletedAt: new Date(), deletedByUid: ADMIN_UID })
+    );
+  });
+
+  it('denies family from marking circle deletedAt', async () => {
+    const db = getDb(FAMILY_UID);
+    await assertFails(
+      updateDoc(doc(db, 'circles', CIRCLE_ID), { deletedAt: new Date(), deletedByUid: FAMILY_UID })
+    );
+  });
+
+  it('denies professional from marking circle deletedAt', async () => {
+    const db = getDb(PROFESSIONAL_UID);
+    await assertFails(
+      updateDoc(doc(db, 'circles', CIRCLE_ID), { deletedAt: new Date(), deletedByUid: PROFESSIONAL_UID })
+    );
+  });
+
+  it('denies readonly from marking circle deletedAt', async () => {
+    const db = getDb(READONLY_UID);
+    await assertFails(
+      updateDoc(doc(db, 'circles', CIRCLE_ID), { deletedAt: new Date(), deletedByUid: READONLY_UID })
+    );
+  });
+
+  it('hides soft-deleted circle from non-admin members (member read denied)', async () => {
+    // Admin marks the circle as deleted
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID), {
+        deletedAt: new Date(),
+        deletedByUid: ADMIN_UID,
+      });
+    });
+    // Family member can no longer read
+    const db = getDb(FAMILY_UID);
+    await assertFails(getDoc(doc(db, 'circles', CIRCLE_ID)));
+  });
+
+  it('allows admin to read soft-deleted circle (for eventual restore)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID), {
+        deletedAt: new Date(),
+        deletedByUid: ADMIN_UID,
+      });
+    });
+    const db = getDb(ADMIN_UID);
+    await assertSucceeds(getDoc(doc(db, 'circles', CIRCLE_ID)));
+  });
+
+  it('non-soft-deleted circle still readable by members (regression check)', async () => {
+    const db = getDb(FAMILY_UID);
+    await assertSucceeds(getDoc(doc(db, 'circles', CIRCLE_ID)));
+  });
+
+  it('denies non-member from reading regardless of deletedAt state', async () => {
+    const db = getDb(OUTSIDER_UID);
+    await assertFails(getDoc(doc(db, 'circles', CIRCLE_ID)));
   });
 });
 
@@ -350,12 +471,47 @@ describe('visits', () => {
     await assertFails(addDoc(collection(db, 'circles', CIRCLE_ID, 'visits'), visitData));
   });
 
-  it('allows only admin to delete', async () => {
-    await testEnv.withSecurityRulesDisabled(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'visits', 'v1'), visitData);
+  describe('delete (admin OR caregiver OR creator)', () => {
+    it('allows admin to delete any visit', async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'visits', 'v1'), visitData);
+      });
+      await assertSucceeds(deleteDoc(doc(getDb(ADMIN_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
     });
-    await assertFails(deleteDoc(doc(getDb(PROFESSIONAL_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
-    await assertSucceeds(deleteDoc(doc(getDb(ADMIN_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
+
+    it('allows the caregiver on the visit to delete it', async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'visits', 'v1'), visitData);
+      });
+      await assertSucceeds(deleteDoc(doc(getDb(PROFESSIONAL_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
+    });
+
+    it('allows the visit creator (createdByUid) to delete it', async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'visits', 'v1'), {
+          ...visitData,
+          createdByUid: FAMILY_UID, // creator is different from caregiver
+        });
+      });
+      await assertSucceeds(deleteDoc(doc(getDb(FAMILY_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
+    });
+
+    it('denies a non-admin member who is neither caregiver nor creator', async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'visits', 'v1'), {
+          ...visitData,
+          createdByUid: ADMIN_UID, // creator = admin, so family is uninvolved
+        });
+      });
+      await assertFails(deleteDoc(doc(getDb(FAMILY_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
+    });
+
+    it('denies non-member regardless of role claims', async () => {
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        await setDoc(doc(ctx.firestore(), 'circles', CIRCLE_ID, 'visits', 'v1'), visitData);
+      });
+      await assertFails(deleteDoc(doc(getDb(OUTSIDER_UID), 'circles', CIRCLE_ID, 'visits', 'v1')));
+    });
   });
 });
 
