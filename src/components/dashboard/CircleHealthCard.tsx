@@ -9,17 +9,7 @@ import type { CareLog } from '../../types';
 import Sparkline from '../shared/Sparkline';
 import { moodLabels } from '../analytics/MoodCalendarHeatmap';
 import type { Mood } from '../../constants';
-
-// Map moods to a 1-5 wellness scale for the Sparkline (its default y range).
-// Higher = better day. Picks the worst mood of the day for the daily score.
-const moodWellness: Record<Mood, number> = {
-  happy: 5,
-  calm: 4,
-  other: 3,
-  withdrawn: 3,
-  confused: 2,
-  agitated: 1,
-};
+import { dailyWorstWellness, perDayAverageSleep } from '../../utils/careLogAggregates';
 
 export default function CircleHealthCard() {
   const { activeCircle } = useCircle();
@@ -38,43 +28,11 @@ export default function CircleHealthCard() {
     return () => { cancelled = true; };
   }, [activeCircle?.id]);
 
-  // Group by day, compute worst-mood wellness per day + avg sleep
+  // Per-day worst-mood wellness series (last 7 days) + per-day avg sleep.
+  // See src/utils/careLogAggregates.ts for multi-entry-per-day handling.
   const { wellnessSeries, avgSleep, dominantMood, logCount } = (() => {
-    const byDay = new Map<string, CareLog[]>();
-    for (const l of logs) {
-      const arr = byDay.get(l.logDate) ?? [];
-      arr.push(l);
-      byDay.set(l.logDate, arr);
-    }
-    const days: number[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const key = dayjs().subtract(i, 'day').format('YYYY-MM-DD');
-      const dayLogs = byDay.get(key) ?? [];
-      if (dayLogs.length === 0) {
-        days.push(NaN);
-      } else {
-        const minWellness = Math.min(...dayLogs.map((l) => moodWellness[l.mood as Mood] ?? 3));
-        days.push(minWellness);
-      }
-    }
-    // Aggregate sleep hours per-day first, then average across days.
-    // Avoids bias from days with multiple entries where each reports sleep.
-    const hoursByDay = new Map<string, number[]>();
-    for (const l of logs) {
-      const h = l.sleep?.hoursSlept;
-      if (typeof h === 'number' && h > 0) {
-        const arr = hoursByDay.get(l.logDate) ?? [];
-        arr.push(h);
-        hoursByDay.set(l.logDate, arr);
-      }
-    }
-    const perDayAverages: number[] = [];
-    for (const [, hrs] of hoursByDay) {
-      perDayAverages.push(hrs.reduce((a, b) => a + b, 0) / hrs.length);
-    }
-    const avg = perDayAverages.length
-      ? perDayAverages.reduce((a, b) => a + b, 0) / perDayAverages.length
-      : 0;
+    const days = dailyWorstWellness(logs, 7);
+    const avg = perDayAverageSleep(logs);
     const moodCount = new Map<Mood, number>();
     for (const l of logs) {
       moodCount.set(l.mood as Mood, (moodCount.get(l.mood as Mood) ?? 0) + 1);
