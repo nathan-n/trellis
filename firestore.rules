@@ -92,7 +92,9 @@ service cloud.firestore {
         allow create: if request.auth != null && hasMinRole(circleId, 'professional')
           && request.resource.data.createdByUid == request.auth.uid;
         allow update: if request.auth != null && hasMinRole(circleId, 'professional');
-        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.createdByUid
+        );
 
         match /comments/{commentId} {
           allow read: if request.auth != null && isCircleMember(circleId) && (
@@ -118,7 +120,9 @@ service cloud.firestore {
             || (request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)/tasks/$(taskId)).data.visibleToUids)
           );
           allow create: if request.auth != null && hasMinRole(circleId, 'professional');
-          allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+          allow delete: if request.auth != null && (
+            hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.uploadedByUid
+          );
         }
 
         // Doctor questions
@@ -141,7 +145,11 @@ service cloud.firestore {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && hasMinRole(circleId, 'professional');
         allow update: if request.auth != null && hasMinRole(circleId, 'professional');
-        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin')
+          || request.auth.uid == resource.data.caregiverUid
+          || ('createdByUid' in resource.data && request.auth.uid == resource.data.createdByUid)
+        );
       }
 
       // Medications
@@ -149,7 +157,9 @@ service cloud.firestore {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && hasMinRole(circleId, 'family');
         allow update: if request.auth != null && hasMinRole(circleId, 'family');
-        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.createdByUid
+        );
 
         match /administrationLog/{logId} {
           allow read: if request.auth != null && isCircleMember(circleId);
@@ -175,7 +185,9 @@ service cloud.firestore {
       match /documents/{docId} {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && hasMinRole(circleId, 'family');
-        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.uploadedByUid
+        );
       }
 
       // Expenses
@@ -183,7 +195,9 @@ service cloud.firestore {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && hasMinRole(circleId, 'family');
         allow update: if request.auth != null && hasMinRole(circleId, 'family');
-        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.paidByUid
+        );
       }
 
       // Caregiver Resources
@@ -191,7 +205,9 @@ service cloud.firestore {
         allow read: if request.auth != null && isCircleMember(circleId);
         allow create: if request.auth != null && hasMinRole(circleId, 'family');
         allow update: if request.auth != null && hasMinRole(circleId, 'family');
-        allow delete: if request.auth != null && hasMinRole(circleId, 'admin');
+        allow delete: if request.auth != null && (
+          hasMinRole(circleId, 'admin') || request.auth.uid == resource.data.addedByUid
+        );
       }
 
       // Wellbeing Check-ins (private to author, admin can view for sparklines)

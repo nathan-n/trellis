@@ -18,7 +18,8 @@ import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { subscribeVisits, deleteVisit, createVisit, toggleVisitStatus } from '../../services/visitService';
 import { useAuth } from '../../contexts/AuthContext';
-import { VisitStatus } from '../../constants';
+import { VisitStatus, CircleRole } from '../../constants';
+import { hasMinRole } from '../../utils/roleUtils';
 import { formatTime } from '../../utils/dateUtils';
 import type { Visit } from '../../types';
 import VisitCreateEditDialog from './VisitCreateEditDialog';
@@ -49,7 +50,7 @@ interface VisitEvent extends Event {
 
 export default function VisitCalendarPage() {
   const { userProfile } = useAuth();
-  const { activeCircle } = useCircle();
+  const { activeCircle, role } = useCircle();
   const { showMessage } = useSnackbar();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -358,11 +359,17 @@ export default function VisitCalendarPage() {
                 {normalizeStatus(selectedVisitForMenu.status) === 'confirmed' ? 'Mark Tentative' : 'Mark Confirmed'}
               </ListItemText>
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={() => { setDeleteTarget(selectedVisitForMenu); closeMenu(); }} sx={{ color: 'error.main' }}>
-              <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
-              <ListItemText>Delete</ListItemText>
-            </MenuItem>
+            {((role && hasMinRole(role, CircleRole.ADMIN))
+              || selectedVisitForMenu.caregiverUid === userProfile?.uid
+              || selectedVisitForMenu.createdByUid === userProfile?.uid) && (
+              <>
+                <Divider />
+                <MenuItem onClick={() => { setDeleteTarget(selectedVisitForMenu); closeMenu(); }} sx={{ color: 'error.main' }}>
+                  <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+                  <ListItemText>Delete</ListItemText>
+                </MenuItem>
+              </>
+            )}
           </MenuList>
         )}
       </Popover>

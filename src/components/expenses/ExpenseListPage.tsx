@@ -127,7 +127,7 @@ export default function ExpenseListPage() {
                     <DownloadIcon fontSize="small" />
                   </IconButton>
                 )}
-                {role && hasMinRole(role, CircleRole.ADMIN) && (
+                {((role && hasMinRole(role, CircleRole.ADMIN)) || expense.paidByUid === userProfile?.uid) && (
                   <IconButton size="small" color="error" onClick={() => setDeleteTarget(expense)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>

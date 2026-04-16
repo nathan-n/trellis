@@ -173,7 +173,7 @@ export default function MedicationListPage() {
                       <CheckCircleOutlineIcon fontSize="small" />
                     </IconButton>
                   )}
-                  {role && hasMinRole(role, CircleRole.ADMIN) && (
+                  {((role && hasMinRole(role, CircleRole.ADMIN)) || med.createdByUid === userProfile?.uid) && (
                     <IconButton size="small" color="error" onClick={() => setDeleteTarget(med)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>

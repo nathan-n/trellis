@@ -159,7 +159,7 @@ export default function MedicationDetailPage() {
 
   const markDirty = () => { setDirty(true); dirtyRef.current = true; };
   const canEdit = role && hasMinRole(role, CircleRole.FAMILY);
-  const canDelete = role && hasMinRole(role, CircleRole.ADMIN);
+  const canDelete = (role && hasMinRole(role, CircleRole.ADMIN)) || med?.createdByUid === userProfile?.uid;
   const isRefillSoon = med?.refillDate && dayjs(med.refillDate.toDate()).diff(dayjs(), 'day') <= 7;
 
   if (loading) return <LoadingSpinner />;

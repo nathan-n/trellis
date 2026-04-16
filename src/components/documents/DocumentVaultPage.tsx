@@ -171,7 +171,7 @@ export default function DocumentVaultPage() {
                   >
                     <DownloadIcon fontSize="small" />
                   </IconButton>
-                  {role && hasMinRole(role, CircleRole.ADMIN) && (
+                  {((role && hasMinRole(role, CircleRole.ADMIN)) || document.uploadedByUid === userProfile?.uid) && (
                     <IconButton size="small" color="error" onClick={() => setDeleteTarget(document)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>

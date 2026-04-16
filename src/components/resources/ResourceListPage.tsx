@@ -223,7 +223,7 @@ export default function ResourceListPage() {
                           <EditIcon fontSize="small" />
                         </IconButton>
                       )}
-                      {canDelete && (
+                      {(canDelete || resource.addedByUid === userProfile?.uid) && (
                         <IconButton size="small" color="error" onClick={() => setDeleteTarget(resource)}>
                           <DeleteIcon fontSize="small" />
                         </IconButton>

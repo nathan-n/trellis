@@ -155,7 +155,7 @@ export default function TaskDetailPage() {
 
   const assignees = members.filter((m) => task.assigneeUids?.includes(m.uid));
   const canEdit = role && hasMinRole(role, CircleRole.PROFESSIONAL);
-  const canDelete = role && hasMinRole(role, CircleRole.ADMIN);
+  const canDelete = (role && hasMinRole(role, CircleRole.ADMIN)) || task.createdByUid === userProfile?.uid;
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto' }}>

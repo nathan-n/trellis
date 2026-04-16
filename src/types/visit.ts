@@ -12,6 +12,7 @@ export interface Visit {
   isAllDay?: boolean;
   notes: string | null;
   status: VisitStatus | string; // string for backward compat with old statuses
+  createdByUid?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

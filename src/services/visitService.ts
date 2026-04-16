@@ -44,6 +44,7 @@ export async function createVisit(
     endTime: Timestamp.fromDate(data.endTime),
     startDateYYYYMMDD: toYYYYMMDD(data.startTime),
     endDateYYYYMMDD: toYYYYMMDD(data.endTime),
+    createdByUid: userId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
