@@ -59,7 +59,11 @@ service cloud.firestore {
 
     // Circles
     match /circles/{circleId} {
-      allow read: if request.auth != null && isCircleMember(circleId);
+      // Soft-deleted circles are hidden from reads (except audit traversal by admin).
+      allow read: if request.auth != null && isCircleMember(circleId) && (
+        !('deletedAt' in resource.data) || resource.data.deletedAt == null
+        || hasMinRole(circleId, 'admin')
+      );
       allow create: if request.auth != null;
       allow update: if request.auth != null && hasMinRole(circleId, 'admin');
 

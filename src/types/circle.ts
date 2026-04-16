@@ -13,6 +13,10 @@ export interface Circle {
   settings: {
     timezone: string;
   };
+  // Soft delete — admin can mark circle for deletion; excluded from lookups.
+  // Hard purge of subcollections/storage is deferred to a future Cloud Function.
+  deletedAt?: Timestamp | null;
+  deletedByUid?: string | null;
 }
 
 export interface CircleMember {

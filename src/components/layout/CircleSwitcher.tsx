@@ -35,11 +35,23 @@ export default function CircleSwitcher() {
   return (
     <>
       <Button
-        color="inherit"
         onClick={(e) => setAnchorEl(e.currentTarget)}
         startIcon={<GroupIcon />}
         endIcon={<ArrowDropDownIcon />}
-        sx={{ textTransform: 'none' }}
+        sx={{
+          textTransform: 'none',
+          color: 'text.primary',
+          bgcolor: 'rgba(58,125,68,0.08)',
+          border: '1px solid',
+          borderColor: 'rgba(58,125,68,0.25)',
+          px: 1.5,
+          py: 0.5,
+          '&:hover': {
+            bgcolor: 'rgba(58,125,68,0.14)',
+            borderColor: 'rgba(58,125,68,0.4)',
+          },
+          '& .MuiButton-startIcon': { color: 'primary.main' },
+        }}
       >
         {activeCircle.name}
       </Button>

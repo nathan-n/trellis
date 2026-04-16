@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -15,11 +16,19 @@ import {
   Divider,
   Menu,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Alert,
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CancelIcon from '@mui/icons-material/Cancel';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useCircle } from '../../contexts/CircleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -29,6 +38,7 @@ import {
   removeMember,
   getCircleInvitations,
   revokeInvitation,
+  softDeleteCircle,
 } from '../../services/circleService';
 import { CircleRole, InvitationStatus } from '../../constants';
 import { getRoleLabel } from '../../utils/roleUtils';
@@ -61,15 +71,19 @@ function formatLastActive(ts: { toDate: () => Date } | null): string {
 }
 
 export default function CircleSettingsPage() {
-  const { activeCircle, role } = useCircle();
-  const { firebaseUser } = useAuth();
+  const { activeCircle, role, refreshCircle } = useCircle();
+  const { firebaseUser, userProfile, refreshProfile } = useAuth();
   const { showMessage } = useSnackbar();
+  const navigate = useNavigate();
   const [members, setMembers] = useState<CircleMember[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedMember, setSelectedMember] = useState<CircleMember | null>(null);
   const [wellbeingData, setWellbeingData] = useState<Map<string, WellbeingCheckin[]>>(new Map());
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const isAdmin = role === CircleRole.ADMIN;
 
@@ -145,6 +159,35 @@ export default function CircleSettingsPage() {
       getCircleInvitations(activeCircle.id).then(setInvitations);
     }
   };
+
+  const handleDeleteCircle = async () => {
+    if (!activeCircle || !firebaseUser || !userProfile) return;
+    if (deleteConfirmText !== activeCircle.name) return;
+    setDeleting(true);
+    try {
+      await softDeleteCircle(activeCircle.id, firebaseUser.uid, userProfile.displayName);
+      showMessage('Circle deleted. Admins can restore within 30 days.', 'success');
+      setDeleteOpen(false);
+      // Refresh profile/circle so the now-deleted circle drops out of state
+      // and AppShell redirects to /select-circle.
+      await refreshCircle();
+      await refreshProfile();
+      navigate('/select-circle', { replace: true });
+    } catch (err) {
+      console.error('[deleteCircle]', err);
+      showMessage('Failed to delete circle', 'error');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteDialogClose = () => {
+    if (deleting) return;
+    setDeleteOpen(false);
+    setDeleteConfirmText('');
+  };
+
+  const deleteEnabled = activeCircle != null && deleteConfirmText === activeCircle.name && !deleting;
 
   if (!activeCircle) return null;
 
@@ -315,6 +358,78 @@ export default function CircleSettingsPage() {
       </Menu>
 
       <InviteDialog open={inviteOpen} onClose={handleInviteClose} />
+
+      {/* Danger Zone — admin only */}
+      {isAdmin && (
+        <Card sx={{ mt: 3, borderLeft: 4, borderColor: 'error.main' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <WarningAmberIcon color="error" />
+              <Typography variant="h6" color="error">Danger Zone</Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Deleting this circle hides it for everyone and marks it for permanent
+              removal after 30 days. An admin can restore it from Firestore within
+              that window. Member profiles, tasks, medications, documents, and all
+              other data become inaccessible immediately.
+            </Typography>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteForeverIcon />}
+              onClick={() => setDeleteOpen(true)}
+            >
+              Delete Circle
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Type-to-confirm delete dialog */}
+      <Dialog
+        open={deleteOpen}
+        onClose={handleDeleteDialogClose}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderTopColor: 'error.main' } }}
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <WarningAmberIcon color="error" />
+            Delete Circle
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This will remove the circle for all <strong>{members.length} member{members.length !== 1 ? 's' : ''}</strong>.
+            The data is retained for 30 days and can be restored by an admin.
+          </Alert>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            Type the circle name <strong>{activeCircle?.name}</strong> to confirm:
+          </Typography>
+          <TextField
+            fullWidth
+            autoFocus
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            placeholder={activeCircle?.name}
+            disabled={deleting}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteDialogClose} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteCircle}
+            disabled={!deleteEnabled}
+          >
+            {deleting ? 'Deleting…' : 'Delete Circle'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -68,7 +68,33 @@ export async function createCircle(
 export async function getCircle(circleId: string): Promise<Circle | null> {
   const snap = await getDoc(doc(db, 'circles', circleId));
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() } as Circle;
+  const data = snap.data();
+  // Treat soft-deleted circles as not found so they're excluded everywhere.
+  if (data?.deletedAt) return null;
+  return { id: snap.id, ...data } as Circle;
+}
+
+/**
+ * Soft-delete a circle. Sets deletedAt and deletedByUid on the circle doc.
+ * Data is retained for 30 days; a future Cloud Function will hard-purge
+ * subcollections and Storage files. Admin-only (enforced by firestore.rules).
+ */
+export async function softDeleteCircle(
+  circleId: string,
+  userId: string,
+  userName: string
+): Promise<void> {
+  // Write audit entry FIRST so it lands even if the subsequent update fails.
+  const { writeAuditEntry } = await import('./auditService');
+  await writeAuditEntry(circleId, userId, userName, 'delete', 'circle', circleId, {
+    softDelete: true,
+  });
+
+  await updateDoc(doc(db, 'circles', circleId), {
+    deletedAt: serverTimestamp(),
+    deletedByUid: userId,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function getCircleMembers(circleId: string): Promise<CircleMember[]> {
