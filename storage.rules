@@ -5,9 +5,21 @@ service firebase.storage {
       // Cross-service rule: verify user is a member of the circle via Firestore
       allow read: if request.auth != null
                   && firestore.exists(/databases/(default)/documents/circles/$(circleId)/members/$(request.auth.uid));
-      allow write: if request.auth != null
-                   && firestore.exists(/databases/(default)/documents/circles/$(circleId)/members/$(request.auth.uid))
-                   && request.resource.size < 25 * 1024 * 1024;
+
+      // Upload / overwrite: member + size cap. request.resource is the
+      // proposed new object, so .size is always present here.
+      allow create, update: if request.auth != null
+                            && firestore.exists(/databases/(default)/documents/circles/$(circleId)/members/$(request.auth.uid))
+                            && request.resource.size < 25 * 1024 * 1024;
+
+      // Delete: member only. request.resource is null on deletes, so we
+      // MUST NOT reference it here (doing so throws and denies the op).
+      // Deletion authorization for specific file types (e.g., documents
+      // admin-or-uploader) is enforced at the Firestore-doc layer; this
+      // rule just says "any circle member may delete files in their
+      // circle's namespace."
+      allow delete: if request.auth != null
+                    && firestore.exists(/databases/(default)/documents/circles/$(circleId)/members/$(request.auth.uid));
     }
   }
 }

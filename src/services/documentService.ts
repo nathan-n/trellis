@@ -58,11 +58,31 @@ export async function removeDocument(
   userId: string,
   userName: string
 ): Promise<void> {
-  await deleteFile(document.storagePath);
+  // Delete the Firestore doc first — this is the user-visible change and
+  // the rule-authoritative permission check (admin OR uploadedByUid).
+  // If the user isn't allowed to delete, this throws and we bail out
+  // before touching Storage.
   await deleteDoc(doc(db, 'circles', circleId, 'documents', document.id));
+
+  // Audit second — the delete has effectively happened from the user's
+  // perspective.
   await writeAuditEntry(circleId, userId, userName, 'document.delete', 'document', document.id, {
     title: document.title,
   });
+
+  // Storage delete is best-effort. An orphaned Storage file is invisible
+  // to users (no Storage listing path in the app) and harmless aside from
+  // a minor leak — far better than surfacing "Failed to remove document"
+  // after the doc has already been removed from Firestore.
+  // Pre-existing docs missing storagePath (edge case from earlier schema
+  // versions) silently skip the Storage cleanup instead of throwing.
+  if (document.storagePath) {
+    try {
+      await deleteFile(document.storagePath);
+    } catch (err) {
+      console.warn('[removeDocument] storage cleanup failed (orphaned file):', err);
+    }
+  }
 }
 
 export function subscribeDocuments(
