@@ -68,6 +68,22 @@ export default function TaskListPage() {
       result = result.filter((t) => matchIds.has(t.id));
     }
 
+    // Review finding 10: Active view default-sort by due date ascending.
+    // Previously the order was whatever Firestore returned — a task with
+    // no due date could sit above one due tomorrow. Now:
+    //   - Active: ascending by due date; no-due-date tasks sink to bottom
+    //   - Other views: keep Firestore order (preserves completed-at sort)
+    if (statusFilter === 'active' && !searchQuery.trim()) {
+      result = [...result].sort((a, b) => {
+        const aDue = a.dueDate?.toMillis?.();
+        const bDue = b.dueDate?.toMillis?.();
+        if (aDue == null && bDue == null) return 0;
+        if (aDue == null) return 1;
+        if (bDue == null) return -1;
+        return aDue - bDue;
+      });
+    }
+
     return result;
   }, [tasks, statusFilter, categoryFilter, searchQuery, fuse]);
 
@@ -95,9 +111,14 @@ export default function TaskListPage() {
     <Box>
       <PageHeader overline={headerOverline} title="Tasks" />
 
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
+      {/* Search on its own row on mobile (xs) so the status + category
+          controls below don't wrap into 3 rows on a 390px viewport.
+          Review finding 10. */}
+      <Box sx={{ mb: { xs: 1.5, sm: 0 } }}>
         <TaskSearchBar onSearch={setSearchQuery} />
+      </Box>
 
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
         <ToggleButtonGroup
           value={statusFilter}
           exclusive

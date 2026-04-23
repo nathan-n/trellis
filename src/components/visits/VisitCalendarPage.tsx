@@ -33,9 +33,22 @@ const localizer = dayjsLocalizer(dayjs);
 const VIEW_MODE_KEY = 'trellis_visit_view_mode';
 type ViewMode = 'monthly' | 'coverage';
 
+// Caregiver swatches drawn from the six brand accents (primary, secondary,
+// clay, ochre, slate, rose) + dark/light variants. Direction C — the
+// previous palette was Material Design 1 primaries (cobalt, saffron,
+// magenta) that clashed against the warm cream surfaces.
+// Review finding 08.
 const caregiverColors = [
-  '#1976d2', '#388e3c', '#7b1fa2', '#d32f2f', '#f57c00',
-  '#0097a7', '#5d4037', '#455a64', '#c2185b', '#00796b',
+  '#3A7D44',  // primary (green)
+  '#7C6F9B',  // secondary (plum)
+  '#B45A3E',  // clay
+  '#C48B2E',  // ochre
+  '#4A5A6E',  // slate
+  '#B86B7E',  // rose
+  '#2D6B37',  // primary dark
+  '#524470',  // secondary dark
+  '#8A4530',  // clay dark
+  '#8E4E5E',  // rose dark
 ];
 
 function normalizeStatus(status: string): string {
