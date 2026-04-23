@@ -69,7 +69,7 @@ export default function MyNextPriorityCard() {
       <WellbeingCheckinCard />
 
       <Typography variant="h5" gutterBottom>
-        My Next <SerifAccent>Priority</SerifAccent>
+        Your next <SerifAccent>priority</SerifAccent>
       </Typography>
 
       {task === null ? (

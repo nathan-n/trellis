@@ -55,8 +55,12 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Navigate to="/my-next" replace /> },
-      { path: 'my-next', element: <Lazy><DashboardPage /></Lazy> },
+      { index: true, element: <Navigate to="/today" replace /> },
+      { path: 'today', element: <Lazy><DashboardPage /></Lazy> },
+      // Legacy redirect: bookmarks, emails, or share links using /my-next
+      // still land on Today. Safe to remove after a reasonable grace
+      // period (~6 months) once any cached references expire.
+      { path: 'my-next', element: <Navigate to="/today" replace /> },
       { path: 'tasks', element: <Lazy><TaskListPage /></Lazy> },
       { path: 'tasks/:taskId', element: <Lazy><TaskDetailPage /></Lazy> },
       { path: 'tasks/calendar', element: <Lazy><TaskCalendarView /></Lazy> },

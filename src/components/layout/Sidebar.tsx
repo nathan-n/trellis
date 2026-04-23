@@ -15,7 +15,9 @@ import {
 import TaskAltIcon from '@mui/icons-material/TaskAltOutlined';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonthOutlined';
 import EventIcon from '@mui/icons-material/EventOutlined';
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+// Review finding 02: sidebar "Today" pointed to /my-next with a
+// PriorityHighIcon (!). Sun icon is warmer, matches "Today's rhythm".
+import WbSunnyIcon from '@mui/icons-material/WbSunnyOutlined';
 import MedicationIcon from '@mui/icons-material/MedicationOutlined';
 import NoteAltIcon from '@mui/icons-material/NoteAltOutlined';
 import EmergencyIcon from '@mui/icons-material/LocalHospitalOutlined';
@@ -42,7 +44,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Today', path: '/my-next', icon: <PriorityHighIcon />, section: 'overview' },
+  { label: 'Today', path: '/today', icon: <WbSunnyIcon />, section: 'overview' },
   { label: 'Activity', path: '/activity', icon: <TimelineIcon />, section: 'overview' },
   { label: 'Tasks', path: '/tasks', icon: <TaskAltIcon />, section: 'manage' },
   { label: 'Calendar', path: '/tasks/calendar', icon: <CalendarMonthIcon />, section: 'manage' },
@@ -50,7 +52,7 @@ const navItems: NavItem[] = [
   { label: 'Medications', path: '/medications', icon: <MedicationIcon />, section: 'care' },
   { label: 'Care log', path: '/care-log', icon: <NoteAltIcon />, section: 'care' },
   { label: 'Emergency info', path: '/emergency', icon: <EmergencyIcon />, section: 'care' },
-  { label: 'Doctor visits', path: '/doctor-prep', icon: <SummarizeIcon />, section: 'care' },
+  { label: 'Doctor prep', path: '/doctor-prep', icon: <SummarizeIcon />, section: 'care' },
   { label: 'Documents', path: '/documents', icon: <FolderIcon />, section: 'resources' },
   { label: 'Resources', path: '/resources', icon: <MenuBookIcon />, section: 'resources' },
   { label: 'Expenses', path: '/expenses', icon: <ReceiptLongIcon />, section: 'resources' },

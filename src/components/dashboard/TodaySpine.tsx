@@ -123,19 +123,15 @@ export default function TodaySpine() {
   }, [careLogs, visits, tasks, userProfile?.uid, today, navigate]);
 
   const loading = loadingLogs || loadingVisits;
-  const humanDate = dayjs().format('dddd, MMMM D');
 
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="overline"
-          sx={{ display: 'block', mb: 0.5 }}
-        >
-          {humanDate}
-        </Typography>
+        {/* Page-level date overline now lives on DashboardPage. Section
+            heading reads "Your rhythm" — matches the review's preferred
+            section-within-Today structure (finding 02). */}
         <Typography variant="h5" sx={{ lineHeight: 1.2 }}>
-          Today's <SerifAccent>rhythm</SerifAccent>
+          Your <SerifAccent>rhythm</SerifAccent>
         </Typography>
       </Box>
 
