@@ -178,6 +178,16 @@ const theme = createTheme({
         root: {
           boxShadow: '0 2px 8px rgba(60,50,40,0.07), 0 1px 3px rgba(60,50,40,0.05)',
           borderRadius: 14,
+          // Direction C tactile hover — chunky offset shadow (no blur) that
+          // gives cards a sticker-on-paper feel. Only triggers when the
+          // card is interactive (CardActionArea, onClick, role=button, or
+          // an anchor/button wrapper). Static informational cards don't
+          // animate. Duration matches MUI default easing.
+          transition: 'transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1)',
+          '&:has(.MuiCardActionArea-root):hover, &[role="button"]:hover, &[tabindex="0"]:hover, &:has(> a):hover, &:has(> button):hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '6px 6px 0 rgba(26,22,18,0.06), 0 2px 8px rgba(60,50,40,0.07)',
+          },
         },
       },
     },
