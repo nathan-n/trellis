@@ -19,6 +19,7 @@ import { formatDateTime } from '../../utils/dateUtils';
 import type { Task } from '../../types';
 import { useTaskViewed } from '../../hooks/useTaskViewed';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import SerifAccent from '../shared/SerifAccent';
 import WellbeingCheckinCard from '../wellbeing/WellbeingCheckinCard';
 
 const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
@@ -68,7 +69,7 @@ export default function MyNextPriorityCard() {
       <WellbeingCheckinCard />
 
       <Typography variant="h5" gutterBottom>
-        My Next Priority
+        My Next <SerifAccent>Priority</SerifAccent>
       </Typography>
 
       {task === null ? (
