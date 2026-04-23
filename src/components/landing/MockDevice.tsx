@@ -39,7 +39,7 @@ export default function MockDevice({ children, title, maxWidth = 480 }: MockDevi
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
         </Box>
-        <Typography variant="caption" sx={{ color: 'white', fontWeight: 600, ml: 0.5, fontFamily: '"Playfair Display", serif', letterSpacing: 0.5 }}>
+        <Typography variant="caption" sx={{ color: 'white', fontWeight: 500, ml: 0.5, fontFamily: '"Fraunces", "Iowan Old Style", Georgia, serif', letterSpacing: -0.2, fontVariationSettings: '"opsz" 18, "SOFT" 80' }}>
           {title ?? 'Trellis'}
         </Typography>
       </Box>

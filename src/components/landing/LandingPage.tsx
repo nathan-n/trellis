@@ -42,6 +42,7 @@ import MockDocumentVault from './mocks/MockDocumentVault';
 import MockResources from './mocks/MockResources';
 import FolderIcon from '@mui/icons-material/FolderOutlined';
 import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
+import SerifAccent from '../shared/SerifAccent';
 
 // ─── Feature section data ────────────────────────────────────────────────────
 
@@ -225,8 +226,10 @@ export default function LandingPage() {
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #3A7D44 0%, #2D6B37 35%, #1B5E20 65%, #524470 100%)',
-          color: 'white',
+          // Direction C brand gradient (D3): pale green lifts into muted plum.
+          // Pairs with dark ink, not white text.
+          background: 'linear-gradient(135deg, #D4E8D1 0%, #A99BC5 55%, #7C6F9B 100%)',
+          color: 'text.primary',
           pt: { xs: 8, md: 12 },
           pb: { xs: 10, md: 14 },
           px: 2,
@@ -234,13 +237,13 @@ export default function LandingPage() {
           overflow: 'hidden',
         }}
       >
-        {/* Subtle pattern overlay */}
+        {/* Warm-brown dot overlay (white dots would disappear on the light gradient) */}
         <Box
           sx={{
             position: 'absolute',
             inset: 0,
-            opacity: 0.04,
-            backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)',
+            opacity: 0.22,
+            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(60,50,40,0.6) 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
@@ -250,22 +253,22 @@ export default function LandingPage() {
               <Typography
                 variant="h2"
                 sx={{
-                  fontWeight: 800,
+                  fontWeight: 500,
                   fontSize: { xs: '2.5rem', md: '3.5rem' },
                   lineHeight: 1.1,
                   mb: 2,
+                  letterSpacing: '-0.02em',
+                  fontVariationSettings: '"opsz" 72, "SOFT" 80',
                 }}
               >
-                Caregiving,{' '}
-                <Box component="span" sx={{ color: '#D4E8D1' }}>
-                  coordinated.
-                </Box>
+                Caregiving, <SerifAccent>coordinated.</SerifAccent>
               </Typography>
               <Typography
                 variant="h6"
                 sx={{
                   fontWeight: 400,
-                  opacity: 0.9,
+                  color: 'text.primary',
+                  opacity: 0.78,
                   mb: 4,
                   maxWidth: 500,
                   lineHeight: 1.6,
@@ -281,9 +284,11 @@ export default function LandingPage() {
                   variant="outlined"
                   size="large"
                   sx={{
-                    color: 'white',
-                    borderColor: 'rgba(255,255,255,0.5)',
-                    '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.08)' },
+                    // Dark-ink outlined button on the light gradient — keeps
+                    // the page-level ink consistent, no white-on-white risk.
+                    color: 'text.primary',
+                    borderColor: 'rgba(26,22,18,0.4)',
+                    '&:hover': { borderColor: 'text.primary', bgcolor: 'rgba(26,22,18,0.06)' },
                     py: 1.5,
                     px: 3,
                   }}
@@ -424,13 +429,16 @@ export default function LandingPage() {
                       width: 80,
                       height: 80,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #3A7D44, #524470)',
-                      color: 'white',
+                      // Direction C step circle — D3 gradient with dark ink.
+                      // Darker plum anchor so icon contrast stays readable.
+                      background: 'linear-gradient(135deg, #D4E8D1 0%, #A99BC5 60%, #7C6F9B 100%)',
+                      color: 'text.primary',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       mx: 'auto',
                       mb: 2,
+                      boxShadow: '0 2px 8px rgba(60,50,40,0.12)',
                     }}
                   >
                     {step.icon}
@@ -505,16 +513,31 @@ export default function LandingPage() {
         sx={{
           py: { xs: 8, md: 12 },
           px: 2,
-          background: 'linear-gradient(135deg, #3A7D44 0%, #2D6B37 40%, #524470 100%)',
-          color: 'white',
+          // D3 brand gradient — matches the hero so the page bookends in
+          // the same light-green-to-plum motion.
+          background: 'linear-gradient(135deg, #D4E8D1 0%, #A99BC5 55%, #7C6F9B 100%)',
+          color: 'text.primary',
           textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <Container maxWidth="sm">
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 2 }}>
-            Your family deserves a better way
+        {/* Same warm-brown dot overlay as the hero */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            opacity: 0.22,
+            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(60,50,40,0.6) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            pointerEvents: 'none',
+          }}
+        />
+        <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography variant="h4" fontWeight={500} sx={{ mb: 2, letterSpacing: '-0.015em' }}>
+            Your family deserves a <SerifAccent>better way</SerifAccent>
           </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.9, mb: 4, lineHeight: 1.7 }}>
+          <Typography variant="body1" sx={{ opacity: 0.78, mb: 4, lineHeight: 1.7, color: 'text.primary' }}>
             Trellis is free for families. Create your care circle today and
             start coordinating with the people who matter most.
           </Typography>
