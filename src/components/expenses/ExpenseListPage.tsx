@@ -23,6 +23,7 @@ import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import AddFab from '../shared/AddFab';
+import PageHeader from '../shared/PageHeader';
 
 const categoryLabels: Record<string, string> = {
   medical: 'Medical', supplies: 'Supplies', home_modification: 'Home Mod',
@@ -77,13 +78,30 @@ export default function ExpenseListPage() {
     setDeleteTarget(null);
   };
 
+  // Dynamic overline (review finding 05): this-month total + YTD total.
+  // Shows running financial context so users scan-land knowing where
+  // they stand without opening the Summary tab first.
+  const headerOverline = useMemo(() => {
+    const thisMonth = dayjs().format('YYYY-MM');
+    const thisYear = dayjs().year();
+    const monthTotal = expenses
+      .filter((e) => e.dateYYYYMM === thisMonth)
+      .reduce((sum, e) => sum + e.amount, 0);
+    const ytdTotal = expenses
+      .filter((e) => dayjs(e.date.toDate()).year() === thisYear)
+      .reduce((sum, e) => sum + e.amount, 0);
+    if (expenses.length === 0) return 'No expenses tracked';
+    if (monthTotal === 0) {
+      return `${formatCents(ytdTotal)} YTD`;
+    }
+    return `${formatCents(monthTotal)} this month · ${formatCents(ytdTotal)} YTD`;
+  }, [expenses]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h5">Expenses</Typography>
-      </Box>
+      <PageHeader overline={headerOverline} title="Expenses" />
 
       <Tabs
         value={viewMode}

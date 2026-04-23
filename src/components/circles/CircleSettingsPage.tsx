@@ -48,6 +48,7 @@ import type { CircleMember, Invitation } from '../../types';
 import type { WellbeingCheckin } from '../../types/wellbeing';
 import Sparkline from '../shared/Sparkline';
 import InviteDialog from './InviteDialog';
+import PageHeader from '../shared/PageHeader';
 
 const inviteStatusConfig: Record<string, { label: string; color: 'warning' | 'success' | 'default' | 'error' }> = {
   pending: { label: 'Pending', color: 'warning' },
@@ -191,14 +192,23 @@ export default function CircleSettingsPage() {
 
   if (!activeCircle) return null;
 
+  // Dynamic overline: circle name + patient being cared for.
+  const headerOverline = `${activeCircle.name} · caring for ${activeCircle.patientName}`;
+  const pendingInviteCount = invitations.filter(
+    (inv) => inv.status === InvitationStatus.PENDING
+  ).length;
+
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto' }}>
-      <Typography variant="h5" gutterBottom>
-        Settings
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        {activeCircle.name} — Caring for {activeCircle.patientName}
-      </Typography>
+      <PageHeader
+        overline={headerOverline}
+        title="Settings"
+      />
+      {pendingInviteCount > 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          {members.length} member{members.length === 1 ? '' : 's'} · {pendingInviteCount} pending invite{pendingInviteCount === 1 ? '' : 's'}
+        </Typography>
+      )}
 
       {/* Members */}
       <Card sx={{ mb: 3 }}>

@@ -32,6 +32,7 @@ import MedicationCreateEditDialog from './MedicationCreateEditDialog';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import PageHeader from '../shared/PageHeader';
 
 export default function MedicationListPage() {
   const navigate = useNavigate();
@@ -87,18 +88,34 @@ export default function MedicationListPage() {
     return dayjs(med.refillDate.toDate()).diff(dayjs(), 'day') <= 7;
   };
 
+  // Dynamic page overline (review finding 05):
+  //  "N active · M need refill"
+  //  A refill is "needed" if refillDate is within 7 days (matches the
+  //  existing isRefillSoon predicate).
+  const activeMeds = useMemo(() => meds.filter((m) => m.isActive), [meds]);
+  const refillSoonCount = useMemo(
+    () => activeMeds.filter(isRefillSoon).length,
+    [activeMeds]
+  );
+  const headerOverline = meds.length === 0
+    ? 'No medications tracked'
+    : refillSoonCount > 0
+      ? `${activeMeds.length} active · ${refillSoonCount} need refill`
+      : `${activeMeds.length} active`;
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">Medications</Typography>
-        {role && hasMinRole(role, CircleRole.FAMILY) && (
+      <PageHeader
+        overline={headerOverline}
+        title="Medications"
+        action={role && hasMinRole(role, CircleRole.FAMILY) ? (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
             Add Medication
           </Button>
-        )}
-      </Box>
+        ) : undefined}
+      />
 
       <ToggleButtonGroup
         value={filter}

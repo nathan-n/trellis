@@ -28,6 +28,7 @@ import type { EmergencyProfile, Medication } from '../../types';
 import EmergencyProfileEditDialog from './EmergencyProfileEditDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import EmptyState from '../shared/EmptyState';
+import PageHeader from '../shared/PageHeader';
 
 const cardSx = { mb: 2 }; // borderRadius inherited from theme (12px)
 
@@ -98,7 +99,7 @@ export default function EmergencyQuickAccessPage() {
   if (!profile) {
     return (
       <Box>
-        <Typography variant="h5" gutterBottom>Emergency Information</Typography>
+        <PageHeader overline="Not set up yet" title="Emergency info" />
         <EmptyState
           icon={<ContactEmergencyIcon />}
           title="No emergency profile yet"
@@ -111,14 +112,27 @@ export default function EmergencyQuickAccessPage() {
     );
   }
 
+  // Dynamic overline: surfaces life-critical facts at a glance so a
+  // paramedic or stranger sees the essentials in the header without
+  // scrolling — counts of allergies + active meds + emergency contacts.
+  const allergyCount = profile.allergies?.length ?? 0;
+  const medCount = activeMeds.length;
+  const contactCount = profile.emergencyContacts?.length ?? 0;
+  const headerOverline = [
+    allergyCount > 0 ? `${allergyCount} allergy${allergyCount === 1 ? '' : 'ies'}` : null,
+    medCount > 0 ? `${medCount} med${medCount === 1 ? '' : 's'}` : null,
+    contactCount > 0 ? `${contactCount} contact${contactCount === 1 ? '' : 's'}` : null,
+  ].filter(Boolean).join(' · ') || 'Not yet filled in';
+
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">Emergency Information</Typography>
-        {role && hasMinRole(role, CircleRole.FAMILY) && (
+      <PageHeader
+        overline={headerOverline}
+        title="Emergency info"
+        action={role && hasMinRole(role, CircleRole.FAMILY) ? (
           <Button startIcon={<EditIcon />} onClick={() => setEditOpen(true)}>Edit</Button>
-        )}
-      </Box>
+        ) : undefined}
+      />
 
       {/* Patient Header — clay bg signals the Emergency/urgency domain
           (Direction C accent mapping). Warm terracotta reads as medical

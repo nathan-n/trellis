@@ -13,6 +13,7 @@ import { fetchDoctorPrepData, type DoctorPrepData } from '../../services/doctorP
 import { fetchQuestions } from '../../services/questionService';
 import type { Task, DoctorQuestion } from '../../types';
 import DoctorPrepReport from './DoctorPrepReport';
+import PageHeader from '../shared/PageHeader';
 import TaskQuestions from '../tasks/TaskQuestions';
 import LoadingSpinner from '../shared/LoadingSpinner';
 
@@ -95,11 +96,14 @@ export default function DoctorPrepPage() {
           @page { margin: 0.6in 0.8in; size: letter; }
         }
       `}</style>
-      <Typography variant="h5" gutterBottom className="no-print">Doctor Visit Prep</Typography>
+      <Box className="no-print">
+        <PageHeader
+          overline={doctorName ? `Preparing for ${doctorName}` : 'Printable prep sheet'}
+          title="Doctor prep"
+        />
+      </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }} className="no-print">
-        {doctorName
-          ? `Preparing for appointment with ${doctorName}`
-          : 'Generate a summary of care logs, medications, and observations for a date range to bring to a doctor appointment.'}
+        Generate a summary of care logs, medications, and observations for a date range to bring to a doctor appointment.
       </Typography>
 
       <Card sx={{ mb: 3 }} className="no-print">

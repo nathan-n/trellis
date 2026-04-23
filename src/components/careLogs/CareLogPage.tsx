@@ -1,12 +1,12 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
-import { Box, Typography, Button, Stack, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { Box, Button, Stack, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CloseIcon from '@mui/icons-material/Close';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { subscribeCareLogsByDate, deleteCareLog } from '../../services/careLogService';
+import { subscribeCareLogsByDate, deleteCareLog, fetchCareLogsInRange } from '../../services/careLogService';
 import type { CareLog } from '../../types';
 import { CircleRole } from '../../constants';
 import { hasMinRole } from '../../utils/roleUtils';
@@ -16,6 +16,7 @@ import CareLogHistoryView from './CareLogHistoryView';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import AddFab from '../shared/AddFab';
+import PageHeader from '../shared/PageHeader';
 
 // Lazy-load Trends tab so recharts + react-calendar-heatmap only load when needed
 const CareLogTrendsTab = lazy(() => import('./CareLogTrendsTab'));
@@ -36,6 +37,38 @@ export default function CareLogPage() {
   const [editTarget, setEditTarget] = useState<CareLog | null>(null);
 
   const dateStr = date.format('YYYY-MM-DD');
+
+  // Week-range fetch for the page header's dynamic overline. Independent
+  // of the current tab so "N entries this week · last Xh ago" stays
+  // stable regardless of which day the user is viewing.
+  const [weekLogs, setWeekLogs] = useState<CareLog[]>([]);
+  useEffect(() => {
+    if (!activeCircle) return;
+    const end = dayjs().format('YYYY-MM-DD');
+    const start = dayjs().subtract(6, 'day').format('YYYY-MM-DD');
+    let cancelled = false;
+    fetchCareLogsInRange(activeCircle.id, start, end)
+      .then((logs) => { if (!cancelled) setWeekLogs(logs); })
+      .catch(() => { /* silent — header overline degrades gracefully */ });
+    return () => { cancelled = true; };
+  }, [activeCircle?.id]);
+
+  const headerOverline = useMemo(() => {
+    if (weekLogs.length === 0) return 'No entries this week';
+    const latest = weekLogs.reduce((acc, l) =>
+      l.logTimestamp?.toMillis?.() > (acc?.logTimestamp?.toMillis?.() ?? 0) ? l : acc,
+    weekLogs[0]);
+    const latestAt = latest?.logTimestamp?.toDate?.();
+    if (!latestAt) return `${weekLogs.length} this week`;
+    // eslint-disable-next-line react-hooks/purity -- recency is snapshot-at-mount
+    const diffMin = Math.floor((Date.now() - latestAt.getTime()) / 60000);
+    const recency = diffMin < 60
+      ? `${diffMin}m ago`
+      : diffMin < 60 * 24
+        ? `${Math.floor(diffMin / 60)}h ago`
+        : `${Math.floor(diffMin / 60 / 24)}d ago`;
+    return `${weekLogs.length} this week · last ${recency}`;
+  }, [weekLogs]);
 
   // FAB click handler. FAB is visible on all tabs so users don't have to
   // switch to Day just to add. If they're NOT on Day, snap to Day and reset
@@ -81,9 +114,7 @@ export default function CareLogPage() {
 
   return (
     <Box>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h5">Care log</Typography>
-      </Box>
+      <PageHeader overline={headerOverline} title="Care log" />
 
       <Tabs
         value={viewMode}

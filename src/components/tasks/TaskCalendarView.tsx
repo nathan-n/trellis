@@ -1,11 +1,12 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { Calendar, dayjsLocalizer, type Event } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useTasks } from '../../hooks/useTasks';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import PageHeader from '../shared/PageHeader';
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -56,13 +57,25 @@ export default function TaskCalendarView() {
     [navigate]
   );
 
+  // Dynamic overline: tasks with dates in current visible month.
+  const headerOverline = useMemo(() => {
+    const startMonth = dayjs(date).startOf('month');
+    const endMonth = dayjs(date).endOf('month');
+    const monthTasks = tasks.filter((t) => {
+      if (!t.dueDate) return false;
+      const due = dayjs(t.dueDate.toDate());
+      return due.isAfter(startMonth) && due.isBefore(endMonth);
+    });
+    const visibleMonth = dayjs(date).format('MMMM YYYY');
+    if (monthTasks.length === 0) return `${visibleMonth} · nothing scheduled`;
+    return `${visibleMonth} · ${monthTasks.length} scheduled`;
+  }, [tasks, date]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Task Calendar
-      </Typography>
+      <PageHeader overline={headerOverline} title="Task calendar" />
       <Box sx={{ height: 'calc(100vh - 200px)', minHeight: 500 }}>
         <Calendar<TaskEvent>
           localizer={localizer}

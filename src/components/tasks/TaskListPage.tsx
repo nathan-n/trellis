@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import {
   Box,
-  Typography,
   Stack,
   FormControl,
   InputLabel,
@@ -24,6 +23,8 @@ import TaskCreateEditDialog from './TaskCreateEditDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import AddFab from '../shared/AddFab';
+import PageHeader from '../shared/PageHeader';
+import dayjs from 'dayjs';
 
 export default function TaskListPage() {
   const { userProfile } = useAuth();
@@ -70,13 +71,29 @@ export default function TaskListPage() {
     return result;
   }, [tasks, statusFilter, categoryFilter, searchQuery, fuse]);
 
+  // Dynamic page-header context (review finding 05 + finding 10):
+  //  "N active · M due today"  — tells the user at a glance whether they
+  //  need to scroll. Counts are computed over the full task list, not the
+  //  filtered view, so the overline stays stable across filter changes.
+  const headerOverline = useMemo(() => {
+    const active = tasks.filter((t) => t.status !== TaskStatus.DONE);
+    const startToday = dayjs().startOf('day');
+    const endToday = dayjs().endOf('day');
+    const dueToday = active.filter(
+      (t) => t.dueDate && !dayjs(t.dueDate.toDate()).isBefore(startToday) && !dayjs(t.dueDate.toDate()).isAfter(endToday)
+    );
+    if (tasks.length === 0) return 'No tasks yet';
+    if (dueToday.length > 0) {
+      return `${active.length} active · ${dueToday.length} due today`;
+    }
+    return `${active.length} active`;
+  }, [tasks]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5">Tasks</Typography>
-      </Box>
+      <PageHeader overline={headerOverline} title="Tasks" />
 
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 3, alignItems: 'center' }}>
         <TaskSearchBar onSearch={setSearchQuery} />

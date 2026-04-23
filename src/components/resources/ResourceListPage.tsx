@@ -26,6 +26,7 @@ import ResourceCreateEditDialog from './ResourceCreateEditDialog';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import PageHeader from '../shared/PageHeader';
 
 const typeConfig: Record<string, { label: string; color: string; icon: React.ReactElement }> = {
   local: { label: 'Local', color: '#2E7D32', icon: <PlaceIcon fontSize="small" /> },
@@ -76,18 +77,31 @@ export default function ResourceListPage() {
   const canEdit = role && hasMinRole(role, CircleRole.FAMILY);
   const canDelete = role && hasMinRole(role, CircleRole.ADMIN);
 
+  // Dynamic overline (review finding 05): resource counts by type.
+  // Highlights hotlines since those are the most time-sensitive/useful
+  // resource type for caregivers in crisis moments.
+  const headerOverline = useMemo(() => {
+    if (resources.length === 0) return 'No resources saved';
+    const hotlines = resources.filter((r) => r.type === 'hotline').length;
+    if (hotlines > 0) {
+      return `${resources.length} saved · ${hotlines} hotline${hotlines === 1 ? '' : 's'}`;
+    }
+    return `${resources.length} saved`;
+  }, [resources]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">Caregiver Resources</Typography>
-        {canEdit && (
+      <PageHeader
+        overline={headerOverline}
+        title="Caregiver resources"
+        action={canEdit ? (
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
             Add Resource
           </Button>
-        )}
-      </Box>
+        ) : undefined}
+      />
 
       <ToggleButtonGroup
         value={typeFilter}

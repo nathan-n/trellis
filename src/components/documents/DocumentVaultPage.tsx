@@ -26,6 +26,7 @@ import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import AddFab from '../shared/AddFab';
+import PageHeader from '../shared/PageHeader';
 import DocumentPreviewDialog from './DocumentPreviewDialog';
 import DocumentThumbnail from './DocumentThumbnail';
 
@@ -88,13 +89,30 @@ export default function DocumentVaultPage() {
     setDeleteTarget(null);
   };
 
+  // Dynamic overline (review finding 05): document count + total size +
+  // last-added recency. Gives users a sense of vault depth at a glance.
+  const headerOverline = useMemo(() => {
+    if (docs.length === 0) return 'No documents yet';
+    const totalBytes = docs.reduce((sum, d) => sum + (d.sizeBytes ?? 0), 0);
+    const totalMb = (totalBytes / (1024 * 1024)).toFixed(totalBytes > 10 * 1024 * 1024 ? 0 : 1);
+    const latest = docs.reduce((acc, d) =>
+      (d.uploadedAt?.toMillis?.() ?? 0) > (acc.uploadedAt?.toMillis?.() ?? 0) ? d : acc,
+    docs[0]);
+    const latestAt = latest?.uploadedAt?.toDate?.();
+    if (!latestAt) {
+      return `${docs.length} document${docs.length === 1 ? '' : 's'} · ${totalMb} MB`;
+    }
+    // eslint-disable-next-line react-hooks/purity -- recency is snapshot-at-mount
+    const diffDays = Math.floor((Date.now() - latestAt.getTime()) / (1000 * 60 * 60 * 24));
+    const recency = diffDays === 0 ? 'today' : diffDays === 1 ? 'yesterday' : `${diffDays}d ago`;
+    return `${docs.length} · ${totalMb} MB · last added ${recency}`;
+  }, [docs]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h5">Documents</Typography>
-      </Box>
+      <PageHeader overline={headerOverline} title="Documents" />
 
       <ToggleButtonGroup
         value={categoryFilter}

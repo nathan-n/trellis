@@ -25,6 +25,7 @@ import type { Visit } from '../../types';
 import VisitCreateEditDialog from './VisitCreateEditDialog';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import PageHeader from '../shared/PageHeader';
 
 dayjs.extend(isSameOrAfter);
 
@@ -243,26 +244,52 @@ export default function VisitCalendarPage() {
     return gaps;
   }, [activeVisits, viewMode]);
 
+  // Dynamic overline (review finding 05): this-week + upcoming totals.
+  // Surfaces coverage quickly — useful when a caregiver checks whether
+  // next week has anyone scheduled.
+  const headerOverline = useMemo(() => {
+    const now = dayjs();
+    const weekEnd = now.add(6, 'day').endOf('day');
+    const nextWeekEnd = now.add(13, 'day').endOf('day');
+    const thisWeek = visits.filter((v) => {
+      const start = v.startTime?.toDate();
+      if (!start) return false;
+      return dayjs(start).isAfter(now.startOf('day')) && dayjs(start).isBefore(weekEnd);
+    }).length;
+    const nextWeek = visits.filter((v) => {
+      const start = v.startTime?.toDate();
+      if (!start) return false;
+      return dayjs(start).isAfter(weekEnd) && dayjs(start).isBefore(nextWeekEnd);
+    }).length;
+    if (visits.length === 0) return 'No visits scheduled';
+    if (thisWeek === 0 && nextWeek === 0) return 'Nothing scheduled this fortnight';
+    if (nextWeek > 0) return `${thisWeek} this week · ${nextWeek} next week`;
+    return `${thisWeek} this week`;
+  }, [visits]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="h5">Visit Schedule</Typography>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size="small">
-            <ToggleButton value="monthly">
-              <CalendarMonthIcon fontSize="small" sx={{ mr: 0.5 }} /> Monthly
-            </ToggleButton>
-            <ToggleButton value="coverage">
-              <ScheduleIcon fontSize="small" sx={{ mr: 0.5 }} /> Coverage
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateOpen}>
-            Schedule Visit
-          </Button>
-        </Box>
-      </Box>
+      <PageHeader
+        overline={headerOverline}
+        title="Visits"
+        action={
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewModeChange} size="small">
+              <ToggleButton value="monthly">
+                <CalendarMonthIcon fontSize="small" sx={{ mr: 0.5 }} /> Monthly
+              </ToggleButton>
+              <ToggleButton value="coverage">
+                <ScheduleIcon fontSize="small" sx={{ mr: 0.5 }} /> Coverage
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateOpen}>
+              Schedule Visit
+            </Button>
+          </Box>
+        }
+      />
 
       {viewMode === 'monthly' && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

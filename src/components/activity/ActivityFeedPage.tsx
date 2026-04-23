@@ -22,6 +22,9 @@ import { formatDateTime } from '../../utils/dateUtils';
 import type { AuditLogEntry } from '../../types';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import EmptyState from '../shared/EmptyState';
+import PageHeader from '../shared/PageHeader';
+import dayjs from 'dayjs';
+import { useMemo } from 'react';
 
 const FEED_LIMIT = 50;
 
@@ -140,12 +143,34 @@ export default function ActivityFeedPage() {
     return unsubscribe;
   }, [activeCircle?.id]);
 
+  // Dynamic overline — count of actions today + most recent entry age.
+  const headerOverline = useMemo(() => {
+    if (entries.length === 0) return 'No activity yet';
+    const startToday = dayjs().startOf('day');
+    const todayCount = entries.filter(
+      (e) => e.timestamp?.toDate && dayjs(e.timestamp.toDate()).isAfter(startToday)
+    ).length;
+    const latest = entries[0]; // already sorted desc by service
+    const latestAt = latest?.timestamp?.toDate?.();
+    if (!latestAt) return `${entries.length} entries`;
+    // eslint-disable-next-line react-hooks/purity -- recency is snapshot-at-mount; fine to not update while page stays open
+    const diffMin = Math.floor((Date.now() - latestAt.getTime()) / 60000);
+    const recency = diffMin < 60
+      ? `${diffMin}m ago`
+      : diffMin < 60 * 24
+        ? `${Math.floor(diffMin / 60)}h ago`
+        : `${Math.floor(diffMin / 60 / 24)}d ago`;
+    return todayCount > 0
+      ? `${todayCount} today · last ${recency}`
+      : `${entries.length} entries · last ${recency}`;
+  }, [entries]);
+
   if (loading) return <LoadingSpinner />;
 
   if (entries.length === 0) {
     return (
       <Box>
-        <Typography variant="h5" gutterBottom>Activity</Typography>
+        <PageHeader overline={headerOverline} title="Activity" />
         <EmptyState title="No activity yet" description="Actions taken in this circle will appear here." />
       </Box>
     );
@@ -153,7 +178,7 @@ export default function ActivityFeedPage() {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>Activity</Typography>
+      <PageHeader overline={headerOverline} title="Activity" />
       <Stack spacing={1}>
         {entries.map((entry) => {
           const info = getActionInfo(entry);

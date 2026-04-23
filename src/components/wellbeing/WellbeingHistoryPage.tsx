@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Stack, Chip, Link, Button,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
+import dayjs from 'dayjs';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { subscribeMyCheckins } from '../../services/wellbeingService';
@@ -12,6 +13,7 @@ import type { WellbeingCheckin } from '../../types/wellbeing';
 import WellbeingCheckinCard from './WellbeingCheckinCard';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import PageHeader from '../shared/PageHeader';
 
 const stressLabels = ['', 'Low', 'Mild', 'Moderate', 'High', 'Very High'];
 const stressColors: Record<number, 'success' | 'info' | 'warning' | 'error'> = {
@@ -36,16 +38,38 @@ export default function WellbeingHistoryPage() {
     return unsubscribe;
   }, [activeCircle?.id, userProfile?.uid]);
 
+  // Dynamic overline: streak + most recent check-in recency.
+  // IMPORTANT: computed before the `if (loading)` early-return so the
+  // hook call order stays stable across renders (Rules of Hooks).
+  const headerOverline = useMemo(() => {
+    if (checkins.length === 0) return 'No check-ins yet';
+    const latestAt = checkins[0]?.createdAt?.toDate?.();
+    // Streak = consecutive days (counting back from today) with any check-in.
+    const dateKeys = new Set(
+      checkins
+        .map((c) => c.createdAt?.toDate?.())
+        .filter((d): d is Date => Boolean(d))
+        .map((d) => dayjs(d).format('YYYY-MM-DD'))
+    );
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const key = dayjs().subtract(i, 'day').format('YYYY-MM-DD');
+      if (dateKeys.has(key)) streak += 1;
+      else break;
+    }
+    if (!latestAt) return `${checkins.length} check-in${checkins.length === 1 ? '' : 's'}`;
+    // eslint-disable-next-line react-hooks/purity -- recency is snapshot-at-mount
+    const diffDays = Math.floor((Date.now() - latestAt.getTime()) / (1000 * 60 * 60 * 24));
+    const recency = diffDays === 0 ? 'today' : diffDays === 1 ? 'yesterday' : `${diffDays}d ago`;
+    if (streak >= 2) return `${streak}-day streak · last ${recency}`;
+    return `${checkins.length} check-in${checkins.length === 1 ? '' : 's'} · last ${recency}`;
+  }, [checkins]);
+
   if (loading) return <LoadingSpinner />;
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FavoriteIcon color="secondary" />
-          <Typography variant="h5">Your Wellbeing</Typography>
-        </Box>
-      </Box>
+      <PageHeader overline={headerOverline} title="Your wellbeing" />
 
       {/* Inline check-in form */}
       <WellbeingCheckinCard />
