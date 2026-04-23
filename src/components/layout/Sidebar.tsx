@@ -49,7 +49,7 @@ const navItems: NavItem[] = [
   { label: 'Visits', path: '/visits', icon: <EventIcon />, section: 'manage' },
   { label: 'Medications', path: '/medications', icon: <MedicationIcon />, section: 'care' },
   { label: 'Care log', path: '/care-log', icon: <NoteAltIcon />, section: 'care' },
-  { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon />, section: 'care' },
+  { label: 'Emergency info', path: '/emergency', icon: <EmergencyIcon />, section: 'care' },
   { label: 'Doctor visits', path: '/doctor-prep', icon: <SummarizeIcon />, section: 'care' },
   { label: 'Documents', path: '/documents', icon: <FolderIcon />, section: 'resources' },
   { label: 'Resources', path: '/resources', icon: <MenuBookIcon />, section: 'resources' },
@@ -93,17 +93,10 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
   const drawer = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Logo */}
+      {/* Logo — uses theme h5 (Fraunces opsz 24, SOFT 80) so the wordmark
+          reads in the same typeface as every other serif surface. */}
       <Box sx={{ px: 2.5, py: 2.5 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontFamily: '"Playfair Display", serif',
-            fontWeight: 800,
-            color: 'primary.main',
-            letterSpacing: '-0.5px',
-          }}
-        >
+        <Typography variant="h5" sx={{ color: 'primary.main' }}>
           Trellis
         </Typography>
         {activeCircle && (
@@ -120,17 +113,12 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           if (items.length === 0) return null;
           return (
             <Box key={section} sx={{ mb: 1 }}>
+              {/* Section label uses theme-styled overline (mono, plum,
+                  0.14em tracking). No inline overrides — keeps the
+                  brand's single canonical overline style. */}
               <Typography
                 variant="overline"
-                sx={{
-                  px: 1.5,
-                  py: 0.5,
-                  display: 'block',
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  color: 'text.secondary',
-                  letterSpacing: '0.08em',
-                }}
+                sx={{ px: 1.5, py: 0.5, display: 'block' }}
               >
                 {sectionLabels[section]}
               </Typography>
