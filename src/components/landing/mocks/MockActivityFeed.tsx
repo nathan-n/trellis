@@ -6,6 +6,13 @@ import NoteAltIcon from '@mui/icons-material/NoteAltOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
 import MockDevice from '../MockDevice';
 
+// Avatar colors match the live ActivityFeedPage.actionConfig hex codes
+// so the mock paints the same colors users see after login:
+//   task.complete → #388e3c  (primary-adjacent green)
+//   medication.*  → #0097a7  (teal reference)
+//   careLog.*     → #f57c00  (warm orange/ochre)
+//   visit.*       → #7b1fa2  (plum/purple)
+//   task.create   → #2e7d32  (primary dark green)
 const entries = [
   { icon: <CheckCircleIcon sx={{ fontSize: '0.7rem' }} />, color: '#388e3c', actor: 'Sarah', action: 'completed task "Refill prescriptions"', time: '2h ago', type: 'task' },
   { icon: <MedicationIcon sx={{ fontSize: '0.7rem' }} />, color: '#0097a7', actor: 'Nathan', action: 'logged Donepezil dose — given', time: '3h ago', type: 'medication' },

@@ -2,18 +2,27 @@ import { Box, Typography } from '@mui/material';
 import MockDevice from '../MockDevice';
 
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Caregiver palette — Direction C (review finding 08). The live
+// VisitCalendarPage cycles these exact hex values by caregiver uid.
+// Replaces the Material Design 1 blue/green/purple trio that clashed
+// with the warm cream surfaces.
+const NATHAN = '#3A7D44'; // primary green
+const SARAH  = '#7C6F9B'; // plum / secondary
+const JAMES  = '#B45A3E'; // clay
+
 const visits: Record<number, { name: string; color: string; tentative?: boolean }[]> = {
-  3: [{ name: 'Nathan', color: '#1976d2' }],
-  7: [{ name: 'Sarah', color: '#388e3c' }],
-  8: [{ name: 'Sarah', color: '#388e3c' }],
-  10: [{ name: 'Nathan', color: '#1976d2' }],
-  11: [{ name: 'Nathan', color: '#1976d2' }],
-  12: [{ name: 'Nathan', color: '#1976d2' }],
-  15: [{ name: 'James', color: '#7b1fa2', tentative: true }],
-  17: [{ name: 'Sarah', color: '#388e3c' }],
-  21: [{ name: 'Nathan', color: '#1976d2' }],
-  24: [{ name: 'Sarah', color: '#388e3c' }, { name: 'James', color: '#7b1fa2' }],
-  28: [{ name: 'Nathan', color: '#1976d2' }],
+  3: [{ name: 'Nathan', color: NATHAN }],
+  7: [{ name: 'Sarah', color: SARAH }],
+  8: [{ name: 'Sarah', color: SARAH }],
+  10: [{ name: 'Nathan', color: NATHAN }],
+  11: [{ name: 'Nathan', color: NATHAN }],
+  12: [{ name: 'Nathan', color: NATHAN }],
+  15: [{ name: 'James', color: JAMES, tentative: true }],
+  17: [{ name: 'Sarah', color: SARAH }],
+  21: [{ name: 'Nathan', color: NATHAN }],
+  24: [{ name: 'Sarah', color: SARAH }, { name: 'James', color: JAMES }],
+  28: [{ name: 'Nathan', color: NATHAN }],
 };
 
 export default function MockVisitCalendar() {
