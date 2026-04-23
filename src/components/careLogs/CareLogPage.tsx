@@ -126,7 +126,12 @@ export default function CareLogPage() {
 
           {loading ? <LoadingSpinner /> : (
             <Box sx={{ pb: 10 }}>
-              <CareLogTimeline logs={logs} onDelete={setDeleteTarget} onEdit={setEditTarget} />
+              <CareLogTimeline
+                logs={logs}
+                onDelete={setDeleteTarget}
+                onEdit={setEditTarget}
+                showSpine
+              />
             </Box>
           )}
         </>

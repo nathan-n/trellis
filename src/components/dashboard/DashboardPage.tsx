@@ -2,9 +2,7 @@ import { Grid, Box } from '@mui/material';
 import { useCircle } from '../../contexts/CircleContext';
 import { CircleRole } from '../../constants';
 import MyNextPriorityCard from '../tasks/MyNextPriorityCard';
-import TodaySnapshotCard from './TodaySnapshotCard';
-import MyTasksCard from './MyTasksCard';
-import UpcomingVisitsCard from './UpcomingVisitsCard';
+import TodaySpine from './TodaySpine';
 import CircleHealthCard from './CircleHealthCard';
 
 export default function DashboardPage() {
@@ -14,24 +12,18 @@ export default function DashboardPage() {
   return (
     <Box>
       {/* Priority + wellbeing check-in — unchanged behavior */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 4 }}>
         <MyNextPriorityCard />
       </Box>
 
-      {/* Row 1: personal daily snapshot */}
-      <Grid container spacing={2} sx={{ mb: isAdmin ? 3 : 0 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <TodaySnapshotCard />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <MyTasksCard />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 12, md: 4 }}>
-          <UpcomingVisitsCard />
-        </Grid>
-      </Grid>
+      {/* Today's spine — replaces the earlier three snapshot cards with a
+          single unified timeline of the day's care logs, visits, and my
+          due tasks. Spine runs top-to-bottom; events string along it. */}
+      <Box sx={{ mb: isAdmin ? 4 : 0 }}>
+        <TodaySpine />
+      </Box>
 
-      {/* Row 2 (admin only): circle-wide wellbeing signal. Expenses are
+      {/* Row (admin only): circle-wide wellbeing signal. Expenses are
           intentionally NOT shown on the home dashboard — running spend
           totals on a caregiver's landing page are demoralizing. They live
           in the Expenses view where users can visit intentionally. */}
