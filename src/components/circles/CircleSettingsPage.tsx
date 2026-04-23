@@ -395,17 +395,19 @@ export default function CircleSettingsPage() {
         </Card>
       )}
 
-      {/* Type-to-confirm delete dialog */}
+      {/* Type-to-confirm delete dialog — destructive variant (clay top
+          border, clay warning icon, clay confirm button). Matches
+          ConfirmDialog destructive treatment (review finding 11). */}
       <Dialog
         open={deleteOpen}
         onClose={handleDeleteDialogClose}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderTopColor: 'error.main' } }}
+        PaperProps={{ sx: { borderTopColor: 'clay.main' } }}
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <WarningAmberIcon color="error" />
+            <WarningAmberIcon sx={{ color: 'clay.main' }} />
             Delete Circle
           </Box>
         </DialogTitle>
@@ -432,7 +434,7 @@ export default function CircleSettingsPage() {
           </Button>
           <Button
             variant="contained"
-            color="error"
+            sx={{ bgcolor: 'clay.main', '&:hover': { bgcolor: 'clay.dark' } }}
             onClick={handleDeleteCircle}
             disabled={!deleteEnabled}
           >

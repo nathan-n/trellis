@@ -18,6 +18,14 @@ interface ConfirmDialogProps {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /**
+   * When true, the dialog renders in destructive mode:
+   * - Top border + icon + confirm button use CLAY (not MUI error red).
+   * - Clay signals urgency without the alarm-bell siren of MUI's red —
+   *   matches Direction C's accent map (clay = urgent/destructive).
+   * Review finding 11 — a green "go" top border on destructive deletes
+   * read wrong; clay makes the intent unambiguous.
+   */
   destructive?: boolean;
 }
 
@@ -38,13 +46,13 @@ export default function ConfirmDialog({
       maxWidth="xs"
       fullWidth
       PaperProps={destructive ? {
-        sx: { borderTopColor: 'error.main' },
+        sx: { borderTopColor: 'clay.main' },
       } : undefined}
     >
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {destructive ? (
-            <WarningAmberIcon color="error" />
+            <WarningAmberIcon sx={{ color: 'clay.main' }} />
           ) : (
             <HelpOutlineIcon color="primary" />
           )}
@@ -59,7 +67,8 @@ export default function ConfirmDialog({
         <Button
           onClick={onConfirm}
           variant="contained"
-          color={destructive ? 'error' : 'primary'}
+          sx={destructive ? { bgcolor: 'clay.main', '&:hover': { bgcolor: 'clay.dark' } } : undefined}
+          color={destructive ? undefined : 'primary'}
         >
           {confirmLabel}
         </Button>

@@ -13,7 +13,16 @@ interface InteractionWarningDialogProps {
 
 export default function InteractionWarningDialog({ open, warnings, onProceed, onCancel }: InteractionWarningDialogProps) {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
+    // Warning variant: ochre top border (not the default primary-green).
+    // Direction C accent map — ochre carries "caution / attention" weight
+    // without the destructive urgency of clay. Review finding 11.
+    <Dialog
+      open={open}
+      onClose={onCancel}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{ sx: { borderTopColor: 'ochre.main' } }}
+    >
       <DialogTitle>Potential Drug Interactions</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -35,7 +44,11 @@ export default function InteractionWarningDialog({ open, warnings, onProceed, on
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>Cancel</Button>
-        <Button onClick={onProceed} variant="contained" color="warning">
+        <Button
+          onClick={onProceed}
+          variant="contained"
+          sx={{ bgcolor: 'ochre.main', '&:hover': { bgcolor: 'ochre.dark' }, color: 'white' }}
+        >
           Add Anyway
         </Button>
       </DialogActions>
