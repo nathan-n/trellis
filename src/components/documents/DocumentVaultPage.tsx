@@ -93,7 +93,7 @@ export default function DocumentVaultPage() {
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="h5">Document Vault</Typography>
+        <Typography variant="h5">Documents</Typography>
       </Box>
 
       <ToggleButtonGroup

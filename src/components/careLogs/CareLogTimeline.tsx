@@ -58,7 +58,7 @@ export default function CareLogTimeline({ logs, onEdit, onDelete }: CareLogTimel
                 <Typography variant="body2" fontWeight={600}>
                   {log.authorName}
                 </Typography>
-                {log.isShiftHandoff && <Chip label="Shift Handoff" size="small" color="primary" />}
+                {log.isShiftHandoff && <Chip label="Handoff" size="small" color="primary" />}
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography variant="caption" color="text.secondary">

@@ -201,7 +201,7 @@ export default function CareLogEntryForm({ date, onCreated, editLog }: CareLogEn
       <TextField label="General Notes" value={generalNotes} onChange={(e) => setGeneralNotes(e.target.value)} fullWidth multiline rows={3} />
 
       {/* Shift Handoff */}
-      <Divider><Chip label="Shift Handoff" size="small" /></Divider>
+      <Divider><Chip label="Handoff" size="small" /></Divider>
       <FormControlLabel control={<Switch checked={isShiftHandoff} onChange={(e) => setIsShiftHandoff(e.target.checked)} />} label="This is a shift handoff entry" />
       {isShiftHandoff && (
         <TextField label="Shift Summary for Next Caregiver" value={shiftSummary} onChange={(e) => setShiftSummary(e.target.value)} fullWidth multiline rows={3} placeholder="Key things the next caregiver should know..." />

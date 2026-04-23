@@ -45,10 +45,10 @@ export default function TodaySnapshotCard() {
         ) : !mostRecent ? (
           <Stack spacing={1.5}>
             <Typography variant="body2" color="text.secondary">
-              No care log entries yet today.
+              Nothing logged yet today.
             </Typography>
             <Button size="small" variant="outlined" onClick={() => navigate('/care-log')}>
-              Log an entry
+              Log today
             </Button>
           </Stack>
         ) : (

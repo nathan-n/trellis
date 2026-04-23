@@ -42,23 +42,23 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'My Next Priority', path: '/my-next', icon: <PriorityHighIcon />, section: 'overview' },
+  { label: 'Today', path: '/my-next', icon: <PriorityHighIcon />, section: 'overview' },
   { label: 'Activity', path: '/activity', icon: <TimelineIcon />, section: 'overview' },
   { label: 'Tasks', path: '/tasks', icon: <TaskAltIcon />, section: 'manage' },
-  { label: 'Task Calendar', path: '/tasks/calendar', icon: <CalendarMonthIcon />, section: 'manage' },
-  { label: 'Visit Schedule', path: '/visits', icon: <EventIcon />, section: 'manage' },
+  { label: 'Calendar', path: '/tasks/calendar', icon: <CalendarMonthIcon />, section: 'manage' },
+  { label: 'Visits', path: '/visits', icon: <EventIcon />, section: 'manage' },
   { label: 'Medications', path: '/medications', icon: <MedicationIcon />, section: 'care' },
-  { label: 'Care Log', path: '/care-log', icon: <NoteAltIcon />, section: 'care' },
+  { label: 'Care log', path: '/care-log', icon: <NoteAltIcon />, section: 'care' },
   { label: 'Emergency Info', path: '/emergency', icon: <EmergencyIcon />, section: 'care' },
-  { label: 'Doctor Prep', path: '/doctor-prep', icon: <SummarizeIcon />, section: 'care' },
+  { label: 'Doctor visits', path: '/doctor-prep', icon: <SummarizeIcon />, section: 'care' },
   { label: 'Documents', path: '/documents', icon: <FolderIcon />, section: 'resources' },
   { label: 'Resources', path: '/resources', icon: <MenuBookIcon />, section: 'resources' },
   { label: 'Expenses', path: '/expenses', icon: <ReceiptLongIcon />, section: 'resources' },
-  { label: 'My Wellbeing', path: '/wellbeing', icon: <FavoriteIcon />, section: 'you' },
+  { label: 'My wellbeing', path: '/wellbeing', icon: <FavoriteIcon />, section: 'you' },
 ];
 
 const adminItems: NavItem[] = [
-  { label: 'Circle Settings', path: '/circle/settings', icon: <SettingsIcon />, minRole: CircleRole.ADMIN },
+  { label: 'Settings', path: '/circle/settings', icon: <SettingsIcon />, minRole: CircleRole.ADMIN },
 ];
 
 const sectionLabels: Record<string, string> = {

@@ -82,7 +82,7 @@ export default function CareLogPage() {
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="h5">Daily Care Log</Typography>
+        <Typography variant="h5">Care log</Typography>
       </Box>
 
       <Tabs
@@ -91,7 +91,7 @@ export default function CareLogPage() {
         sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab value="day" label="Day" />
-        <Tab value="history" label="All Entries" />
+        <Tab value="history" label="History" />
         <Tab value="trends" label="Trends" />
       </Tabs>
 

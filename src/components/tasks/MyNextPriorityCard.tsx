@@ -77,13 +77,13 @@ export default function MyNextPriorityCard() {
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
             <PriorityHighIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
-              You're all caught up
+              You're all <SerifAccent>caught up</SerifAccent>
             </Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>
-              No active tasks assigned to you right now.
+              Nothing on your plate right now — take the minute.
             </Typography>
             <Button variant="outlined" onClick={() => navigate('/tasks')}>
-              View All Tasks
+              View all tasks
             </Button>
           </CardContent>
         </Card>

@@ -194,7 +194,7 @@ export default function CircleSettingsPage() {
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto' }}>
       <Typography variant="h5" gutterBottom>
-        Circle Settings
+        Settings
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         {activeCircle.name} — Caring for {activeCircle.patientName}
