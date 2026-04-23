@@ -4,8 +4,8 @@
   "description": "Caregiving coordination for your family",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F5F0",
-  "theme_color": "#2E7D32",
+  "background_color": "#F7F3EC",
+  "theme_color": "#3A7D44",
   "icons": [
     {
       "src": "/icons/icon-192.svg",
