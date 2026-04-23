@@ -26,6 +26,7 @@ import { logAdministration, subscribeAdministrationLog } from '../../services/me
 import { formatDateTime } from '../../utils/dateUtils';
 import type { Medication, AdministrationLog } from '../../types';
 import MedicationDrugInfo from './MedicationDrugInfo';
+import { accentChipSx } from '../../utils/accentMap';
 
 interface AdministrationLogDialogProps {
   open: boolean;
@@ -128,9 +129,13 @@ export default function AdministrationLogDialog({ open, onClose, medication }: A
                 primary={
                   <Stack direction="row" spacing={1} alignItems="center">
                     {log.skipped ? (
-                      <Chip icon={<CancelIcon />} label="Skipped" size="small" color="warning" />
+                      // Skipped = categorical log state, not a warning.
+                      // slate (reference tone) reads neutral; pairs with
+                      // the green "Given" chip for contrast without
+                      // over-alarming the user.
+                      <Chip icon={<CancelIcon />} label="Skipped" size="small" sx={accentChipSx('slate')} />
                     ) : (
-                      <Chip icon={<CheckCircleIcon />} label="Given" size="small" color="success" />
+                      <Chip icon={<CheckCircleIcon />} label="Given" size="small" sx={accentChipSx('green')} />
                     )}
                     <Typography variant="body2">{log.administeredByName}</Typography>
                   </Stack>

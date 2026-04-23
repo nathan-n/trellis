@@ -386,8 +386,8 @@ export default function VisitCalendarPage() {
               || selectedVisitForMenu.createdByUid === userProfile?.uid) && (
               <>
                 <Divider />
-                <MenuItem onClick={() => { setDeleteTarget(selectedVisitForMenu); closeMenu(); }} sx={{ color: 'error.main' }}>
-                  <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+                <MenuItem onClick={() => { setDeleteTarget(selectedVisitForMenu); closeMenu(); }} sx={{ color: 'clay.main' }}>
+                  <ListItemIcon><DeleteIcon fontSize="small" sx={{ color: 'clay.main' }} /></ListItemIcon>
                   <ListItemText>Delete</ListItemText>
                 </MenuItem>
               </>

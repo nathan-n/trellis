@@ -10,6 +10,7 @@ import {
 import SendIcon from '@mui/icons-material/SendOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
+import { useCircleMembers } from '../../hooks/useCircleMembers';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { addComment, subscribeComments } from '../../services/taskService';
 import { formatDateTime } from '../../utils/dateUtils';
@@ -22,6 +23,7 @@ interface TaskCommentsProps {
 export default function TaskComments({ taskId }: TaskCommentsProps) {
   const { userProfile } = useAuth();
   const { activeCircle } = useCircle();
+  const { members } = useCircleMembers();
   const { showMessage } = useSnackbar();
   const [comments, setComments] = useState<TaskComment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -58,9 +60,13 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
       </Typography>
 
       <Stack spacing={2} sx={{ mb: 3 }}>
-        {comments.map((comment) => (
+        {comments.map((comment) => {
+          // Look up the author's photoURL from the circle member list so
+          // comments render the same avatar pattern as tasks/settings.
+          const author = members.find((m) => m.uid === comment.authorUid);
+          return (
           <Box key={comment.id} sx={{ display: 'flex', gap: 1.5 }}>
-            <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>
+            <Avatar src={author?.photoURL || undefined} sx={{ width: 32, height: 32, fontSize: 14 }}>
               {comment.authorName?.[0]?.toUpperCase()}
             </Avatar>
             <Box sx={{ flex: 1 }}>
@@ -77,7 +83,8 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
               </Typography>
             </Box>
           </Box>
-        ))}
+          );
+        })}
       </Stack>
 
       <Box sx={{ display: 'flex', gap: 1 }}>

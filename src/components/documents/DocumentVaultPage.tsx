@@ -198,7 +198,7 @@ export default function DocumentVaultPage() {
                   {((role && hasMinRole(role, CircleRole.ADMIN)) || document.uploadedByUid === userProfile?.uid) && (
                     <IconButton
                       size="small"
-                      color="error"
+                      sx={{ color: 'clay.main' }}
                       onClick={(e) => { e.stopPropagation(); setDeleteTarget(document); }}
                       aria-label={`Delete ${document.title}`}
                     >

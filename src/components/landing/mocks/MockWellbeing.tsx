@@ -1,6 +1,14 @@
 import { Box, Card, CardContent, Typography, Chip, Stack, Slider } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MockDevice from '../MockDevice';
+import { accentChipSx, type AccentKind } from '../../../utils/accentMap';
+
+// Stress level → Direction C accent. Matches WellbeingHistoryPage.
+const stressAccent: Record<string, AccentKind> = {
+  Low: 'green',
+  Moderate: 'ochre',
+  High: 'clay',
+};
 
 export default function MockWellbeing() {
   return (
@@ -44,9 +52,13 @@ export default function MockWellbeing() {
             <CardContent sx={{ py: 0.5, px: 1.5, '&:last-child': { pb: 0.5 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>{c.date}</Typography>
               <Stack direction="row" spacing={0.3}>
-                <Chip label={c.stress} size="small" color={c.stress === 'High' ? 'error' : c.stress === 'Moderate' ? 'warning' : 'success'} sx={{ height: 16, fontSize: '0.5rem' }} />
+                <Chip label={c.stress} size="small" sx={{ height: 16, fontSize: '0.5rem', ...accentChipSx(stressAccent[c.stress] ?? 'slate') }} />
                 <Chip label={c.sleep} size="small" variant="outlined" sx={{ height: 16, fontSize: '0.5rem' }} />
-                {c.overwhelmed && <Chip label="Overwhelmed" size="small" color="error" variant="outlined" sx={{ height: 16, fontSize: '0.5rem' }} />}
+                {c.overwhelmed && (
+                  // Rose (wellbeing/body tone) — matches the live
+                  // WellbeingHistoryPage overwhelmed chip.
+                  <Chip label="Overwhelmed" size="small" variant="outlined" sx={{ height: 16, fontSize: '0.5rem', color: 'rose.dark', borderColor: 'rose.main' }} />
+                )}
               </Stack>
             </CardContent>
           </Card>

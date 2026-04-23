@@ -14,10 +14,17 @@ import WellbeingCheckinCard from './WellbeingCheckinCard';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import PageHeader from '../shared/PageHeader';
+import { accentChipSx, type AccentKind } from '../../utils/accentMap';
 
 const stressLabels = ['', 'Low', 'Mild', 'Moderate', 'High', 'Very High'];
-const stressColors: Record<number, 'success' | 'info' | 'warning' | 'error'> = {
-  1: 'success', 2: 'success', 3: 'warning', 4: 'error', 5: 'error',
+// Stress severity uses the Direction C accent map (review finding 03):
+//   1–2 low  → green (OK)
+//   3 moderate → ochre (scheduled/attention)
+//   4–5 high → clay (urgent)
+// Replaces the prior MUI success/info/warning/error palette so the chip
+// speaks the same visual language as priority chips across the app.
+const stressAccent: Record<number, AccentKind> = {
+  1: 'green', 2: 'green', 3: 'ochre', 4: 'clay', 5: 'clay',
 };
 
 export default function WellbeingHistoryPage() {
@@ -111,11 +118,19 @@ export default function WellbeingHistoryPage() {
                     <Chip
                       label={`Stress: ${stressLabels[c.stressLevel]}`}
                       size="small"
-                      color={stressColors[c.stressLevel] ?? 'default'}
+                      sx={accentChipSx(stressAccent[c.stressLevel] ?? 'slate')}
                     />
                     <Chip label={`Sleep: ${c.sleepQuality}`} size="small" variant="outlined" />
                     {c.feelingOverwhelmed && (
-                      <Chip label="Overwhelmed" size="small" color="error" variant="outlined" />
+                      // Overwhelmed is wellbeing-domain, so rose (body &
+                      // care tone) — not MUI error red — keeps the chip
+                      // in-family with the rest of the wellbeing page.
+                      <Chip
+                        label="Overwhelmed"
+                        size="small"
+                        variant="outlined"
+                        sx={{ color: 'rose.dark', borderColor: 'rose.main' }}
+                      />
                     )}
                   </Stack>
                 </Box>

@@ -1,5 +1,6 @@
 import { Box, Card, CardContent, Typography, Chip, Stack, Avatar } from '@mui/material';
 import MockDevice from '../MockDevice';
+import { accentChipSx } from '../../../utils/accentMap';
 
 export default function MockCareLog() {
   return (
@@ -15,7 +16,7 @@ export default function MockCareLog() {
               <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto', fontSize: '0.6rem' }}>2:30 PM</Typography>
             </Box>
             <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 0.5 }}>
-              <Chip label="Mood: Calm" size="small" color="success" sx={{ height: 18, fontSize: '0.55rem' }} />
+              <Chip label="Mood: Calm" size="small" sx={{ height: 18, fontSize: '0.55rem', ...accentChipSx('green') }} />
               <Chip label="Sleep: Fair (6h)" size="small" variant="outlined" sx={{ height: 18, fontSize: '0.55rem' }} />
               <Chip label="2 meals" size="small" variant="outlined" sx={{ height: 18, fontSize: '0.55rem' }} />
             </Stack>
@@ -41,7 +42,7 @@ export default function MockCareLog() {
               <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto', fontSize: '0.6rem' }}>9:15 AM</Typography>
             </Box>
             <Stack direction="row" spacing={0.5} flexWrap="wrap">
-              <Chip label="Mood: Happy" size="small" color="success" sx={{ height: 18, fontSize: '0.55rem' }} />
+              <Chip label="Mood: Happy" size="small" sx={{ height: 18, fontSize: '0.55rem', ...accentChipSx('green') }} />
               <Chip label="Sleep: Good (8h)" size="small" variant="outlined" sx={{ height: 18, fontSize: '0.55rem' }} />
             </Stack>
           </CardContent>

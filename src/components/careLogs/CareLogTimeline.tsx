@@ -16,17 +16,28 @@ import { formatDateTime } from '../../utils/dateUtils';
 import type { CareLog } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
+import { useCircleMembers } from '../../hooks/useCircleMembers';
 import { CircleRole, Mood } from '../../constants';
 import { moodColors as moodPaletteColors } from '../analytics/MoodCalendarHeatmap';
+import { accentChipSx, type AccentKind } from '../../utils/accentMap';
 
-const moodChipColors: Record<string, 'success' | 'error' | 'warning' | 'info' | 'default'> = {
-  calm: 'success',
-  happy: 'success',
-  agitated: 'error',
-  confused: 'warning',
-  withdrawn: 'info',
+// Mood → Direction C accent. Replaces MUI semantic chip colors so the
+// care-log reads in the same visual language as priority/refill/doc
+// chips across the app (review finding 03).
+const moodAccent: Record<string, AccentKind | 'default'> = {
+  calm: 'green',
+  happy: 'green',
+  agitated: 'clay',
+  confused: 'ochre',
+  withdrawn: 'slate',
   other: 'default',
 };
+
+function moodChipSx(mood: string) {
+  const kind = moodAccent[mood] ?? 'default';
+  if (kind === 'default') return { fontWeight: 500 };
+  return accentChipSx(kind);
+}
 
 interface CareLogTimelineProps {
   logs: CareLog[];
@@ -44,6 +55,7 @@ interface CareLogTimelineProps {
 export default function CareLogTimeline({ logs, onEdit, onDelete, showSpine = false }: CareLogTimelineProps) {
   const { userProfile } = useAuth();
   const { role } = useCircle();
+  const { members } = useCircleMembers();
   const isAdmin = role === CircleRole.ADMIN;
 
   if (logs.length === 0) {
@@ -54,7 +66,12 @@ export default function CareLogTimeline({ logs, onEdit, onDelete, showSpine = fa
     );
   }
 
-  const renderCard = (log: CareLog) => (
+  const renderCard = (log: CareLog) => {
+    // Look up the author via the members hook so we render the same
+    // photo+fallback pattern used in TaskCard / CircleSettings. Prior
+    // initial-only Avatar was inconsistent with the rest of the app.
+    const author = members.find((m) => m.uid === log.authorUid);
+    return (
     <Card
       variant={log.isShiftHandoff ? 'elevation' : 'outlined'}
       sx={log.isShiftHandoff ? { borderLeft: 4, borderLeftColor: 'primary.main' } : {}}
@@ -62,7 +79,7 @@ export default function CareLogTimeline({ logs, onEdit, onDelete, showSpine = fa
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar sx={{ width: 28, height: 28, fontSize: 13 }}>
+            <Avatar src={author?.photoURL || undefined} sx={{ width: 28, height: 28, fontSize: 13 }}>
               {log.authorName?.[0]?.toUpperCase()}
             </Avatar>
             <Typography variant="body2" fontWeight={600}>
@@ -83,7 +100,7 @@ export default function CareLogTimeline({ logs, onEdit, onDelete, showSpine = fa
             )}
             {(isAdmin || log.authorUid === userProfile?.uid) && onDelete && (
               <Tooltip title="Delete entry" arrow>
-                <IconButton size="small" color="error" onClick={() => onDelete(log)}>
+                <IconButton size="small" sx={{ color: 'clay.main' }} onClick={() => onDelete(log)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -92,7 +109,7 @@ export default function CareLogTimeline({ logs, onEdit, onDelete, showSpine = fa
         </Box>
 
         <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1.5 }}>
-          <Chip label={`Mood: ${log.mood}`} size="small" color={moodChipColors[log.mood] ?? 'default'} />
+          <Chip label={`Mood: ${log.mood}`} size="small" sx={moodChipSx(log.mood)} />
           <Chip label={`Sleep: ${log.sleep?.quality ?? 'N/A'}${log.sleep?.hoursSlept ? ` (${log.sleep.hoursSlept}h)` : ''}`} size="small" variant="outlined" />
           {log.meals?.length > 0 && <Chip label={`${log.meals.length} meal(s)`} size="small" variant="outlined" />}
         </Stack>
@@ -132,7 +149,8 @@ export default function CareLogTimeline({ logs, onEdit, onDelete, showSpine = fa
         )}
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   if (!showSpine) {
     return <Stack spacing={2}>{logs.map((log) => <Box key={log.id}>{renderCard(log)}</Box>)}</Stack>;

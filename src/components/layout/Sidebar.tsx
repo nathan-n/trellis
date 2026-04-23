@@ -147,7 +147,10 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                       >
                         <ListItemIcon sx={{ minWidth: 36 }}>
                           {item.path === '/tasks' && unseenTaskCount > 0 ? (
-                            <Badge badgeContent={unseenTaskCount} color="info" max={99}>
+                            // Plum (secondary) matches the unseen-task
+                            // left-rule on TaskCard / MyNextPriorityCard —
+                            // single "new to me" signal across the app.
+                            <Badge badgeContent={unseenTaskCount} color="secondary" max={99}>
                               {item.icon}
                             </Badge>
                           ) : item.icon}

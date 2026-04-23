@@ -48,11 +48,20 @@ export default function MedicationDrugInfo({ openFda }: MedicationDrugInfoProps)
         {open ? 'Hide drug info' : 'Drug info'}
       </Button>
       <Collapse in={open}>
-        <Box sx={{ mt: 1, pl: 1, borderLeft: 2, borderColor: 'info.light' }}>
+        {/* slate accent (reference/reports tone) replaces MUI info blue
+            for pharm class chips — matches the Direction C accent map
+            where reference data uses slate across the app. */}
+        <Box sx={{ mt: 1, pl: 1, borderLeft: 2, borderColor: 'slate.light' }}>
           {openFda.pharmClassEpc.length > 0 && (
             <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 1 }}>
               {openFda.pharmClassEpc.map((cls, i) => (
-                <Chip key={i} label={cls} size="small" variant="outlined" color="info" sx={{ fontSize: '0.65rem', height: 20 }} />
+                <Chip
+                  key={i}
+                  label={cls}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.65rem', height: 20, color: 'slate.dark', borderColor: 'slate.main' }}
+                />
               ))}
             </Stack>
           )}

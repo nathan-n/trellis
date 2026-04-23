@@ -40,11 +40,30 @@ interface EmergencyProfileEditDialogProps {
 
 const relationshipOptions = ['Spouse', 'Son', 'Daughter', 'Sibling', 'Parent', 'Friend', 'Caregiver', 'Other'];
 
-function SectionCard({ icon, label, color, children }: { icon: React.ReactNode; label: string; color: string; children: React.ReactNode }) {
+// SectionCard — neutral by default. The `accent` prop is reserved for
+// truly high-stakes sections (Allergies) where an urgency cue earns its
+// place. Mirrors the view-page de-rainbow fix (review finding 04): the
+// edit dialog shouldn't look like a paintbox just because the view
+// doesn't.
+function SectionCard({
+  icon,
+  label,
+  accent,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  accent?: 'clay';
+  children: React.ReactNode;
+}) {
+  const accentColor = accent === 'clay' ? 'clay.main' : undefined;
   return (
-    <Card variant="outlined" sx={{ borderLeft: 4, borderLeftColor: color }}>
+    <Card
+      variant="outlined"
+      sx={accentColor ? { borderLeft: 4, borderLeftColor: accentColor } : undefined}
+    >
       <CardContent sx={{ py: 2, px: 2.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, color }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, color: accentColor ?? 'text.primary' }}>
           {icon}
           <Typography variant="subtitle1" fontWeight={600} color="inherit">{label}</Typography>
         </Box>
@@ -158,30 +177,30 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
             </CardContent>
           </Card>
 
-          {/* Allergies */}
-          <SectionCard icon={<WarningAmberIcon />} label="Allergies" color="warning.main">
+          {/* Allergies — the only section that keeps an accent. Allergies
+              are high-stakes emergency data (anaphylaxis risk), so the
+              clay left-rule earns its urgency cue. */}
+          <SectionCard icon={<WarningAmberIcon />} label="Allergies" accent="clay">
             <ChipInput
               label="Add allergy"
               placeholder="e.g. Penicillin"
               values={allergies}
               onChange={setAllergies}
-              chipColor="warning"
             />
           </SectionCard>
 
           {/* Conditions */}
-          <SectionCard icon={<HealthAndSafetyIcon />} label="Conditions" color="secondary.main">
+          <SectionCard icon={<HealthAndSafetyIcon />} label="Conditions">
             <ChipInput
               label="Add condition"
               placeholder="e.g. Hypertension"
               values={conditions}
               onChange={setConditions}
-              chipColor="secondary"
             />
           </SectionCard>
 
           {/* Emergency Contacts */}
-          <SectionCard icon={<ContactEmergencyIcon />} label="Emergency Contacts" color="primary.main">
+          <SectionCard icon={<ContactEmergencyIcon />} label="Emergency Contacts">
             <Stack spacing={1.5}>
               {contacts.map((contact, i) => (
                 <Box key={i} sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 2, position: 'relative' }}>
@@ -230,7 +249,7 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
           </SectionCard>
 
           {/* Current Medications — read-only, synced from Medications page */}
-          <SectionCard icon={<MedicationIcon />} label="Current Medications" color="primary.light">
+          <SectionCard icon={<MedicationIcon />} label="Current Medications">
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
               Medications sync automatically from the Medications page.
             </Typography>
@@ -261,7 +280,7 @@ export default function EmergencyProfileEditDialog({ open, onClose, profile }: E
           </SectionCard>
 
           {/* Medical & Insurance */}
-          <SectionCard icon={<LocalHospitalIcon />} label="Medical & Insurance" color="secondary.main">
+          <SectionCard icon={<LocalHospitalIcon />} label="Medical & Insurance">
             <Stack spacing={2}>
               <Typography variant="caption" fontWeight={600} color="text.secondary">Physician</Typography>
               <Box sx={{ display: 'flex', gap: 2 }}>

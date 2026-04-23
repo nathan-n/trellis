@@ -161,7 +161,7 @@ export default function ExpenseListPage() {
                   </IconButton>
                 )}
                 {((role && hasMinRole(role, CircleRole.ADMIN)) || expense.paidByUid === userProfile?.uid) && (
-                  <IconButton size="small" color="error" onClick={() => setDeleteTarget(expense)}>
+                  <IconButton size="small" sx={{ color: 'clay.main' }} onClick={() => setDeleteTarget(expense)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 )}

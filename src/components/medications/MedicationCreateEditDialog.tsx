@@ -191,7 +191,13 @@ export default function MedicationCreateEditDialog({ open, onClose, medication, 
             {openFda && (
               <Stack direction="row" spacing={0.5} flexWrap="wrap">
                 {openFda.pharmClassEpc.map((cls, i) => (
-                  <Chip key={i} label={cls} size="small" color="info" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                  <Chip
+                    key={i}
+                    label={cls}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.7rem', color: 'slate.dark', borderColor: 'slate.main' }}
+                  />
                 ))}
                 {openFda.genericNames.length > 0 && (
                   <Typography variant="caption" color="text.secondary">

@@ -174,7 +174,13 @@ export default function MedicationListPage() {
                     {med.openFda?.pharmClassEpc?.length ? (
                       <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mt: 0.5 }}>
                         {med.openFda.pharmClassEpc.slice(0, 2).map((cls, i) => (
-                          <Chip key={i} label={cls} size="small" color="info" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                          <Chip
+                            key={i}
+                            label={cls}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontSize: '0.65rem', height: 20, color: 'slate.dark', borderColor: 'slate.main' }}
+                          />
                         ))}
                       </Stack>
                     ) : null}
@@ -198,7 +204,7 @@ export default function MedicationListPage() {
                     </IconButton>
                   )}
                   {((role && hasMinRole(role, CircleRole.ADMIN)) || med.createdByUid === userProfile?.uid) && (
-                    <IconButton size="small" color="error" onClick={() => setDeleteTarget(med)}>
+                    <IconButton size="small" sx={{ color: 'clay.main' }} onClick={() => setDeleteTarget(med)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   )}

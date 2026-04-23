@@ -197,7 +197,7 @@ export default function TaskDetailPage() {
                 </IconButton>
               )}
               {canDelete && (
-                <IconButton color="error" onClick={() => setDeleteOpen(true)}>
+                <IconButton sx={{ color: 'clay.main' }} onClick={() => setDeleteOpen(true)}>
                   <DeleteIcon />
                 </IconButton>
               )}

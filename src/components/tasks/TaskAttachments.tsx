@@ -120,7 +120,7 @@ export default function TaskAttachments({ taskId }: TaskAttachmentsProps) {
                   <DownloadIcon fontSize="small" />
                 </IconButton>
                 {role && hasMinRole(role, CircleRole.ADMIN) && (
-                  <IconButton size="small" onClick={() => handleRemove(att)} color="error">
+                  <IconButton size="small" onClick={() => handleRemove(att)} sx={{ color: 'clay.main' }}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 )}

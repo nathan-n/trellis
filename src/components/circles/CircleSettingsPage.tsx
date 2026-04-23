@@ -303,7 +303,7 @@ export default function CircleSettingsPage() {
                     key={inv.id}
                     secondaryAction={
                       isAdmin && inv.status === InvitationStatus.PENDING ? (
-                        <IconButton color="error" onClick={() => handleRevoke(inv.id)} title="Revoke invitation">
+                        <IconButton sx={{ color: 'clay.main' }} onClick={() => handleRevoke(inv.id)} title="Revoke invitation">
                           <CancelIcon />
                         </IconButton>
                       ) : undefined
@@ -361,7 +361,7 @@ export default function CircleSettingsPage() {
         <Divider />
         <MenuItem
           onClick={() => selectedMember && handleRemove(selectedMember.uid)}
-          sx={{ color: 'error.main' }}
+          sx={{ color: 'clay.main' }}
         >
           Remove from Circle
         </MenuItem>
@@ -369,13 +369,17 @@ export default function CircleSettingsPage() {
 
       <InviteDialog open={inviteOpen} onClose={handleInviteClose} />
 
-      {/* Danger Zone — admin only */}
+      {/* Danger Zone — admin only. Clay (not MUI error red) matches the
+          destructive-accent treatment shared by ConfirmDialog, delete
+          IconButtons, and the type-to-confirm dialog below. Keeps the
+          whole app speaking a single "urgency without alarm-siren"
+          language (review finding 11). */}
       {isAdmin && (
-        <Card sx={{ mt: 3, borderLeft: 4, borderColor: 'error.main' }}>
+        <Card sx={{ mt: 3, borderLeft: 4, borderColor: 'clay.main' }}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <WarningAmberIcon color="error" />
-              <Typography variant="h6" color="error">Danger Zone</Typography>
+              <WarningAmberIcon sx={{ color: 'clay.main' }} />
+              <Typography variant="h6" sx={{ color: 'clay.main' }}>Danger Zone</Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Deleting this circle hides it for everyone and marks it for permanent
@@ -385,9 +389,13 @@ export default function CircleSettingsPage() {
             </Typography>
             <Button
               variant="outlined"
-              color="error"
               startIcon={<DeleteForeverIcon />}
               onClick={() => setDeleteOpen(true)}
+              sx={{
+                color: 'clay.main',
+                borderColor: 'clay.main',
+                '&:hover': { borderColor: 'clay.dark', bgcolor: 'clay.light', color: 'clay.dark' },
+              }}
             >
               Delete Circle
             </Button>

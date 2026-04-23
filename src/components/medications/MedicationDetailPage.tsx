@@ -23,6 +23,7 @@ import type { Medication, AdministrationLog } from '../../types';
 import MedicationDrugInfo from './MedicationDrugInfo';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import { refillChipSx, refillUrgency, accentChipSx } from '../../utils/accentMap';
 
 export default function MedicationDetailPage() {
   const { medicationId } = useParams<{ medicationId: string }>();
@@ -191,11 +192,27 @@ export default function MedicationDetailPage() {
               ) : null}
               <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
                 <Chip label={isActive ? 'Active' : 'Inactive'} size="small" color={isActive ? 'success' : 'default'} />
-                {isRefillSoon && (
-                  <Chip icon={<WarningAmberIcon />} label={`Refill: ${formatDate(med.refillDate)}`} size="small" color="warning" />
-                )}
+                {isRefillSoon && med.refillDate && (() => {
+                  // Refill urgency follows the shared accent map:
+                  // overdue/<3d → clay, ≤7d → ochre (matches list page).
+                  const daysUntil = dayjs(med.refillDate.toDate()).diff(dayjs(), 'day');
+                  return (
+                    <Chip
+                      icon={<WarningAmberIcon />}
+                      label={`Refill: ${formatDate(med.refillDate)}`}
+                      size="small"
+                      sx={refillChipSx(refillUrgency(daysUntil))}
+                    />
+                  );
+                })()}
                 {med.openFda?.pharmClassEpc?.map((cls, i) => (
-                  <Chip key={i} label={cls} size="small" color="info" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+                  <Chip
+                    key={i}
+                    label={cls}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.7rem', color: 'slate.dark', borderColor: 'slate.main' }}
+                  />
                 ))}
               </Stack>
             </Box>
@@ -206,7 +223,7 @@ export default function MedicationDetailPage() {
                 </Button>
               )}
               {canDelete && (
-                <IconButton color="error" onClick={() => setDeleteOpen(true)}>
+                <IconButton sx={{ color: 'clay.main' }} onClick={() => setDeleteOpen(true)}>
                   <DeleteIcon />
                 </IconButton>
               )}
@@ -285,8 +302,7 @@ export default function MedicationDetailPage() {
                   <Chip
                     label={log.skipped ? 'Skipped' : 'Given'}
                     size="small"
-                    color={log.skipped ? 'warning' : 'success'}
-                    sx={{ width: 70 }}
+                    sx={{ width: 70, ...(log.skipped ? accentChipSx('slate') : accentChipSx('green')) }}
                   />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2">{log.administeredByName}</Typography>

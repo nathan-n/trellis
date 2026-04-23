@@ -3,6 +3,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
 import CancelIcon from '@mui/icons-material/CancelOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import MockDevice from '../MockDevice';
+import { accentChipSx } from '../../../utils/accentMap';
 
 const meds = [
   {
@@ -46,7 +47,9 @@ export default function MockMedications() {
                   </Typography>
                 </Box>
                 {med.refillSoon && (
-                  <Chip icon={<WarningAmberIcon sx={{ fontSize: '0.7rem !important' }} />} label="Refill Apr 12" size="small" color="warning" sx={{ height: 20, fontSize: '0.6rem' }} />
+                  // Ochre refill chip — matches the accent map for
+                  // upcoming/scheduled refills in the live app.
+                  <Chip icon={<WarningAmberIcon sx={{ fontSize: '0.7rem !important' }} />} label="Refill Apr 12" size="small" sx={{ height: 20, fontSize: '0.6rem', ...accentChipSx('ochre') }} />
                 )}
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem', display: 'block', mt: 0.5 }}>
@@ -54,14 +57,21 @@ export default function MockMedications() {
               </Typography>
               <Stack direction="row" spacing={0.5} sx={{ mt: 1 }} flexWrap="wrap">
                 {med.logs.map((log, j) => (
+                  // Given = green (confirmed/done), skipped = slate
+                  // (categorical log state). Matches the accent map used
+                  // in AdministrationLogDialog / MedicationDetailPage.
                   <Chip
                     key={j}
                     icon={log.given ? <CheckCircleIcon sx={{ fontSize: '0.7rem !important' }} /> : <CancelIcon sx={{ fontSize: '0.7rem !important' }} />}
                     label={`${log.by} ${log.time}`}
                     size="small"
-                    color={log.given ? 'success' : 'warning'}
                     variant="outlined"
-                    sx={{ height: 18, fontSize: '0.55rem' }}
+                    sx={{
+                      height: 18,
+                      fontSize: '0.55rem',
+                      color: log.given ? 'primary.dark' : 'slate.dark',
+                      borderColor: log.given ? 'primary.main' : 'slate.main',
+                    }}
                   />
                 ))}
               </Stack>
