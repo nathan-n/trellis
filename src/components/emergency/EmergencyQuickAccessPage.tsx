@@ -120,8 +120,10 @@ export default function EmergencyQuickAccessPage() {
         )}
       </Box>
 
-      {/* Patient Header */}
-      <Card sx={{ ...cardSx, bgcolor: 'primary.main', color: 'white' }}>
+      {/* Patient Header — clay bg signals the Emergency/urgency domain
+          (Direction C accent mapping). Warm terracotta reads as medical
+          urgency without being alarm-bell red. */}
+      <Card sx={{ ...cardSx, bgcolor: 'clay.main', color: 'white' }}>
         <CardContent sx={{ py: 3, px: 3 }}>
           <Typography variant="h4" fontWeight={700}>{profile.patientName}</Typography>
           {profile.dateOfBirth && (
@@ -130,7 +132,7 @@ export default function EmergencyQuickAccessPage() {
           {profile.bloodType && (
             <Chip
               label={`Blood Type: ${profile.bloodType}`}
-              sx={{ mt: 1, bgcolor: 'white', color: 'primary.dark', fontWeight: 700, fontSize: '1rem' }}
+              sx={{ mt: 1, bgcolor: 'white', color: 'clay.dark', fontWeight: 700, fontSize: '1rem' }}
             />
           )}
         </CardContent>

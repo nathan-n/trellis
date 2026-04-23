@@ -46,12 +46,19 @@ export default function CircleHealthCard() {
 
   return (
     <Card
-      sx={{ height: '100%', cursor: 'pointer' }}
+      sx={{
+        height: '100%',
+        cursor: 'pointer',
+        // Rose signals the wellbeing / personal-health domain
+        // (Direction C accent mapping).
+        borderLeft: 3,
+        borderLeftColor: 'rose.main',
+      }}
       onClick={() => navigate('/care-log')}
     >
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-          <FavoriteBorderIcon fontSize="small" color="action" />
+          <FavoriteBorderIcon fontSize="small" sx={{ color: 'rose.main' }} />
           <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
             Circle Health (7d)
           </Typography>

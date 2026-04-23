@@ -188,7 +188,11 @@ export default function ExpenseSummaryTab({ expenses }: Props) {
             sublabel={dayjs().format('MMMM YYYY')}
             deltaPct={metrics.monthDelta}
             inverted // up = more spending = red arrow
-            accentColor={CATEGORY_COLORS.medical}
+            // Ochre signals the money / expenses domain (Direction C
+            // accent mapping). Leaves the other three cards on their
+            // category-specific colors since each represents a
+            // distinct sub-category within expenses.
+            accentColor="#C48B2E"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>

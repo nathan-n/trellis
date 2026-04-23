@@ -52,11 +52,14 @@ export default function DocumentThumbnail({ document, size = 44 }: Props) {
         flexShrink: 0,
         borderRadius: 1,
         overflow: 'hidden',
-        bgcolor: 'grey.100',
+        // Slate signals the documents domain (Direction C accent mapping).
+        // Soft tile bg so the fallback icon reads as "doc" even when
+        // there's no thumbnail to display.
+        bgcolor: 'slate.light',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'text.secondary',
+        color: 'slate.dark',
       }}
     >
       {showImage ? (
