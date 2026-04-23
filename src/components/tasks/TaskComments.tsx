@@ -7,7 +7,7 @@ import {
   Avatar,
   Stack,
 } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
+import SendIcon from '@mui/icons-material/SendOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

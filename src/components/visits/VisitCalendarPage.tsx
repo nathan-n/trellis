@@ -4,11 +4,11 @@ import {
   Popover, MenuList, MenuItem, ListItemIcon, ListItemText, Divider,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ScheduleIcon from '@mui/icons-material/Schedule';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonthOutlined';
+import ScheduleIcon from '@mui/icons-material/ScheduleOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { Calendar, dayjsLocalizer, type Event, type SlotInfo } from 'react-big-calendar';
 import dayjs from 'dayjs';

@@ -4,15 +4,15 @@ import {
   IconButton, ToggleButtonGroup, ToggleButton, Link,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import PlaceIcon from '@mui/icons-material/Place';
-import LanguageIcon from '@mui/icons-material/Language';
-import PhoneIcon from '@mui/icons-material/Phone';
-import GroupsIcon from '@mui/icons-material/Groups';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
+import PlaceIcon from '@mui/icons-material/PlaceOutlined';
+import LanguageIcon from '@mui/icons-material/LanguageOutlined';
+import PhoneIcon from '@mui/icons-material/PhoneOutlined';
+import GroupsIcon from '@mui/icons-material/GroupsOutlined';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalanceOutlined';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoneyOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';

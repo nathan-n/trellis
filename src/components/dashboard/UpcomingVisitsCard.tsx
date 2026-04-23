@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Box, Stack, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import EventIcon from '@mui/icons-material/Event';
+import EventIcon from '@mui/icons-material/EventOutlined';
 import dayjs from 'dayjs';
 import { useCircle } from '../../contexts/CircleContext';
 import { subscribeVisitsByDateRange } from '../../services/visitService';

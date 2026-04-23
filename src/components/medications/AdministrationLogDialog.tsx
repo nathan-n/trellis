@@ -17,8 +17,8 @@ import {
   Typography,
   Divider,
 } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
+import CancelIcon from '@mui/icons-material/CancelOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

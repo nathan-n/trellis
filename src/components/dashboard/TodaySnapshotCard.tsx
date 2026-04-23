@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Box, Chip, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import MoodIcon from '@mui/icons-material/Mood';
+import MoodIcon from '@mui/icons-material/MoodOutlined';
 import { useCircle } from '../../contexts/CircleContext';
 import { subscribeCareLogsByDate } from '../../services/careLogService';
 import type { CareLog } from '../../types';

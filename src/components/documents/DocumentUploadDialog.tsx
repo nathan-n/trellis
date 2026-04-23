@@ -14,7 +14,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloudUploadIcon from '@mui/icons-material/CloudUploadOutlined';
 import { DocumentCategory } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';

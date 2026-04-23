@@ -23,12 +23,12 @@ import {
   TextField,
   Alert,
 } from '@mui/material';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonAddIcon from '@mui/icons-material/PersonAddOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CancelIcon from '@mui/icons-material/CancelOutlined';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useCircle } from '../../contexts/CircleContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

@@ -1,8 +1,8 @@
 import { Box, Card, CardContent, Typography, Chip, Stack } from '@mui/material';
-import PlaceIcon from '@mui/icons-material/Place';
-import LanguageIcon from '@mui/icons-material/Language';
-import PhoneIcon from '@mui/icons-material/Phone';
-import GroupsIcon from '@mui/icons-material/Groups';
+import PlaceIcon from '@mui/icons-material/PlaceOutlined';
+import LanguageIcon from '@mui/icons-material/LanguageOutlined';
+import PhoneIcon from '@mui/icons-material/PhoneOutlined';
+import GroupsIcon from '@mui/icons-material/GroupsOutlined';
 import MockDevice from '../MockDevice';
 
 const resources = [

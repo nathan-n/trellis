@@ -1,9 +1,9 @@
 import { Box, Card, CardContent, Typography, Avatar, Stack, Chip } from '@mui/material';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import EventIcon from '@mui/icons-material/Event';
-import MedicationIcon from '@mui/icons-material/Medication';
-import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import TaskAltIcon from '@mui/icons-material/TaskAltOutlined';
+import EventIcon from '@mui/icons-material/EventOutlined';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import NoteAltIcon from '@mui/icons-material/NoteAltOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
 import MockDevice from '../MockDevice';
 
 const entries = [

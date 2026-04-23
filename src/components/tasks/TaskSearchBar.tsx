@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TextField, InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/SearchOutlined';
 
 interface TaskSearchBarProps {
   onSearch: (query: string) => void;

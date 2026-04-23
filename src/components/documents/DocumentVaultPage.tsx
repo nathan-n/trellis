@@ -10,9 +10,9 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
-import FolderIcon from '@mui/icons-material/Folder';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/Download';
+import FolderIcon from '@mui/icons-material/FolderOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import DownloadIcon from '@mui/icons-material/DownloadOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

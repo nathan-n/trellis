@@ -10,8 +10,8 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import EditIcon from '@mui/icons-material/EditOutlined';
 import { formatDateTime } from '../../utils/dateUtils';
 import type { CareLog } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';

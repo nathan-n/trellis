@@ -5,7 +5,7 @@ import {
   Box, Typography, InputAdornment,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloudUploadIcon from '@mui/icons-material/CloudUploadOutlined';
 import dayjs, { type Dayjs } from 'dayjs';
 import { ExpenseCategory } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
+import GroupIcon from '@mui/icons-material/GroupOutlined';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useAuth } from '../../contexts/AuthContext';

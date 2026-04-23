@@ -3,9 +3,9 @@ import {
   Box, Typography, Card, CardContent, Stack, Chip,
   IconButton, ToggleButtonGroup, ToggleButton, Tabs, Tab,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import DownloadIcon from '@mui/icons-material/Download';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLongOutlined';
+import DownloadIcon from '@mui/icons-material/DownloadOutlined';
 import dayjs from 'dayjs';
 
 // Lazy-load Summary tab so recharts only loads when requested

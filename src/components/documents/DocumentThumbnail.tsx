@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DescriptionIcon from '@mui/icons-material/Description';
+import ImageIcon from '@mui/icons-material/ImageOutlined';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdfOutlined';
+import DescriptionIcon from '@mui/icons-material/DescriptionOutlined';
 import type { VaultDocument } from '../../types';
 import { getPreviewKind } from '../../utils/documentPreview';
 

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import dayjs, { type Dayjs } from 'dayjs';
 import { VisitStatus } from '../../constants';

@@ -16,7 +16,7 @@ import {
   Alert,
   IconButton,
 } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import { CircleRole } from '../../constants';
 import { getRoleLabel } from '../../utils/roleUtils';
 import { useAuth } from '../../contexts/AuthContext';

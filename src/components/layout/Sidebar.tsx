@@ -10,20 +10,22 @@ import {
   Typography,
   Badge,
 } from '@mui/material';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import EventIcon from '@mui/icons-material/Event';
+// Direction C icons — outlined variants. Import variable names unchanged
+// so render sites don't need updates; only the source module swaps.
+import TaskAltIcon from '@mui/icons-material/TaskAltOutlined';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonthOutlined';
+import EventIcon from '@mui/icons-material/EventOutlined';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import MedicationIcon from '@mui/icons-material/Medication';
-import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import EmergencyIcon from '@mui/icons-material/LocalHospital';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import NoteAltIcon from '@mui/icons-material/NoteAltOutlined';
+import EmergencyIcon from '@mui/icons-material/LocalHospitalOutlined';
 import TimelineIcon from '@mui/icons-material/Timeline';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import SummarizeIcon from '@mui/icons-material/Summarize';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FolderIcon from '@mui/icons-material/Folder';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import SettingsIcon from '@mui/icons-material/Settings';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLongOutlined';
+import SummarizeIcon from '@mui/icons-material/SummarizeOutlined';
+import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
+import FolderIcon from '@mui/icons-material/FolderOutlined';
+import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
+import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 import { SIDEBAR_WIDTH, CircleRole } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';

@@ -1,5 +1,5 @@
 import { Box, TextField, InputAdornment, Chip, Stack, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/SearchOutlined';
 import { Mood } from '../../constants';
 
 export interface CareLogFilters {

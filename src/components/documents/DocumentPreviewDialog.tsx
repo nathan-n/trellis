@@ -14,8 +14,8 @@ import {
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import DownloadIcon from '@mui/icons-material/Download';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import DownloadIcon from '@mui/icons-material/DownloadOutlined';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import type { VaultDocument } from '../../types';
 import { getPreviewKind, type PreviewKind } from '../../utils/documentPreview';
 

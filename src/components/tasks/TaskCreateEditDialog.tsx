@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import dayjs, { type Dayjs } from 'dayjs';
 import { TaskCategory, TaskPriority, TaskStatus, TaskSubtype } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';

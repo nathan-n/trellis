@@ -10,8 +10,8 @@ import {
   Tooltip,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
-import PeopleIcon from '@mui/icons-material/People';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import PeopleIcon from '@mui/icons-material/PeopleOutlined';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospitalOutlined';
 import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../utils/dateUtils';
 import { useCircleMembers } from '../../hooks/useCircleMembers';

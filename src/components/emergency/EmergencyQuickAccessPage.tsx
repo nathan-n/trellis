@@ -9,14 +9,14 @@ import {
   Stack,
   Divider,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/EditOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import MedicationIcon from '@mui/icons-material/Medication';
-import ContactEmergencyIcon from '@mui/icons-material/ContactEmergency';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import PhoneIcon from '@mui/icons-material/Phone';
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafetyOutlined';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import ContactEmergencyIcon from '@mui/icons-material/ContactEmergencyOutlined';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospitalOutlined';
+import PhoneIcon from '@mui/icons-material/PhoneOutlined';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUserOutlined';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useCircle } from '../../contexts/CircleContext';

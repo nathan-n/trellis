@@ -1,6 +1,6 @@
 import { AppBar, Toolbar, IconButton, Avatar, Box, Tooltip, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout';
+import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { SIDEBAR_WIDTH } from '../../constants';
 import CircleSwitcher from './CircleSwitcher';

@@ -16,12 +16,12 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import ContactEmergencyIcon from '@mui/icons-material/ContactEmergency';
-import MedicationIcon from '@mui/icons-material/Medication';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafetyOutlined';
+import ContactEmergencyIcon from '@mui/icons-material/ContactEmergencyOutlined';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospitalOutlined';
 import dayjs, { type Dayjs } from 'dayjs';
 import { doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';

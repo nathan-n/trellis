@@ -10,11 +10,11 @@ import {
   IconButton,
   CircularProgress,
 } from '@mui/material';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import ImageIcon from '@mui/icons-material/Image';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/Download';
+import AttachFileIcon from '@mui/icons-material/AttachFileOutlined';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import ImageIcon from '@mui/icons-material/ImageOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import DownloadIcon from '@mui/icons-material/DownloadOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

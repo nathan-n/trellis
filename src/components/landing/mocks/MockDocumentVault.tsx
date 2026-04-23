@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Typography, Chip, Stack } from '@mui/material';
-import DescriptionIcon from '@mui/icons-material/Description';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DownloadIcon from '@mui/icons-material/Download';
+import DescriptionIcon from '@mui/icons-material/DescriptionOutlined';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdfOutlined';
+import DownloadIcon from '@mui/icons-material/DownloadOutlined';
 import MockDevice from '../MockDevice';
 
 const docs = [

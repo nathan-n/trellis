@@ -14,8 +14,8 @@ import {
   IconButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import MedicationIcon from '@mui/icons-material/Medication';
-import DeleteIcon from '@mui/icons-material/Delete';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import dayjs from 'dayjs';

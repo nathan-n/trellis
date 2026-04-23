@@ -8,13 +8,13 @@ import {
   Stack,
   Chip,
 } from '@mui/material';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import EventIcon from '@mui/icons-material/Event';
-import MedicationIcon from '@mui/icons-material/Medication';
-import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import FolderIcon from '@mui/icons-material/Folder';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import TaskAltIcon from '@mui/icons-material/TaskAltOutlined';
+import EventIcon from '@mui/icons-material/EventOutlined';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import NoteAltIcon from '@mui/icons-material/NoteAltOutlined';
+import FolderIcon from '@mui/icons-material/FolderOutlined';
+import PersonAddIcon from '@mui/icons-material/PersonAddOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useCircle } from '../../contexts/CircleContext';

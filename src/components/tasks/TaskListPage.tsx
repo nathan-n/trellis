@@ -10,7 +10,7 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import TaskAltIcon from '@mui/icons-material/TaskAltOutlined';
 import Fuse from 'fuse.js';
 import { useTasks } from '../../hooks/useTasks';
 import { useTaskViewed } from '../../hooks/useTaskViewed';

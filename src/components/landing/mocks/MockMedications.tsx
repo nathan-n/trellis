@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, Typography, Chip, Stack } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutlined';
+import CancelIcon from '@mui/icons-material/CancelOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import MockDevice from '../MockDevice';
 

@@ -4,7 +4,7 @@ import {
   Box, Typography, Card, CardContent, Stack, Chip, Link, Button,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { subscribeMyCheckins } from '../../services/wellbeingService';

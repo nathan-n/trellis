@@ -12,7 +12,7 @@ import {
   Stack,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import GroupIcon from '@mui/icons-material/Group';
+import GroupIcon from '@mui/icons-material/GroupOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';

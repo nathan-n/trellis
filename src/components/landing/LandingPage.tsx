@@ -12,20 +12,20 @@ import {
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import PeopleIcon from '@mui/icons-material/People';
+import PeopleIcon from '@mui/icons-material/PeopleOutlined';
 import SyncIcon from '@mui/icons-material/Sync';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import MedicationIcon from '@mui/icons-material/Medication';
-import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import SummarizeIcon from '@mui/icons-material/Summarize';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import TaskAltIcon from '@mui/icons-material/TaskAltOutlined';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonthOutlined';
+import MedicationIcon from '@mui/icons-material/MedicationOutlined';
+import NoteAltIcon from '@mui/icons-material/NoteAltOutlined';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospitalOutlined';
+import SummarizeIcon from '@mui/icons-material/SummarizeOutlined';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLongOutlined';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import SecurityIcon from '@mui/icons-material/Security';
+import SecurityIcon from '@mui/icons-material/SecurityOutlined';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -40,8 +40,8 @@ import MockActivityFeed from './mocks/MockActivityFeed';
 import MockWellbeing from './mocks/MockWellbeing';
 import MockDocumentVault from './mocks/MockDocumentVault';
 import MockResources from './mocks/MockResources';
-import FolderIcon from '@mui/icons-material/Folder';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
+import FolderIcon from '@mui/icons-material/FolderOutlined';
+import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
 
 // ─── Feature section data ────────────────────────────────────────────────────
 

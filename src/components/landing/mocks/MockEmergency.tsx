@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Typography, Chip, Stack } from '@mui/material';
-import PhoneIcon from '@mui/icons-material/Phone';
+import PhoneIcon from '@mui/icons-material/PhoneOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import MockDevice from '../MockDevice';
 

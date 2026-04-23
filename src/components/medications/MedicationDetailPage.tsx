@@ -6,8 +6,8 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SaveIcon from '@mui/icons-material/Save';
-import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/SaveOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import dayjs, { type Dayjs } from 'dayjs';
 import { doc, onSnapshot } from 'firebase/firestore';
