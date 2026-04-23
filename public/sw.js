@@ -1,4 +1,11 @@
-const CACHE_NAME = 'trellis-v3';
+// Bump this on every meaningful SW change. A byte-diff forces browsers
+// to treat the SW file as "new" on next navigation, at which point
+// skipWaiting + clients.claim (below) activate it immediately and the
+// controllerchange listener in main.tsx reloads the tab so the fresh
+// code actually runs. Without the version bump, old clients can sit on
+// a stale SW indefinitely (browser default SW update check is at most
+// every 24h and only on navigation).
+const CACHE_NAME = 'trellis-v4';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
