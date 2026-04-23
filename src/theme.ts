@@ -144,6 +144,20 @@ const theme = createTheme({
       fontWeight: 500,
       letterSpacing: '0.02em',
     },
+    // Direction C overline — mono, plum, uppercase, wide tracking.
+    // Replaces MUI's default sans/grey overline across every
+    // <Typography variant="overline"> call site, giving eyebrow labels
+    // (section headers, small uppercase tags) the same visual DNA as
+    // the design-system tokens.
+    overline: {
+      fontFamily: monoFont,
+      fontSize: '0.6875rem',
+      fontWeight: 600,
+      letterSpacing: '0.14em',
+      textTransform: 'uppercase',
+      color: '#7C6F9B',
+      lineHeight: 1.2,
+    },
   },
   shape: {
     borderRadius: 14,
