@@ -15,7 +15,6 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafetyOutlined';
 import MedicationIcon from '@mui/icons-material/MedicationOutlined';
 import ContactEmergencyIcon from '@mui/icons-material/ContactEmergencyOutlined';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospitalOutlined';
-import PhoneIcon from '@mui/icons-material/PhoneOutlined';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUserOutlined';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
@@ -29,6 +28,7 @@ import EmergencyProfileEditDialog from './EmergencyProfileEditDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import EmptyState from '../shared/EmptyState';
 import PageHeader from '../shared/PageHeader';
+import CallNowButton from '../shared/CallNowButton';
 
 const cardSx = { mb: 2 }; // borderRadius inherited from theme (12px)
 
@@ -152,17 +152,20 @@ export default function EmergencyQuickAccessPage() {
         </CardContent>
       </Card>
 
-      {/* Allergies */}
+      {/* Allergies — the ONLY card that keeps a clay accent border. Per
+          review finding 04: allergies are the one life-threatening fact
+          on this page; accent earns its weight. Every other card relies
+          on structure (weight + spacing + section header), not borders. */}
       {profile.allergies?.length > 0 && (
-        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'warning.main' }}>
+        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'clay.main' }}>
           <CardContent>
-            <SectionHeader icon={<WarningAmberIcon />} label="Allergies" color="warning.dark" />
+            <SectionHeader icon={<WarningAmberIcon />} label="Allergies" color="clay.main" />
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 0.5 }}>
               {profile.allergies.map((a, i) => (
                 <Chip
                   key={i}
                   label={a}
-                  sx={{ bgcolor: 'warning.light', color: 'warning.dark', fontSize: '0.95rem', fontWeight: 600 }}
+                  sx={{ bgcolor: 'clay.light', color: 'clay.dark', fontSize: '0.95rem', fontWeight: 600 }}
                 />
               ))}
             </Stack>
@@ -170,11 +173,11 @@ export default function EmergencyQuickAccessPage() {
         </Card>
       )}
 
-      {/* Conditions */}
+      {/* Conditions — no accent border. Structure carries hierarchy. */}
       {profile.conditions?.length > 0 && (
-        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'secondary.light' }}>
+        <Card sx={cardSx}>
           <CardContent>
-            <SectionHeader icon={<HealthAndSafetyIcon />} label="Conditions" color="secondary.main" />
+            <SectionHeader icon={<HealthAndSafetyIcon />} label="Conditions" />
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 0.5 }}>
               {profile.conditions.map((c, i) => (
                 <Chip key={i} label={c} color="secondary" variant="outlined" sx={{ fontSize: '0.95rem' }} />
@@ -184,11 +187,11 @@ export default function EmergencyQuickAccessPage() {
         </Card>
       )}
 
-      {/* Current Medications — auto-synced from medication tracker */}
+      {/* Current Medications — no accent border. */}
       {activeMeds.length > 0 && (
-        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'primary.light' }}>
+        <Card sx={cardSx}>
           <CardContent>
-            <SectionHeader icon={<MedicationIcon />} label="Current Medications" color="primary.main" />
+            <SectionHeader icon={<MedicationIcon />} label="Current Medications" />
             {activeMeds.map((m) => (
               <Typography key={m.id} variant="body1" sx={{ py: 0.5 }}>
                 <strong>{m.name}</strong> <Typography component="span" color="text.secondary">— {m.dosage}</Typography>
@@ -199,28 +202,19 @@ export default function EmergencyQuickAccessPage() {
         </Card>
       )}
 
-      {/* Emergency Contacts */}
+      {/* Emergency Contacts — phone buttons use the CallNowButton (clay,
+          full-width, chunky, mono number). Primary action on the page. */}
       {profile.emergencyContacts?.length > 0 && (
-        <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'primary.main' }}>
+        <Card sx={cardSx}>
           <CardContent>
-            <SectionHeader icon={<ContactEmergencyIcon />} label="Emergency Contacts" color="primary.main" />
-            <Stack spacing={1.5}>
+            <SectionHeader icon={<ContactEmergencyIcon />} label="Emergency Contacts" />
+            <Stack spacing={2}>
               {profile.emergencyContacts.map((c, i) => (
-                <Box key={i} sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 2 }}>
-                  <Typography variant="body1" fontWeight={600}>
+                <Box key={i}>
+                  <Typography variant="body1" fontWeight={600} sx={{ mb: 1 }}>
                     {c.name} <Typography component="span" color="text.secondary">({c.relationship})</Typography>
                   </Typography>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<PhoneIcon />}
-                    href={`tel:${c.phone}`}
-                    component="a"
-                    size="small"
-                    sx={{ mt: 1 }}
-                  >
-                    {c.phone}
-                  </Button>
+                  <CallNowButton phone={c.phone} label={c.name} />
                 </Box>
               ))}
             </Stack>
@@ -228,25 +222,18 @@ export default function EmergencyQuickAccessPage() {
         </Card>
       )}
 
-      {/* Medical & Insurance */}
-      <Card sx={{ ...cardSx, borderLeft: 4, borderLeftColor: 'secondary.main' }}>
+      {/* Medical & Insurance — no accent border. */}
+      <Card sx={cardSx}>
         <CardContent>
-          <SectionHeader icon={<LocalHospitalIcon />} label="Medical" color="secondary.main" />
-          <Stack spacing={1}>
+          <SectionHeader icon={<LocalHospitalIcon />} label="Medical" />
+          <Stack spacing={1.5}>
             {profile.physicianName && (
               <Box>
-                <Typography variant="body2"><strong>Physician:</strong> {profile.physicianName}</Typography>
+                <Typography variant="body2" sx={{ mb: profile.physicianPhone ? 1 : 0 }}>
+                  <strong>Physician:</strong> {profile.physicianName}
+                </Typography>
                 {profile.physicianPhone && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<PhoneIcon />}
-                    href={`tel:${profile.physicianPhone}`}
-                    component="a"
-                    sx={{ mt: 0.5 }}
-                  >
-                    {profile.physicianPhone}
-                  </Button>
+                  <CallNowButton phone={profile.physicianPhone} label={profile.physicianName} />
                 )}
               </Box>
             )}
