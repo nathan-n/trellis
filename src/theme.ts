@@ -149,6 +149,21 @@ const theme = createTheme({
     borderRadius: 14,
   },
   components: {
+    // Paper-fiber texture on the app background. A tiny inline SVG
+    // fractal-noise filter tiled at 200px, tinted warm brown at ~10%
+    // opacity. Low enough to read as paper grain, not noise overlay.
+    // Sits UNDER every cream/paper surface — Cards, Dialogs, TopBar all
+    // have their own opaque backgrounds that cover it except where the
+    // page default shows through.
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0.10 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundAttachment: 'fixed',
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
