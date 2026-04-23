@@ -298,15 +298,17 @@ export default function VisitCalendarPage() {
       )}
 
       {coverageGaps.length > 0 && (
-        <Box sx={{ mb: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningAmberIcon color="warning" />
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'clay.light', borderRadius: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Coverage gaps are urgent — unscheduled days that need a
+              caregiver. Clay signals urgency per the Direction C map. */}
+          <WarningAmberIcon sx={{ color: 'clay.main' }} />
           <Box>
             <Typography variant="body2" fontWeight={600}>
               Coverage gaps in the next 7 days
             </Typography>
             <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mt: 0.5 }}>
               {coverageGaps.map((day) => (
-                <Chip key={day} label={day} size="small" color="warning" variant="outlined" />
+                <Chip key={day} label={day} size="small" sx={{ bgcolor: 'clay.main', color: 'white', border: 'none' }} />
               ))}
             </Stack>
           </Box>

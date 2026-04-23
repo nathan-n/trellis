@@ -29,6 +29,7 @@ import AddFab from '../shared/AddFab';
 import PageHeader from '../shared/PageHeader';
 import DocumentPreviewDialog from './DocumentPreviewDialog';
 import DocumentThumbnail from './DocumentThumbnail';
+import { documentCategoryChipSx } from '../../utils/accentMap';
 
 const categoryLabels: Record<string, string> = {
   legal: 'Legal',
@@ -38,13 +39,9 @@ const categoryLabels: Record<string, string> = {
   other: 'Other',
 };
 
-const categoryColors: Record<string, 'error' | 'primary' | 'success' | 'info' | 'default'> = {
-  legal: 'error',
-  insurance: 'primary',
-  medical: 'success',
-  identification: 'info',
-  other: 'default',
-};
+// Document category accents moved to src/utils/accentMap.ts per the
+// review's approved categorical color map (medical=rose, legal=slate,
+// insurance=ochre, identification=plum, other=default).
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -171,8 +168,7 @@ export default function DocumentVaultPage() {
                     <Chip
                       label={categoryLabels[document.category] ?? document.category}
                       size="small"
-                      color={categoryColors[document.category] ?? 'default'}
-                      variant="outlined"
+                      sx={documentCategoryChipSx(document.category)}
                     />
                     <Typography variant="caption" color="text.secondary" noWrap>
                       {document.fileName} — {formatFileSize(document.sizeBytes)}

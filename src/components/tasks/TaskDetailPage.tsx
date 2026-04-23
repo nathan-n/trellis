@@ -52,13 +52,7 @@ import TaskAttachments from './TaskAttachments';
 import TaskQuestions from './TaskQuestions';
 import ConfirmDialog from '../shared/ConfirmDialog';
 import LoadingSpinner from '../shared/LoadingSpinner';
-
-const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
-  urgent: 'error',
-  high: 'warning',
-  medium: 'info',
-  low: 'default',
-};
+import { priorityChipSx } from '../../utils/accentMap';
 
 const statusLabels: Record<string, string> = {
   todo: 'To Do',
@@ -174,8 +168,7 @@ export default function TaskDetailPage() {
                 <Chip
                   label={task.priority}
                   size="small"
-                  color={priorityColors[task.priority] ?? 'default'}
-                  sx={{ textTransform: 'capitalize' }}
+                  sx={{ ...priorityChipSx(task.priority), textTransform: 'capitalize' }}
                 />
                 <Chip label={statusLabels[task.status] ?? task.status} size="small" variant="outlined" />
                 <Chip label={categoryLabels[task.category] ?? task.category} size="small" variant="outlined" />

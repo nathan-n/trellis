@@ -33,6 +33,7 @@ import ConfirmDialog from '../shared/ConfirmDialog';
 import EmptyState from '../shared/EmptyState';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import PageHeader from '../shared/PageHeader';
+import { refillChipSx, refillUrgency } from '../../utils/accentMap';
 
 export default function MedicationListPage() {
   const navigate = useNavigate();
@@ -154,14 +155,20 @@ export default function MedicationListPage() {
                       </Box>
                       <Stack direction="row" spacing={0.5}>
                         {!med.isActive && <Chip label="Inactive" size="small" />}
-                        {isRefillSoon(med) && (
-                          <Chip
-                            icon={<WarningAmberIcon />}
-                            label={`Refill: ${formatDate(med.refillDate)}`}
-                            size="small"
-                            color="warning"
-                          />
-                        )}
+                        {med.refillDate && isRefillSoon(med) && (() => {
+                          // Refill chip uses clay (overdue / <3 days) or
+                          // ochre (≤7 days). Replaces MUI warning amber
+                          // per the accent map.
+                          const daysUntil = dayjs(med.refillDate.toDate()).diff(dayjs(), 'day');
+                          return (
+                            <Chip
+                              icon={<WarningAmberIcon />}
+                              label={`Refill: ${formatDate(med.refillDate)}`}
+                              size="small"
+                              sx={refillChipSx(refillUrgency(daysUntil))}
+                            />
+                          );
+                        })()}
                       </Stack>
                     </Box>
                     {med.openFda?.pharmClassEpc?.length ? (

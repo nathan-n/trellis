@@ -21,13 +21,7 @@ import { useTaskViewed } from '../../hooks/useTaskViewed';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import SerifAccent from '../shared/SerifAccent';
 import WellbeingCheckinCard from '../wellbeing/WellbeingCheckinCard';
-
-const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
-  urgent: 'error',
-  high: 'warning',
-  medium: 'info',
-  low: 'default',
-};
+import { priorityChipSx } from '../../utils/accentMap';
 
 const categoryLabels: Record<string, string> = {
   medical: 'Medical',
@@ -99,8 +93,7 @@ export default function MyNextPriorityCard() {
                   {isTaskUnseen(task) && <Chip label="New" size="small" color="info" />}
                   <Chip
                     label={task.priority}
-                    color={priorityColors[task.priority] ?? 'default'}
-                    sx={{ textTransform: 'capitalize', fontSize: '0.9rem' }}
+                    sx={{ ...priorityChipSx(task.priority), textTransform: 'capitalize', fontSize: '0.9rem' }}
                   />
                 </Stack>
               </Box>

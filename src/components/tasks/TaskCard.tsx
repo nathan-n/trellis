@@ -17,13 +17,7 @@ import { formatDate } from '../../utils/dateUtils';
 import { useCircleMembers } from '../../hooks/useCircleMembers';
 import { TASK_STATUS_LABELS, TASK_CATEGORY_LABELS } from '../../constants';
 import type { Task } from '../../types';
-
-const priorityColors: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
-  urgent: 'error',
-  high: 'warning',
-  medium: 'info',
-  low: 'default',
-};
+import { priorityChipSx } from '../../utils/accentMap';
 
 const statusLabels = TASK_STATUS_LABELS;
 const categoryLabels = TASK_CATEGORY_LABELS;
@@ -55,8 +49,7 @@ export default function TaskCard({ task, isUnseen }: TaskCardProps) {
             <Chip
               label={task.priority}
               size="small"
-              color={priorityColors[task.priority] ?? 'default'}
-              sx={{ textTransform: 'capitalize', ml: 1 }}
+              sx={{ ...priorityChipSx(task.priority), textTransform: 'capitalize', ml: 1 }}
             />
           </Box>
 
