@@ -82,7 +82,11 @@ export default function MyNextPriorityCard() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        // Unseen-indicator: border-only (review finding 09). The previous
+        // "New" chip here was one of four redundant signals for the same
+        // boolean; dropped in favor of the plum left-rule shared with
+        // TaskCard so "new to me" reads the same everywhere.
+        <Card sx={isTaskUnseen(task) ? { borderLeft: 3, borderLeftColor: 'secondary.main' } : undefined}>
           <CardActionArea onClick={() => navigate(`/tasks/${task.id}`)}>
             <CardContent sx={{ py: 4, px: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -90,7 +94,6 @@ export default function MyNextPriorityCard() {
                   {task.title}
                 </Typography>
                 <Stack direction="row" spacing={1}>
-                  {isTaskUnseen(task) && <Chip label="New" size="small" color="info" />}
                   <Chip
                     label={task.priority}
                     sx={{ ...priorityChipSx(task.priority), textTransform: 'capitalize', fontSize: '0.9rem' }}

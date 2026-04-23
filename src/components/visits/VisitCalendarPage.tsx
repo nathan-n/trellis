@@ -16,9 +16,9 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { subscribeVisits, deleteVisit, createVisit, toggleVisitStatus } from '../../services/visitService';
+import { subscribeVisits, deleteVisit, toggleVisitStatus } from '../../services/visitService';
 import { useAuth } from '../../contexts/AuthContext';
-import { VisitStatus, CircleRole } from '../../constants';
+import { CircleRole } from '../../constants';
 import { hasMinRole } from '../../utils/roleUtils';
 import { formatTime } from '../../utils/dateUtils';
 import type { Visit } from '../../types';
@@ -147,45 +147,25 @@ export default function VisitCalendarPage() {
     setSelectedVisitForMenu(null);
   };
 
-  // Drag-to-select or single click
+  // Slot selection — single click OR drag-to-select.
+  //
+  // Review finding 06: previously a single click silently called
+  // createVisit(..., status: CONFIRMED, all-day). An exploratory tap
+  // would commit a confirmed visit to the DB with no confirmation.
+  //
+  // New behavior: single click opens the create dialog pre-filled with
+  // that date. Drag-across-days continues to open the dialog with the
+  // full range. No more silent DB writes on tap.
   const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
-    if (viewMode === 'monthly') {
-      const isDrag = slotInfo.action === 'select';
-      if (isDrag) {
-        // Multi-day drag: open dialog with range
-        setCreateDefaultDate(slotInfo.start);
-        setCreateDefaultEndDate(slotInfo.end);
-        setCreateOpen(true);
-      } else {
-        // Single click: quick-add
-        quickAddVisit(slotInfo.start);
-      }
-    } else {
-      setCreateDefaultDate(slotInfo.start);
-      setCreateDefaultEndDate(null);
-      setCreateOpen(true);
-    }
-  }, [viewMode, activeCircle, userProfile]);
-
-  const quickAddVisit = async (clickDate: Date) => {
-    if (!activeCircle || !userProfile) return;
-    const startOfDay = dayjs(clickDate).startOf('day').toDate();
-    const endOfDay = dayjs(clickDate).add(1, 'day').startOf('day').toDate();
-    try {
-      await createVisit(activeCircle.id, userProfile.uid, userProfile.displayName, {
-        caregiverUid: userProfile.uid,
-        caregiverName: userProfile.displayName,
-        startTime: startOfDay,
-        endTime: endOfDay,
-        notes: null,
-        status: VisitStatus.CONFIRMED,
-        isAllDay: true,
-      });
-      showMessage('Visit added — click to edit', 'success');
-    } catch {
-      showMessage('Failed to add visit', 'error');
-    }
-  };
+    setCreateDefaultDate(slotInfo.start);
+    // slotInfo.action === 'select' indicates a drag across multiple days;
+    // 'click' is a single tap. Only pass an end date for drags so the
+    // dialog pre-fills as a multi-day range; single-click defaults to
+    // same-day (dialog handles that internally).
+    const isDrag = slotInfo.action === 'select';
+    setCreateDefaultEndDate(isDrag && viewMode === 'monthly' ? slotInfo.end : null);
+    setCreateOpen(true);
+  }, [viewMode]);
 
   const handleCreateOpen = () => {
     setCreateDefaultDate(null);
@@ -293,7 +273,7 @@ export default function VisitCalendarPage() {
 
       {viewMode === 'monthly' && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Click a day to quick-add a visit. Drag across days to schedule a multi-day visit.
+          Click a day to schedule a visit. Drag across days for a multi-day visit.
         </Typography>
       )}
 

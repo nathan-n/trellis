@@ -33,15 +33,17 @@ export default function TaskCard({ task, isUnseen }: TaskCardProps) {
 
   const assignees = members.filter((m) => task.assigneeUids.includes(m.uid));
 
+  // Unseen indicator: ONE signal (a plum left-border rule), not four.
+  // Review finding 09: the previous treatment used a left border +
+  // tinted background + a leading dot + a "New" chip — redundant for
+  // a single boolean. Plum matches the brand's secondary accent so the
+  // "new to me" state doesn't compete with cobalt info chips.
   return (
-    <Card sx={isUnseen ? { borderLeft: 3, borderLeftColor: 'info.main', bgcolor: 'rgba(2, 136, 209, 0.04)' } : undefined}>
+    <Card sx={isUnseen ? { borderLeft: 3, borderLeftColor: 'secondary.main' } : undefined}>
       <CardActionArea onClick={() => navigate(`/tasks/${task.id}`)}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-              {isUnseen && (
-                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.main', flexShrink: 0 }} />
-              )}
               <Typography variant="subtitle1" fontWeight={600}>
                 {task.title}
               </Typography>

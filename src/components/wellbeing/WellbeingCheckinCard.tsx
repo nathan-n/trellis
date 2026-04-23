@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography, Button, Stack,
-  Slider, FormControlLabel, Switch, TextField, Box, Chip,
+  Slider, TextField, Box, Chip,
   FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -11,8 +11,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCircle } from '../../contexts/CircleContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { createCheckin, getLastCheckin } from '../../services/wellbeingService';
+import type { OverwhelmLevel } from '../../types/wellbeing';
 
 const stressLabels = ['', 'Low', 'Mild', 'Moderate', 'High', 'Very High'];
+
+const OVERWHELM_OPTIONS: { value: OverwhelmLevel; label: string }[] = [
+  { value: 'not_really', label: 'Not really' },
+  { value: 'a_little', label: 'A little' },
+  { value: 'quite_a_bit', label: 'Quite a bit' },
+];
 
 export default function WellbeingCheckinCard() {
   const { userProfile } = useAuth();
@@ -24,7 +31,11 @@ export default function WellbeingCheckinCard() {
 
   const [stressLevel, setStressLevel] = useState(3);
   const [sleepQuality, setSleepQuality] = useState<string>(SleepQuality.FAIR);
-  const [overwhelmed, setOverwhelmed] = useState(false);
+  // Review finding 07: switch ("Feeling overwhelmed: on/off") replaced
+  // with a 3-state chip group. Defaults to 'not_really' so the absence
+  // of input reads as "not setting this off" rather than an implicit
+  // binary assertion.
+  const [overwhelmLevel, setOverwhelmLevel] = useState<OverwhelmLevel>('not_really');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -57,7 +68,10 @@ export default function WellbeingCheckinCard() {
         {
           stressLevel,
           sleepQuality: sleepQuality as SleepQuality,
-          feelingOverwhelmed: overwhelmed,
+          // Map the 3-state to the legacy boolean for backward-compat
+          // readers (WellbeingHistoryPage "Overwhelmed" chip, sparkline).
+          feelingOverwhelmed: overwhelmLevel === 'quite_a_bit',
+          overwhelmLevel,
           notes: notes.trim() || null,
         }
       );
@@ -88,11 +102,26 @@ export default function WellbeingCheckinCard() {
     );
   }
 
+  // Prompt shape: rose-tint paper when shouldPrompt && !showForm;
+  // neutral paper once the user engages the form.
+  const isPromptState = shouldPrompt && !showForm;
+
   return (
-    <Card sx={{ mb: 3, border: 1, borderColor: 'secondary.light' }}>
+    <Card
+      sx={{
+        mb: 3,
+        // Review finding 07: warmer weekly prompt — rose paper tint (not
+        // a plain bordered card) so the nudge reads as gentle invitation,
+        // not generic alert. Matches the wellbeing domain accent.
+        bgcolor: isPromptState ? 'rose.light' : 'background.paper',
+        border: 1,
+        borderColor: isPromptState ? 'rose.main' : 'secondary.light',
+        transition: 'background-color 200ms',
+      }}
+    >
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <FavoriteIcon color="secondary" />
+          <FavoriteIcon sx={{ color: isPromptState ? 'rose.dark' : 'secondary.main' }} />
           <Typography variant="subtitle1" fontWeight={600}>How are you doing?</Typography>
         </Box>
 
@@ -102,10 +131,15 @@ export default function WellbeingCheckinCard() {
               Taking care of yourself matters too. A quick check-in helps you stay aware of your own wellbeing.
             </Typography>
             <Stack direction="row" spacing={1}>
-              <Button variant="outlined" color="secondary" size="small" onClick={() => setShowForm(true)}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => setShowForm(true)}
+                sx={{ bgcolor: 'rose.main', '&:hover': { bgcolor: 'rose.dark' }, color: 'white' }}
+              >
                 Check In
               </Button>
-              <Button size="small" onClick={() => setShouldPrompt(false)}>
+              <Button size="small" onClick={() => setShouldPrompt(false)} sx={{ color: 'text.secondary' }}>
                 Not Now
               </Button>
             </Stack>
@@ -131,10 +165,34 @@ export default function WellbeingCheckinCard() {
                 <MenuItem value={SleepQuality.POOR}>Poor</MenuItem>
               </Select>
             </FormControl>
-            <FormControlLabel
-              control={<Switch checked={overwhelmed} onChange={(e) => setOverwhelmed(e.target.checked)} />}
-              label="Feeling overwhelmed"
-            />
+            {/* Overwhelm: 3-state chip group. Selected chip solid rose
+                (wellbeing domain); unselected light rose tint. Gentler
+                than the previous clinical yes/no switch. */}
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Feeling overwhelmed?
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 0.75 }}>
+                {OVERWHELM_OPTIONS.map((opt) => {
+                  const selected = overwhelmLevel === opt.value;
+                  return (
+                    <Chip
+                      key={opt.value}
+                      label={opt.label}
+                      onClick={() => setOverwhelmLevel(opt.value)}
+                      sx={{
+                        fontWeight: 500,
+                        bgcolor: selected ? 'rose.main' : 'rose.light',
+                        color: selected ? 'white' : 'rose.dark',
+                        '&:hover': {
+                          bgcolor: selected ? 'rose.dark' : 'rose.light',
+                        },
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+            </Box>
             <TextField
               label="Anything on your mind? (optional)"
               value={notes}
@@ -144,10 +202,16 @@ export default function WellbeingCheckinCard() {
               rows={2}
             />
             <Stack direction="row" spacing={1}>
-              <Button variant="contained" color="secondary" onClick={handleSubmit} disabled={saving} size="small">
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={saving}
+                size="small"
+                sx={{ bgcolor: 'rose.main', '&:hover': { bgcolor: 'rose.dark' }, color: 'white' }}
+              >
                 {saving ? 'Saving...' : 'Save Check-In'}
               </Button>
-              <Button size="small" onClick={() => { setShowForm(false); setShouldPrompt(false); }}>
+              <Button size="small" onClick={() => { setShowForm(false); setShouldPrompt(false); }} sx={{ color: 'text.secondary' }}>
                 Cancel
               </Button>
             </Stack>

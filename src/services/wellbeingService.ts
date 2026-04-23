@@ -11,7 +11,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { WellbeingCheckin } from '../types/wellbeing';
+import type { WellbeingCheckin, OverwhelmLevel } from '../types/wellbeing';
 import type { SleepQuality } from '../constants';
 
 function checkinsCol(circleId: string) {
@@ -22,6 +22,8 @@ export interface CreateCheckinData {
   stressLevel: number;
   sleepQuality: SleepQuality;
   feelingOverwhelmed: boolean;
+  /** New on v2 — 3-state overwhelm level. Undefined on legacy UI paths. */
+  overwhelmLevel?: OverwhelmLevel;
   notes: string | null;
 }
 
