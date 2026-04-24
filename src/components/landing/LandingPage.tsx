@@ -201,8 +201,25 @@ export default function LandingPage() {
     setSigningIn(true);
     try {
       await signIn();
-    } catch {
-      showMessage('Failed to sign in. Please try again.', 'error');
+    } catch (err) {
+      // Capture the Firebase error code so we can surface actionable
+      // guidance to the user and a useful signal in the console for
+      // diagnosing future issues (empty catches hid the real cause).
+      const error = err as { code?: string; message?: string };
+      console.error('[signIn] failed:', error.code, error.message);
+      const msg =
+        error.code === 'auth/popup-blocked'
+          ? 'Please allow popups for this site and try again.'
+          : error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request'
+          ? 'Sign-in was cancelled.'
+          : error.code === 'auth/unauthorized-domain'
+          ? 'This domain is not authorized for sign-in. Contact support.'
+          : error.code === 'auth/network-request-failed'
+          ? 'Network error. Check your connection and try again.'
+          : error.code
+          ? `Sign-in failed (${error.code}). Please try again.`
+          : 'Failed to sign in. Please try again.';
+      showMessage(msg, 'error');
     } finally {
       setSigningIn(false);
     }

@@ -113,7 +113,35 @@ export default function InvitationAcceptPage() {
           </Typography>
 
           {!firebaseUser ? (
-            <Button variant="contained" size="large" fullWidth onClick={signIn}>
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              onClick={async () => {
+                try {
+                  await signIn();
+                } catch (err) {
+                  // Same diagnostics as LandingPage.handleSignIn so users
+                  // coming in through the invitation flow see the real
+                  // error code, and we have console signal for debugging.
+                  const error = err as { code?: string; message?: string };
+                  console.error('[signIn] failed:', error.code, error.message);
+                  const msg =
+                    error.code === 'auth/popup-blocked'
+                      ? 'Please allow popups for this site and try again.'
+                      : error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request'
+                      ? 'Sign-in was cancelled.'
+                      : error.code === 'auth/unauthorized-domain'
+                      ? 'This domain is not authorized for sign-in. Contact support.'
+                      : error.code === 'auth/network-request-failed'
+                      ? 'Network error. Check your connection and try again.'
+                      : error.code
+                      ? `Sign-in failed (${error.code}). Please try again.`
+                      : 'Failed to sign in. Please try again.';
+                  showMessage(msg, 'error');
+                }
+              }}
+            >
               Sign in with Google to Accept
             </Button>
           ) : userProfile && invitation.inviteeEmail !== userProfile.email.toLowerCase() ? (
