@@ -60,12 +60,22 @@ function shouldUseRedirect(): boolean {
 
 // Error codes from signInWithPopup that mean "the popup path won't work —
 // use redirect instead". We fall back on these even on desktop.
+//
+// auth/internal-error is included because Chrome 133+ disabled
+// third-party cookies by default. signInWithPopup needs cross-origin
+// cookies between the app origin and authDomain (firebaseapp.com) for
+// the hidden auth iframe to coordinate with the popup. With those
+// cookies blocked, the SDK throws auth/internal-error within the same
+// click event — no popup ever appears. Redirect doesn't depend on
+// cross-origin cookies (state is in URL params + app's own
+// IndexedDB), so the fallback recovers transparently.
 const POPUP_FALLBACK_CODES = new Set([
   'auth/popup-blocked',
   'auth/popup-closed-by-user',
   'auth/cancelled-popup-request',
   'auth/operation-not-supported-in-this-environment',
   'auth/web-storage-unsupported',
+  'auth/internal-error',
 ]);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
