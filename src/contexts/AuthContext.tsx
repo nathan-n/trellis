@@ -1,11 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import {
   onAuthStateChanged,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  setPersistence,
-  browserLocalPersistence,
   signOut as firebaseSignOut,
   type User,
 } from 'firebase/auth';
@@ -27,88 +24,58 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
- * Decide popup vs redirect for Google sign-in.
+ * Sign-in flow uses signInWithRedirect across all browsers and devices.
  *
- * `signInWithPopup` is nicer on desktop but breaks in these environments:
- *   - iOS Safari — ITP blocks the third-party cookies the OAuth popup sets,
- *     popup closes without completing the flow.
- *   - Installed PWAs (standalone display mode) on any OS — popups open in a
- *     browser context that can't postMessage back to the standalone window.
- *   - Mobile Chrome / Samsung Internet / Firefox mobile — flakier than
- *     desktop; even when it works, tab-to-tab handoff feels broken.
- *   - In-app webviews (Facebook, Instagram, LinkedIn) — usually no popup.
+ * Authoritative source (Firebase Auth docs, redirect best practices):
+ *   https://firebase.google.com/docs/auth/web/redirect-best-practices
  *
- * `signInWithRedirect` navigates the whole page to Google and comes back,
- * so no popup, no cross-window messaging, no third-party-cookie reliance.
- * We use redirect on any mobile or standalone context, popup on desktop.
+ *   "For browsers that block third-party storage access,
+ *    signInWithPopup() may not work correctly. For better cross-browser
+ *    compatibility … consider using signInWithRedirect() instead."
+ *
+ * Why redirect, not popup:
+ *   - Chrome 133+ (current is 147+) disables third-party cookies by
+ *     default. signInWithPopup needs cross-origin cookies between the
+ *     app origin and authDomain to coordinate the popup ↔ opener
+ *     handshake — those cookies are blocked, popup fails with
+ *     auth/internal-error or completes but doesn't persist to local
+ *     storage.
+ *   - Mobile Chrome / iOS Safari / installed PWAs have always been
+ *     unreliable with popup auth (popup blockers, in-app webview
+ *     restrictions, postMessage failures).
+ *   - signInWithRedirect carries auth state via URL params on the
+ *     return leg from authDomain/__/auth/handler. The app reads state
+ *     from its OWN origin's IndexedDB. No cross-origin storage,
+ *     no third-party cookies, no postMessage between windows.
+ *
+ * Persistence is the SDK default (browserLocalPersistence on web —
+ * IndexedDB). Per Firebase docs, this is preserved across
+ * signInWithRedirect calls automatically. No explicit setPersistence
+ * call is needed (and adding one was racing with the auth flow in
+ * earlier code).
  */
-function shouldUseRedirect(): boolean {
-  if (typeof window === 'undefined') return false;
-
-  // Installed PWA (any OS)
-  if (window.matchMedia?.('(display-mode: standalone)').matches) return true;
-  // iOS-specific standalone flag
-  if ((window.navigator as Navigator & { standalone?: boolean }).standalone === true) return true;
-
-  // Mobile user-agent sniff. Good enough for the sign-in decision — worst
-  // case on a weird UA we fall back to popup, which falls back to redirect
-  // on its own if it fails.
-  if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
-
-  return false;
-}
-
-// Error codes from signInWithPopup that mean "the popup path won't work —
-// use redirect instead". We fall back on these even on desktop.
-//
-// auth/internal-error is included because Chrome 133+ disabled
-// third-party cookies by default. signInWithPopup needs cross-origin
-// cookies between the app origin and authDomain (firebaseapp.com) for
-// the hidden auth iframe to coordinate with the popup. With those
-// cookies blocked, the SDK throws auth/internal-error within the same
-// click event — no popup ever appears. Redirect doesn't depend on
-// cross-origin cookies (state is in URL params + app's own
-// IndexedDB), so the fallback recovers transparently.
-const POPUP_FALLBACK_CODES = new Set([
-  'auth/popup-blocked',
-  'auth/popup-closed-by-user',
-  'auth/cancelled-popup-request',
-  'auth/operation-not-supported-in-this-environment',
-  'auth/web-storage-unsupported',
-  'auth/internal-error',
-]);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Pin persistence to local storage explicitly. The SDK defaults to this
-  // on web, but being explicit protects against future SDK changes and
-  // makes the intent unambiguous: keep the session across reloads.
-  useEffect(() => {
-    setPersistence(auth, browserLocalPersistence).catch((err) => {
-      console.error('[auth] setPersistence failed:', err);
-    });
-  }, []);
-
-  // Handle the return leg of signInWithRedirect. If the user just came
-  // back from Google, this resolves with a UserCredential; onAuthStateChanged
-  // below will also fire, so this call is primarily for surfacing errors.
-  // Safe to call on every load — returns null when there's no redirect.
+  // Process the return leg of signInWithRedirect on every page load.
+  // Returns null when there's no pending redirect — safe to call always.
+  // The user object is delivered via onAuthStateChanged below; this
+  // call's primary purpose is to surface redirect-specific errors.
   useEffect(() => {
     getRedirectResult(auth).catch((err) => {
       console.error('[auth] getRedirectResult error:', err);
     });
   }, []);
 
-  // Single source of truth for profile loading
+  // Single source of truth for profile loading.
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
         try {
-          // Ensure user profile exists
+          // Ensure user profile exists.
           const userRef = doc(db, 'users', user.uid);
           const snap = await getDoc(userRef);
           if (!snap.exists()) {
@@ -137,27 +104,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  // signIn chooses popup vs redirect based on environment, then falls back
-  // to redirect on popup-specific failures even when we initially chose
-  // popup (belt-and-suspenders — catches edge cases the UA sniff misses).
   const signIn = async () => {
-    if (shouldUseRedirect()) {
-      // Fire-and-forget: page will navigate to Google and come back.
-      // getRedirectResult + onAuthStateChanged pick up from there.
-      await signInWithRedirect(auth, googleProvider);
-      return;
-    }
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      const code = (err as { code?: string }).code;
-      if (code && POPUP_FALLBACK_CODES.has(code)) {
-        console.warn(`[auth] popup failed (${code}); falling back to redirect`);
-        await signInWithRedirect(auth, googleProvider);
-        return;
-      }
-      throw err;
-    }
+    await signInWithRedirect(auth, googleProvider);
+    // signInWithRedirect navigates the page to authDomain/__/auth/handler.
+    // This Promise never resolves in a normal flow because the page
+    // leaves. If we reach the next line, navigation was prevented.
   };
 
   const logOut = async () => {

@@ -5,7 +5,7 @@
 // code actually runs. Without the version bump, old clients can sit on
 // a stale SW indefinitely (browser default SW update check is at most
 // every 24h and only on navigation).
-const CACHE_NAME = 'trellis-v8';
+const CACHE_NAME = 'trellis-v9';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
