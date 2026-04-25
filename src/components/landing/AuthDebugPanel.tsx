@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, Stack, Chip, Button } from '@mui/material';
 import { auth, RESOLVED_AUTH_DOMAIN } from '../../config/firebase';
 import { getRedirectResult } from 'firebase/auth';
+import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * AuthDebugPanel — visible diagnostic information for sign-in issues.
@@ -75,7 +76,12 @@ function Row({ label, value, ok }: { label: string; value: string | boolean; ok?
 }
 
 export default function AuthDebugPanel() {
+  const { signIn } = useAuth();
   const [state, setState] = useState<DebugState | null>(null);
+  // Captures the result of the in-panel "Test Sign In" button so we
+  // can show the error code inline — no toast to miss, no scrolling
+  // through the marketing page to find the real sign-in button.
+  const [signInResult, setSignInResult] = useState<string>('not attempted');
 
   useEffect(() => {
     async function gather() {
@@ -183,8 +189,31 @@ export default function AuthDebugPanel() {
           <Row label="SW registrations" value={String(state.swCount)} />
           <Row label="SW controller" value={state.swController} />
           <Row label="userAgent" value={state.userAgent.slice(0, 90) + (state.userAgent.length > 90 ? '…' : '')} />
+          <Row label="signIn() result" value={signInResult} />
         </Stack>
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {/* Test Sign In: invokes signIn directly so any synchronous
+              error gets captured inline. If signInWithRedirect navigates
+              successfully, the page will leave for Google and this
+              button never returns. If it errors, we show the code. */}
+          <Button
+            size="small"
+            variant="contained"
+            onClick={async () => {
+              setSignInResult('calling signIn()…');
+              try {
+                await signIn();
+                // If we reach here without navigating, the redirect
+                // didn't fire — note that for the user.
+                setSignInResult('signIn() resolved without navigating (unexpected)');
+              } catch (err) {
+                const e = err as { code?: string; message?: string };
+                setSignInResult(`error: ${e.code ?? 'unknown'} — ${e.message ?? String(err)}`);
+              }
+            }}
+          >
+            Test Sign In
+          </Button>
           <Button
             size="small"
             variant="outlined"
@@ -199,7 +228,6 @@ export default function AuthDebugPanel() {
               }
               window.location.reload();
             }}
-            sx={{ mr: 1 }}
           >
             Reset SW + Caches
           </Button>
