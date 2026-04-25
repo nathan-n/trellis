@@ -43,6 +43,7 @@ import MockResources from './mocks/MockResources';
 import FolderIcon from '@mui/icons-material/FolderOutlined';
 import MenuBookIcon from '@mui/icons-material/MenuBookOutlined';
 import SerifAccent from '../shared/SerifAccent';
+import AuthDebugPanel from './AuthDebugPanel';
 
 // ─── Feature section data ────────────────────────────────────────────────────
 
@@ -193,7 +194,12 @@ export default function LandingPage() {
     document.title = 'Trellis — Caregiving, Coordinated';
   }, []);
 
-  if (!loading && firebaseUser) {
+  // ?debug=1 shows the diagnostic panel and disables the auto-redirect
+  // so a signed-in user can still inspect their auth state. Useful for
+  // debugging mobile sign-in issues where you can't open DevTools.
+  const isDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
+
+  if (!loading && firebaseUser && !isDebug) {
     return <Navigate to="/" replace />;
   }
 
@@ -240,6 +246,14 @@ export default function LandingPage() {
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+      {/* Debug panel — only when /?debug=1, used to diagnose mobile
+          sign-in issues by reading state directly off the device
+          (no DevTools needed). */}
+      {isDebug && (
+        <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
+          <AuthDebugPanel />
+        </Box>
+      )}
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <Box
         sx={{
