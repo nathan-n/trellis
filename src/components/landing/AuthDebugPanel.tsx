@@ -23,7 +23,6 @@ import { useAuth } from '../../contexts/AuthContext';
 interface DebugState {
   origin: string;
   authDomain: string;
-  domainMatch: boolean;
   isStandalone: boolean;
   isIosStandalone: boolean;
   isMobileUA: boolean;
@@ -144,13 +143,9 @@ export default function AuthDebugPanel() {
         ? `${auth.currentUser.email} (${auth.currentUser.uid.slice(0, 8)}…)`
         : 'null';
 
-      const appDomain = origin.replace(/^https?:\/\//, '');
-      const domainMatch = appDomain === authDomain;
-
       setState({
         origin,
         authDomain,
-        domainMatch,
         isStandalone,
         isIosStandalone,
         isMobileUA,
@@ -178,19 +173,19 @@ export default function AuthDebugPanel() {
   }
 
   return (
-    <Card sx={{ mt: 3, mx: 'auto', maxWidth: 720, border: 2, borderColor: state.domainMatch ? 'primary.main' : 'clay.main' }}>
+    <Card sx={{ mt: 3, mx: 'auto', maxWidth: 720, border: 2, borderColor: 'primary.main' }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Auth Diagnostics
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-          Read this off your phone if sign-in is failing. Domain mismatch is the most
-          common cause — app + authDomain must be the same origin for OAuth to work
-          on Android Chrome and Safari.
+          Read this off your phone if sign-in is failing. After tapping Test Sign In,
+          the event log below will show what happened — error code, navigation, or
+          a stuck state — without needing DevTools.
         </Typography>
         <Stack spacing={1}>
           <Row label="origin" value={state.origin} />
-          <Row label="authDomain" value={state.authDomain} ok={state.domainMatch} />
+          <Row label="authDomain" value={state.authDomain} />
           <Row label="standalone PWA" value={state.isStandalone || state.isIosStandalone} />
           <Row label="mobile UA" value={state.isMobileUA} />
           <Row label="cookies enabled" value={state.cookiesEnabled} ok={state.cookiesEnabled} />
