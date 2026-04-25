@@ -1,11 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import {
-  onAuthStateChanged,
-  signInWithRedirect,
-  getRedirectResult,
-  signOut as firebaseSignOut,
-  type User,
-} from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, type User } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { getUserProfile } from '../services/authService';
 import type { UserProfile } from '../types';
@@ -23,59 +17,18 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-/**
- * Sign-in flow uses signInWithRedirect across all browsers and devices.
- *
- * Authoritative source (Firebase Auth docs, redirect best practices):
- *   https://firebase.google.com/docs/auth/web/redirect-best-practices
- *
- *   "For browsers that block third-party storage access,
- *    signInWithPopup() may not work correctly. For better cross-browser
- *    compatibility … consider using signInWithRedirect() instead."
- *
- * Why redirect, not popup:
- *   - Chrome 133+ (current is 147+) disables third-party cookies by
- *     default. signInWithPopup needs cross-origin cookies between the
- *     app origin and authDomain to coordinate the popup ↔ opener
- *     handshake — those cookies are blocked, popup fails with
- *     auth/internal-error or completes but doesn't persist to local
- *     storage.
- *   - Mobile Chrome / iOS Safari / installed PWAs have always been
- *     unreliable with popup auth (popup blockers, in-app webview
- *     restrictions, postMessage failures).
- *   - signInWithRedirect carries auth state via URL params on the
- *     return leg from authDomain/__/auth/handler. The app reads state
- *     from its OWN origin's IndexedDB. No cross-origin storage,
- *     no third-party cookies, no postMessage between windows.
- *
- * Persistence is the SDK default (browserLocalPersistence on web —
- * IndexedDB). Per Firebase docs, this is preserved across
- * signInWithRedirect calls automatically. No explicit setPersistence
- * call is needed (and adding one was racing with the auth flow in
- * earlier code).
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Process the return leg of signInWithRedirect on every page load.
-  // Returns null when there's no pending redirect — safe to call always.
-  // The user object is delivered via onAuthStateChanged below; this
-  // call's primary purpose is to surface redirect-specific errors.
-  useEffect(() => {
-    getRedirectResult(auth).catch((err) => {
-      console.error('[auth] getRedirectResult error:', err);
-    });
-  }, []);
-
-  // Single source of truth for profile loading.
+  // Single source of truth for profile loading
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
         try {
-          // Ensure user profile exists.
+          // Ensure user profile exists
           const userRef = doc(db, 'users', user.uid);
           const snap = await getDoc(userRef);
           if (!snap.exists()) {
@@ -104,11 +57,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
+  // signIn only triggers the auth state change — onAuthStateChanged handles profile
   const signIn = async () => {
-    await signInWithRedirect(auth, googleProvider);
-    // signInWithRedirect navigates the page to authDomain/__/auth/handler.
-    // This Promise never resolves in a normal flow because the page
-    // leaves. If we reach the next line, navigation was prevented.
+    await signInWithPopup(auth, googleProvider);
   };
 
   const logOut = async () => {
