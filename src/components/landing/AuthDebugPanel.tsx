@@ -82,6 +82,18 @@ export default function AuthDebugPanel() {
   // can show the error code inline — no toast to miss, no scrolling
   // through the marketing page to find the real sign-in button.
   const [signInResult, setSignInResult] = useState<string>('not attempted');
+  // Click counter proves the onClick is firing at all. If the user taps
+  // and this stays at 0, the click never registered (CSS blocking,
+  // wrong bundle, etc.).
+  const [clickCount, setClickCount] = useState<number>(0);
+  // In-panel event log so we don't rely on the user catching
+  // ephemeral toasts. Appends timestamped lines for every step.
+  const [events, setEvents] = useState<string[]>([]);
+  const log = (msg: string) => {
+    const ts = new Date().toISOString().slice(11, 19);
+    setEvents((prev) => [...prev, `${ts} — ${msg}`].slice(-12));
+    console.log(`[debug] ${msg}`);
+  };
 
   useEffect(() => {
     async function gather() {
@@ -190,7 +202,30 @@ export default function AuthDebugPanel() {
           <Row label="SW controller" value={state.swController} />
           <Row label="userAgent" value={state.userAgent.slice(0, 90) + (state.userAgent.length > 90 ? '…' : '')} />
           <Row label="signIn() result" value={signInResult} />
+          <Row label="click count" value={String(clickCount)} />
         </Stack>
+
+        {/* Event log — surfaces what's actually happening since the
+            user can't open DevTools easily on a phone. The Test Sign
+            In flow logs every step here so we can see whether the
+            click registered, signIn was called, signInWithRedirect
+            was reached, and whether it threw or navigated. */}
+        {events.length > 0 && (
+          <Box sx={{ mt: 2, p: 1.5, bgcolor: 'grey.100', borderRadius: 1, maxHeight: 200, overflow: 'auto' }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, fontFamily: '"JetBrains Mono", ui-monospace, monospace', display: 'block', mb: 0.5 }}>
+              event log
+            </Typography>
+            {events.map((e, i) => (
+              <Typography
+                key={i}
+                variant="caption"
+                sx={{ display: 'block', fontFamily: '"JetBrains Mono", ui-monospace, monospace', fontSize: '0.65rem' }}
+              >
+                {e}
+              </Typography>
+            ))}
+          </Box>
+        )}
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {/* Test Sign In: invokes signIn directly so any synchronous
               error gets captured inline. If signInWithRedirect navigates
@@ -200,14 +235,22 @@ export default function AuthDebugPanel() {
             size="small"
             variant="contained"
             onClick={async () => {
+              // Log first thing so we know the click registered even
+              // if everything downstream throws.
+              setClickCount((c) => c + 1);
+              log('Test Sign In clicked');
               setSignInResult('calling signIn()…');
+              log(`signIn function: ${typeof signIn}`);
               try {
+                log('about to call signIn()');
                 await signIn();
                 // If we reach here without navigating, the redirect
                 // didn't fire — note that for the user.
+                log('signIn() returned without navigating');
                 setSignInResult('signIn() resolved without navigating (unexpected)');
               } catch (err) {
                 const e = err as { code?: string; message?: string };
+                log(`signIn() threw: ${e.code ?? 'no-code'} ${e.message ?? String(err)}`);
                 setSignInResult(`error: ${e.code ?? 'unknown'} — ${e.message ?? String(err)}`);
               }
             }}

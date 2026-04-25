@@ -5,7 +5,7 @@
 // code actually runs. Without the version bump, old clients can sit on
 // a stale SW indefinitely (browser default SW update check is at most
 // every 24h and only on navigation).
-const CACHE_NAME = 'trellis-v4';
+const CACHE_NAME = 'trellis-v5';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -31,6 +31,13 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.hostname.includes('googleapis') || url.hostname.includes('firestore')) return;
   if (url.hostname.includes('fda.gov')) return;
+
+  // Skip Firebase Hosting reserved paths (/__/auth/*, /__/firebase/*).
+  // Firebase serves the OAuth handler and init.json from these paths;
+  // intercepting them with our own fetch wrapper breaks the auth flow
+  // in subtle ways (cookie attribution, redirect chain handling).
+  // Let the browser navigate to them natively.
+  if (url.pathname.startsWith('/__/')) return;
 
   // Navigation requests (HTML): ALWAYS go to network, never serve from cache
   // This prevents stale index.html from referencing deleted JS chunks
