@@ -6,6 +6,12 @@
   "display": "standalone",
   "background_color": "#F7F3EC",
   "theme_color": "#3A7D44",
+  "//capture_links": "Opt out of Android's PWA link-capture behavior. Without this, when a user is in mobile Chrome at trellis.necaise.co and triggers any in-domain navigation (including the OAuth redirect that signInWithRedirect kicks off), Android can hijack that navigation and open it in the installed PWA — dropping the OAuth flow's state mid-handshake. 'none' tells Android we are not a default link handler for this domain.",
+  "capture_links": "none",
+  "//launch_handler": "client_mode: 'navigate-existing' opens an existing PWA window when one is open, or a new one when not. Combined with capture_links: none, this prevents the browser-tab-to-PWA hijack while still letting users launch the PWA normally from the home screen.",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
       "src": "/icons/icon-192.svg",

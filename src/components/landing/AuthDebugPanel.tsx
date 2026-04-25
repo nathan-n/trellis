@@ -239,10 +239,19 @@ export default function AuthDebugPanel() {
               try {
                 log('about to call signIn()');
                 await signIn();
-                // If we reach here without navigating, the redirect
-                // didn't fire — note that for the user.
-                log('signIn() returned without navigating');
-                setSignInResult('signIn() resolved without navigating (unexpected)');
+                // Popup mode: resolves successfully when popup auth
+                // completes — this is the SUCCESS path on desktop.
+                // Redirect mode: navigates the page, so we'd never
+                // reach this line. So "returned" = success on popup
+                // OR a no-op call on redirect.
+                const u = auth.currentUser;
+                if (u) {
+                  log(`signIn() succeeded — user: ${u.email}`);
+                  setSignInResult(`success — signed in as ${u.email}`);
+                } else {
+                  log('signIn() returned but auth.currentUser is null');
+                  setSignInResult('returned with no current user (popup may have closed before completing)');
+                }
               } catch (err) {
                 const e = err as { code?: string; message?: string };
                 log(`signIn() threw: ${e.code ?? 'no-code'} ${e.message ?? String(err)}`);
