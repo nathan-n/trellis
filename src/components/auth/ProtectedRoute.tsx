@@ -1,9 +1,10 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { firebaseUser, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -18,15 +19,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
           gap: 3,
         }}
       >
-        <Typography
-          sx={{
-            fontFamily: '"Playfair Display", serif',
-            fontWeight: 800,
-            fontSize: '2rem',
-            color: 'primary.main',
-            letterSpacing: '-0.5px',
-          }}
-        >
+        {/* Wordmark uses theme h4 (Fraunces) so the loading screen
+            speaks the same brand voice as every other surface. The
+            old hardcoded Playfair was a stale leftover from before
+            the Direction C font sweep. */}
+        <Typography variant="h4" sx={{ color: 'primary.main' }}>
           Trellis
         </Typography>
         <CircularProgress size={32} thickness={3} sx={{ color: 'primary.main' }} />
@@ -35,7 +32,11 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!firebaseUser) {
-    return <Navigate to="/login" replace />;
+    // Preserve the query string on the redirect so flags like
+    // ?debug=1 survive the bounce from `/` to `/login`. Without this,
+    // the diagnostic panel was unreachable from the root URL.
+    const target = `/login${location.search}`;
+    return <Navigate to={target} replace />;
   }
 
   return <>{children}</>;
