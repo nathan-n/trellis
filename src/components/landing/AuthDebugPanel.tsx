@@ -253,8 +253,24 @@ export default function AuthDebugPanel() {
                   setSignInResult('returned with no current user (popup may have closed before completing)');
                 }
               } catch (err) {
-                const e = err as { code?: string; message?: string };
+                const e = err as {
+                  code?: string;
+                  message?: string;
+                  customData?: Record<string, unknown>;
+                  stack?: string;
+                };
                 log(`signIn() threw: ${e.code ?? 'no-code'} ${e.message ?? String(err)}`);
+                // Surface Firebase's customData (often contains the
+                // underlying cause for auth/internal-error) and the
+                // first frame of the stack so we can pinpoint where
+                // inside the SDK the error originated.
+                if (e.customData && Object.keys(e.customData).length > 0) {
+                  log(`customData: ${JSON.stringify(e.customData)}`);
+                }
+                if (e.stack) {
+                  const firstFrame = e.stack.split('\n').slice(1, 4).join(' | ');
+                  log(`stack: ${firstFrame}`);
+                }
                 setSignInResult(`error: ${e.code ?? 'unknown'} — ${e.message ?? String(err)}`);
               }
             }}
