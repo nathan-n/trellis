@@ -3,34 +3,41 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// authDomain comes from the env var (`<project>.firebaseapp.com`).
+// authDomain pinned to the app's primary custom domain.
 //
-// Earlier we tried pinning authDomain to the runtime host on the theory
-// that storage partitioning would break the OAuth round-trip when app
-// and auth handler were on different origins. That was the WRONG
-// diagnosis: signInWithRedirect carries auth state via URL params on
-// the return leg and reads it from the APP origin's IndexedDB — never
-// crosses origins for storage. signInWithPopup uses cross-window
-// postMessage, also no storage crossing.
+// Firebase Auth — redirect best practices (authoritative source):
+//   https://firebase.google.com/docs/auth/web/redirect-best-practices
 //
-// What pinning authDomain to a custom domain DID break:
-//   - signInWithPopup creates an iframe at `${authDomain}/__/auth/iframe`.
-//     With authDomain = trellis.necaise.co, that iframe is same-origin,
-//     gated by the opener's CSP `frame-src` directive. Our CSP listed
-//     `frame-src https://accounts.google.com https://*.firebaseapp.com
-//     https://*.googleapis.com` — no 'self'. CSP does NOT fall back to
-//     default-src when frame-src is explicitly set, so same-origin
-//     iframes were blocked → auth/internal-error.
-//   - It also required custom-domain redirect URIs in the Google Cloud
-//     OAuth client, an extra config step every operator must do.
+//   "Update your Firebase config to use your primary custom domain as
+//    authDomain. Update OAuth providers' authorized redirect URIs to
+//    include https://example.com/__/auth/handler. Add the domain to
+//    Firebase Console's authorized domains list."
 //
-// Sticking with `<project>.firebaseapp.com` (which IS in the existing
-// CSP frame-src and IS pre-authorized in the OAuth client) avoids both
-// failure modes. Mobile redirect still works because state transfer
-// doesn't cross origins.
+// Why this matters: starting Chrome 115+ (we're on 147+ now), modern
+// browsers block third-party storage access. With authDomain on a
+// different eTLD+1 (e.g., firebaseapp.com) than the app
+// (trellis.necaise.co), the auth iframe Firebase uses to coordinate
+// signInWithPopup is partitioned and can't access the cookies/state it
+// needs — sign-in throws auth/internal-error synchronously, no popup
+// ever opens.
+//
+// With authDomain on the SAME root domain as the app, the iframe is
+// same-site (same eTLD+1), no partitioning, sign-in works.
+//
+// Hardcoded rather than env-var driven: this value is part of the
+// auth contract (with the OAuth client + Firebase authorized domains)
+// and can't be changed casually. Hardcoding keeps it in lockstep with
+// firebase.json's CSP (which must also reference this domain).
+//
+// Localhost dev still works — Firebase pre-authorizes localhost as a
+// sign-in origin against any project's auth handler, so popup flows
+// from localhost completing through trellis.necaise.co/__/auth/handler
+// is supported by the SDK.
+const AUTH_DOMAIN = 'trellis.necaise.co';
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  authDomain: AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
@@ -45,4 +52,4 @@ export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Expose the resolved domain for the diagnostic panel.
-export const RESOLVED_AUTH_DOMAIN = firebaseConfig.authDomain as string;
+export const RESOLVED_AUTH_DOMAIN = firebaseConfig.authDomain;
