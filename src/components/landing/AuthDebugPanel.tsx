@@ -256,16 +256,24 @@ export default function AuthDebugPanel() {
                 const e = err as {
                   code?: string;
                   message?: string;
-                  customData?: Record<string, unknown>;
+                  customData?: unknown;
                   stack?: string;
                 };
                 log(`signIn() threw: ${e.code ?? 'no-code'} ${e.message ?? String(err)}`);
-                // Surface Firebase's customData (often contains the
-                // underlying cause for auth/internal-error) and the
-                // first frame of the stack so we can pinpoint where
-                // inside the SDK the error originated.
-                if (e.customData && Object.keys(e.customData).length > 0) {
-                  log(`customData: ${JSON.stringify(e.customData)}`);
+                // customData on a script-load error is the raw DOM Event.
+                // JSON.stringify drops most Event properties, so dig
+                // out the target's src URL and tagName explicitly —
+                // that's the URL that failed to load.
+                const cd = e.customData;
+                if (cd && typeof cd === 'object') {
+                  const target = (cd as { target?: { tagName?: string; src?: string; href?: string } }).target;
+                  if (target) {
+                    const tag = target.tagName ?? '?';
+                    const url = target.src ?? target.href ?? '(no src)';
+                    log(`failed resource: <${tag.toLowerCase()}> src=${url}`);
+                  } else {
+                    log(`customData (raw): ${JSON.stringify(cd)}`);
+                  }
                 }
                 if (e.stack) {
                   const firstFrame = e.stack.split('\n').slice(1, 4).join(' | ');
