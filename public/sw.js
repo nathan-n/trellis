@@ -1,11 +1,7 @@
 // Bump this on every meaningful SW change. A byte-diff forces browsers
 // to treat the SW file as "new" on next navigation, at which point
-// skipWaiting + clients.claim (below) activate it immediately and the
-// controllerchange listener in main.tsx reloads the tab so the fresh
-// code actually runs. Without the version bump, old clients can sit on
-// a stale SW indefinitely (browser default SW update check is at most
-// every 24h and only on navigation).
-const CACHE_NAME = 'trellis-v15';
+// skipWaiting + clients.claim (below) activate it immediately.
+const CACHE_NAME = 'trellis-v16';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -27,20 +23,33 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (request.method !== 'GET') return;
 
-  // Skip Firebase/Google API calls entirely
   const url = new URL(request.url);
-  if (url.hostname.includes('googleapis') || url.hostname.includes('firestore')) return;
-  if (url.hostname.includes('fda.gov')) return;
 
-  // Skip Firebase Hosting reserved paths (/__/auth/*, /__/firebase/*).
-  // Firebase serves the OAuth handler and init.json from these paths;
-  // intercepting them with our own fetch wrapper breaks the auth flow
-  // in subtle ways (cookie attribution, redirect chain handling).
-  // Let the browser navigate to them natively.
+  // Skip ALL cross-origin requests. The SW's purpose is to cache and
+  // serve OUR app's assets — third-party services (Google APIs,
+  // Firebase backends, gapi, reCAPTCHA, fonts CDNs, etc.) must be
+  // handled directly by the browser. Intercepting them with
+  // event.respondWith(fetch(request)) can break cross-origin script
+  // execution in modern browsers (opaque responses, third-party
+  // cookie partitioning, redirect chain attribution).
+  //
+  // Earlier SW versions tried to enumerate skip rules per hostname
+  // (googleapis, firestore, fda.gov, etc.). That approach silently
+  // failed for hostnames we forgot — most recently apis.google.com,
+  // which doesn't match `.includes('googleapis')`. Catching all
+  // cross-origin in one rule eliminates the whole class of bugs.
+  if (url.origin !== self.location.origin) return;
+
+  // Skip Firebase Hosting reserved paths on our own origin. Firebase
+  // serves the OAuth handler/iframe at /__/auth/*, the project init
+  // config at /__/firebase/init.json. Intercepting these with our
+  // wrapper detaches the response from the browser's natural
+  // navigation/cookie context and breaks the auth flow.
   if (url.pathname.startsWith('/__/')) return;
 
-  // Navigation requests (HTML): ALWAYS go to network, never serve from cache
-  // This prevents stale index.html from referencing deleted JS chunks
+  // Navigation requests (HTML): always go to network. This prevents a
+  // stale index.html (which references a deleted JS chunk) from being
+  // served from cache.
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
@@ -53,7 +62,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets (JS/CSS/fonts/images): network-first with cache fallback
+  // Same-origin static assets (JS/CSS/fonts/images under /assets/ etc):
+  // network-first with cache fallback for offline support.
   event.respondWith(
     fetch(request)
       .then((response) => {
